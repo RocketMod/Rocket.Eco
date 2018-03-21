@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco", "Rocket.Eco\Ro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoAssemblyExtractor", "Rocket.Eco.AssemblyExtractor\EcoAssemblyExtractor.csproj", "{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco.Launcher", "Rocket.Eco.Launcher\Rocket.Eco.Launcher.csproj", "{45552E32-FE23-405F-A683-AAC820637C9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45552E32-FE23-405F-A683-AAC820637C9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45552E32-FE23-405F-A683-AAC820637C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45552E32-FE23-405F-A683-AAC820637C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45552E32-FE23-405F-A683-AAC820637C9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
