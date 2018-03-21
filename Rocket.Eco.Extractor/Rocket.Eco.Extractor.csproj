@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>EcoAssemblyExtractor</RootNamespace>
-    <AssemblyName>EcoAssemblyExtractor</AssemblyName>
+    <RootNamespace>Rocket.Eco.Extractor</RootNamespace>
+    <AssemblyName>Rocket.Eco.Extractor</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 
-namespace Rocket.Eco.EcoAssemblyExtractor
+namespace Rocket.Eco.Extractor
 {
     class Program
     {

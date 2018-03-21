@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco", "Rocket.Eco\Rocket.Eco.csproj", "{A4344501-4C40-4222-ACD2-255200D78C59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoAssemblyExtractor", "Rocket.Eco.AssemblyExtractor\EcoAssemblyExtractor.csproj", "{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco.Extractor", "Rocket.Eco.Extractor\Rocket.Eco.Extractor.csproj", "{54077A5A-3AC1-4F92-ACA1-0EA6EF191D76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco.Launcher", "Rocket.Eco.Launcher\Rocket.Eco.Launcher.csproj", "{45552E32-FE23-405F-A683-AAC820637C9B}"
 EndProject
