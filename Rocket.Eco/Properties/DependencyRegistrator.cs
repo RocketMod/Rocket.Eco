@@ -1,6 +1,7 @@
 ﻿using System;
 
-using Rocket.API.IOC;
+using Rocket.API;
+using Rocket.API.DependencyInjection;
 
 namespace Rocket.Eco.Properties
 {
@@ -8,8 +9,8 @@ namespace Rocket.Eco.Properties
     {
         public void Register(IDependencyContainer container, IDependencyResolver resolver)
         {
-            container.RegisterSingletonType<IPatchManager, PatchManager>();
-            container.RegisterSingletonInstance<IEco>(resolver.Activate<Eco>());
+            container.RegisterSingletonInstance<IPatchManager>(new PatchManager());
+            container.RegisterSingletonInstance<IImplementation>(resolver.Activate<Eco>());
         }
     }
 }

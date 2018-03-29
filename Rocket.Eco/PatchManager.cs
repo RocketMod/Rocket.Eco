@@ -8,14 +8,21 @@ using System.Collections.Generic;
 using Mono.Cecil;
 
 using Rocket.Eco.API;
-using Rocket.API.IOC;
 using Rocket.API.Logging;
-using Rocket.Compability;
+using Rocket.API.DependencyInjection;
 
 namespace Rocket.Eco
 {
     public sealed class PatchManager : IPatchManager
     {
+        public PatchManager()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
+            {
+                return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Equals(args.Name, StringComparison.InvariantCultureIgnoreCase));
+            };
+        }
+
         public void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new()
         {
             T patch = new T();
@@ -143,7 +150,7 @@ namespace Rocket.Eco
                 }
             }
 
-            Assembly.Load(finalAssembly);
+            Console.WriteLine(Assembly.Load(finalAssembly).FullName);
 
             string directory = Path.Combine(Directory.GetCurrentDirectory(), "PatchedAssemblies/");
             Directory.CreateDirectory(directory);

@@ -15,7 +15,7 @@ namespace Rocket.Eco.Launcher
             Assembly.LoadFile(Path.Combine(currentPath, "EcoServer.exe"));
 
             //AttachAssemblies();
-            R.Bootstrap();
+            Runtime.Bootstrap();
 
             if (args.Length == 0 || !args[0].Equals("-extract", StringComparison.InvariantCultureIgnoreCase)) 
             {

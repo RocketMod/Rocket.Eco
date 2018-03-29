@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
-using Rocket.API.IOC;
+using Rocket.API;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 
 namespace Rocket.Eco
 {
-    public sealed class Eco : IEco
+    public sealed class Eco : IImplementation
     {
+        public string InstanceId => "RocketEco";
+        public IEnumerable<string> Capabilities => new List<string> { "idk" };
+
         public Eco(IDependencyContainer container, IDependencyResolver resolver, ILogger logger, IPatchManager patchManager)
         {
             //patchManager.RegisterPatch<EcoSharedPatch>(container, logger);
@@ -15,10 +20,15 @@ namespace Rocket.Eco
 
             patchManager.PatchAll(resolver);
         }
-    }
 
-    public interface IEco
-    {
-        //TODO: Add some methods
+        public void Shutdown()
+        {
+
+        }
+
+        public void Reload()
+        {
+
+        }
     }
 }
