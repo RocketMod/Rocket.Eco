@@ -1,6 +1,6 @@
 ﻿using System;
 
-using Rocket.IOC;
+using Rocket.API.IOC;
 
 namespace Rocket.Eco.Properties
 {

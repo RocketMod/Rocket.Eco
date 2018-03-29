@@ -7,17 +7,16 @@ using System.Collections.Generic;
 
 using Mono.Cecil;
 
-using Rocket.Core;
-using Rocket.IOC;
-using Rocket.Compability.Tuples;
-
 using Rocket.Eco.API;
+using Rocket.API.IOC;
+using Rocket.API.Logging;
+using Rocket.Compability;
 
 namespace Rocket.Eco
 {
     public sealed class PatchManager : IPatchManager
     {
-        public void RegisterPatch<T>(IDependencyContainer container, ILog logger) where T : IAssemblyPatch, new()
+        public void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new()
         {
             T patch = new T();
             container.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
@@ -150,7 +149,7 @@ namespace Rocket.Eco
 
     public interface IPatchManager
     {
-        void RegisterPatch<T>(IDependencyContainer container, ILog logger) where T : IAssemblyPatch, new();
+        void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new();
         Tuple<string, Stream>[] PatchAll(IDependencyResolver resolver);
     }
 }

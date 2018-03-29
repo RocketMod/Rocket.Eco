@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Linq;
 
-using Rocket.Core;
-using Rocket.IOC;
-
-using Rocket.Eco.Patches;
-using Rocket.Eco.API;
+using Rocket.API.IOC;
+using Rocket.API.Logging;
 
 namespace Rocket.Eco
 {
     public sealed class Eco : IEco
     {
-        public Eco(IDependencyContainer container, IDependencyResolver resolver, ILog logger, IPatchManager patchManager)
+        public Eco(IDependencyContainer container, IDependencyResolver resolver, ILogger logger, IPatchManager patchManager)
         {
             //patchManager.RegisterPatch<EcoSharedPatch>(container, logger);
             logger.Info("Rocket.Eco.E has initialized.");

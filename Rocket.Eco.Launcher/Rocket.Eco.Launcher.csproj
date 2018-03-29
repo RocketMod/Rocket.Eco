@@ -40,9 +40,9 @@
       <Project>{a4344501-4c40-4222-acd2-255200d78c59}</Project>
       <Name>Rocket.Eco</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rocket\Rocket.Core\Rocket.csproj">
+    <ProjectReference Include="..\Rocket\Rocket.Core\Rocket.Runtime.csproj">
       <Project>{5d260f94-bb23-4397-94df-ba4af0cd8bcb}</Project>
-      <Name>Rocket</Name>
+      <Name>Rocket.Runtime</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

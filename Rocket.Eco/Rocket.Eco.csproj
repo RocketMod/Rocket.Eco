@@ -54,13 +54,21 @@
     <Compile Include="Properties\DependencyRegistrator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rocket\Rocket.Core\Rocket.csproj">
-      <Project>{5d260f94-bb23-4397-94df-ba4af0cd8bcb}</Project>
-      <Name>Rocket</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\Rocket\Rocket.API\Rocket.API.csproj">
+      <Project>{da356abb-aa77-4b22-9ab1-34a30cf4048a}</Project>
+      <Name>Rocket.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rocket\Rocket.Compability\Rocket.Compability.csproj">
+      <Project>{01263b0d-9ce3-4d5a-afcb-165592ef24b5}</Project>
+      <Name>Rocket.Compability</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rocket\Rocket.Core\Rocket.Runtime.csproj">
+      <Project>{5d260f94-bb23-4397-94df-ba4af0cd8bcb}</Project>
+      <Name>Rocket.Runtime</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
