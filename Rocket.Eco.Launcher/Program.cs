@@ -14,9 +14,13 @@ namespace Rocket.Eco.Launcher
             Assembly.LoadFile(Path.Combine(currentPath, "Rocket.Eco.dll"));
             Assembly.LoadFile(Path.Combine(currentPath, "EcoServer.exe"));
 
-            AttachAssemblies();
+            //AttachAssemblies();
             R.Bootstrap();
-            StartServer(args);
+
+            if (args.Length == 0 || !args[0].Equals("-extract", StringComparison.InvariantCultureIgnoreCase)) 
+            {
+                StartServer(args);
+            }
         }
 
         //TODO: Remove this method as to administer the patches once I have the patcher finished.

@@ -13,11 +13,10 @@ namespace Rocket.Eco
     {
         public Eco(IDependencyContainer container, IDependencyResolver resolver, ILog logger, IPatchManager patchManager)
         {
-            patchManager.RegisterPatch<EcoSharedPatch>(container, logger);
+            //patchManager.RegisterPatch<EcoSharedPatch>(container, logger);
             logger.Info("Rocket.Eco.E has initialized.");
 
-            var patchers = resolver.GetAll<IAssemblyPatch>();
-            logger.Info(patchers.Count().ToString());
+            patchManager.PatchAll(resolver);
         }
     }
 
