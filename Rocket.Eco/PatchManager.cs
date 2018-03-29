@@ -89,12 +89,12 @@ namespace Rocket.Eco
 
                                     asmDef.Write(memStream);
                                     memStream.Position = 0;
-                                    WriteAssembly(memStream);
+                                    WriteAssembly(finalName, memStream);
                                 }
                             }
                             else
                             {
-                                WriteAssembly(deflateStream);
+                                WriteAssembly(finalName, deflateStream);
                             }
                         }
                     }
@@ -113,7 +113,7 @@ namespace Rocket.Eco
             return null;
         }
 
-        void WriteAssembly(Stream stream)
+        void WriteAssembly(string finalName, Stream stream)
         {
             byte[] finalAssembly;
 
@@ -144,6 +144,11 @@ namespace Rocket.Eco
             }
 
             Assembly.Load(finalAssembly);
+
+            string directory = Path.Combine(Directory.GetCurrentDirectory(), "PatchedAssemblies/");
+            Directory.CreateDirectory(directory);
+
+            File.WriteAllBytes(Path.Combine(directory, finalName), finalAssembly);
         }
     }
 
