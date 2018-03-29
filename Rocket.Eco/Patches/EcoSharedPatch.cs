@@ -13,7 +13,7 @@ namespace Rocket.Eco.Patches
 
         public void Patch(TypeDefinition definition)
         {
-            
+
         }
     }
 }
