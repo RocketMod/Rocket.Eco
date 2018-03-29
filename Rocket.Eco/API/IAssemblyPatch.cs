@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using Mono.Cecil;
 
 namespace Rocket.Eco.API
 {
     public interface IAssemblyPatch
     {
         string TargetAssembly { get; }
+        string TargetType { get; }
 
-        void Patch(ref byte[] assembly);
+        void Patch(TypeDefinition definition);
     }
 }
