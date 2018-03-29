@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>a4344501-4c40-4222-acd2-255200d78c59</ProjectGuid>
+    <ProjectGuid>{A4344501-4C40-4222-ACD2-255200D78C59}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rocket.Eco</RootNamespace>
@@ -31,19 +31,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    
-    
-    <Reference Include="System.Data" />
-    
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Eco.cs" />
+    <Compile Include="API\IAssemblyPatch.cs" />
+    <Compile Include="Patches\EcoSharedPatch.cs" />
+    <Compile Include="PatchManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\DependencyRegistrator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rocket\Rocket.Core\Rocket.csproj">
+      <Project>{5d260f94-bb23-4397-94df-ba4af0cd8bcb}</Project>
+      <Name>Rocket</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
- </Project>
+</Project>
