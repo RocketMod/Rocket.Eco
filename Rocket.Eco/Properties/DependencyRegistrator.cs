@@ -9,7 +9,7 @@ namespace Rocket.Eco.Properties
         public void Register(IDependencyContainer container, IDependencyResolver resolver)
         {
             container.RegisterSingletonType<IPatchManager, PatchManager>();
-            container.RegisterInstance<IEco>(resolver.Activate<Eco>());
+            container.RegisterSingletonInstance<IEco>(resolver.Activate<Eco>());
         }
     }
 }
