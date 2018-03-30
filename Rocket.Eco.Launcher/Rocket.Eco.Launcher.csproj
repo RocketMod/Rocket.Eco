@@ -7,7 +7,8 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Rocket.Eco.Launcher</RootNamespace>
     <AssemblyName>Rocket.Eco.Launcher</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,9 @@
       <Project>{5d260f94-bb23-4397-94df-ba4af0cd8bcb}</Project>
       <Name>Rocket.Runtime</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -15,14 +15,6 @@ namespace Rocket.Eco
 {
     public sealed class PatchManager : IPatchManager
     {
-        public PatchManager()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
-            {
-                return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Equals(args.Name, StringComparison.InvariantCultureIgnoreCase));
-            };
-        }
-
         public void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new()
         {
             T patch = new T();
@@ -31,7 +23,7 @@ namespace Rocket.Eco
             logger.Info($"A patch for {patch.TargetAssembly} has been registered.");
         }
 
-        public Tuple<string, Stream>[] PatchAll(IDependencyResolver resolver)
+        public Dictionary<string, byte[]> PatchAll(IDependencyResolver resolver, ILogger logger)
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
@@ -43,6 +35,8 @@ namespace Rocket.Eco
             }
 
             var resources = eco.GetManifestResourceNames().Where(x => x.EndsWith(".compressed", StringComparison.InvariantCultureIgnoreCase)).Where(x => x.StartsWith("costura.", StringComparison.InvariantCultureIgnoreCase));
+
+            Dictionary<string, byte[]> assemblies = new Dictionary<string, byte[]>();
 
             foreach (string resource in resources)
             {
@@ -71,12 +65,7 @@ namespace Rocket.Eco
                                     memStream.Position = 0;
 
                                     AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream);
-
-                                    if (asmDef == null)
-                                    {
-                                        Console.WriteLine("awfawf");
-                                    }
-
+                                  
                                     foreach (IAssemblyPatch patch in targetedPatches)
                                     {
                                         foreach (ModuleDefinition modDef in asmDef.Modules)
@@ -96,31 +85,28 @@ namespace Rocket.Eco
 
                                     asmDef.Write(memStream);
                                     memStream.Position = 0;
-                                    WriteAssembly(finalName, memStream);
+                                    WriteAssembly(finalName, memStream, assemblies);
                                 }
                             }
                             else
                             {
-                                WriteAssembly(finalName, deflateStream);
+                                WriteAssembly(finalName, deflateStream, assemblies);
                             }
                         }
                     }
-
-                    //File.WriteAllBytes(Path.Combine(OutputDir, finalName), finalFile);
-                    //Console.WriteLine($"Successfully extracted {finalName}!");
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"An error occured while extracting {finalName}!");
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
+                    logger.Error($"An error occured while extracting {finalName}!");
+                    logger.Error(e.Message);
+                    logger.Error(e.StackTrace);
                 }
             }
 
-            return null;
+            return assemblies;
         }
 
-        void WriteAssembly(string finalName, Stream stream)
+        void WriteAssembly(string finalName, Stream stream, Dictionary<string, byte[]> dict)
         {
             byte[] finalAssembly;
 
@@ -150,18 +136,18 @@ namespace Rocket.Eco
                 }
             }
 
-            Console.WriteLine(Assembly.Load(finalAssembly).FullName);
-
-            string directory = Path.Combine(Directory.GetCurrentDirectory(), "PatchedAssemblies/");
-            Directory.CreateDirectory(directory);
-
-            File.WriteAllBytes(Path.Combine(directory, finalName), finalAssembly);
+            try
+            {
+                Assembly.Load(finalAssembly, finalAssembly);
+                dict[finalName] = finalAssembly;
+            }
+            catch { }
         }
     }
 
     public interface IPatchManager
     {
         void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new();
-        Tuple<string, Stream>[] PatchAll(IDependencyResolver resolver);
+        Dictionary<string, byte[]> PatchAll(IDependencyResolver resolver, ILogger logger);
     }
 }
