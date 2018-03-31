@@ -12,13 +12,15 @@ namespace Rocket.Eco
     public sealed class Eco : IImplementation
     {
         public string InstanceId => "RocketEco";
-        public IEnumerable<string> Capabilities => new List<string> { "idk" };
+        public IEnumerable<string> Capabilities => new List<string> { "NADA" };
 
         internal static string[] Arguments = default(string[]);
 
-        public Eco(IDependencyContainer container, IDependencyResolver resolver, ILogger logger, IPatchManager patchManager)
+        public void Load(IRuntime runtime)
         {
-            var result = patchManager.PatchAll(resolver, logger);
+            var logger = runtime.Container.Get<ILogger>();
+
+            var result = runtime.Container.Get<IPatchManager>().PatchAll(runtime.Container, logger);
 
             if (Arguments.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
             {
