@@ -2,6 +2,7 @@
 using System.Linq;
 using System.IO;
 using System.Reflection;
+using System.Globalization;
 
 namespace Rocket.Eco.Launcher
 {
@@ -15,21 +16,16 @@ namespace Rocket.Eco.Launcher
             {
                 try
                 {
-                    AssemblyName requestedName = new AssemblyName(args.Name);
+                    AssemblyName assemblyName = new AssemblyName(args.Name);
                     Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
                     foreach (Assembly assembly in assemblies)
                     {
-                        AssemblyName iteratedName = assembly.GetName();
-                        if (string.Equals(iteratedName.Name, requestedName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(iteratedName.CultureInfo.Name ?? "", requestedName.CultureInfo.Name ?? "", StringComparison.InvariantCultureIgnoreCase))
+                        AssemblyName name2 = assembly.GetName();
+                        if (string.Equals(name2.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(CultureToString(name2.CultureInfo), CultureToString(assemblyName.CultureInfo), StringComparison.InvariantCultureIgnoreCase))
                         {
                             return assembly;
                         }
-                    }
-
-                    if (requestedName.Flags == AssemblyNameFlags.Retargetable)
-                    {
-                        return Assembly.Load(requestedName);
                     }
 
                     return null;
@@ -42,7 +38,17 @@ namespace Rocket.Eco.Launcher
             };
         }
 
-        static void Main(string[] args)
+        static string CultureToString(CultureInfo culture)
+        {
+            if (culture == null)
+            {
+                return "";
+            }
+
+            return culture.Name;
+        }
+
+        public static void Main(string[] args)
         {
             string currentPath = Directory.GetCurrentDirectory();
 
