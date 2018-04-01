@@ -13,7 +13,7 @@ namespace Rocket.Eco.Patches
     {
         public string TargetAssembly => "Eco.Gameplay";
 
-        public string TargetType => "Eco.Gameplayer.Players.UserManager";
+        public string TargetType => "Eco.Gameplay.Players.UserManager";
 
         public void Patch(TypeDefinition definition)
         {

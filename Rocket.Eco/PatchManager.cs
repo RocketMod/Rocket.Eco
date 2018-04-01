@@ -82,6 +82,7 @@ namespace Rocket.Eco
 
         public void PatchAll(Dictionary<string, byte[]> targets, List<IAssemblyPatch> patches, DefaultAssemblyResolver oof)
         {
+            Console.WriteLine(patches.Count);
             foreach (KeyValuePair<string, byte[]> target in targets.ToList())
             {
                 string finalName = target.Key;
