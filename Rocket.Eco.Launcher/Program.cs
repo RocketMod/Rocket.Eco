@@ -15,16 +15,21 @@ namespace Rocket.Eco.Launcher
             {
                 try
                 {
-                    AssemblyName assemblyName = new AssemblyName(args.Name);
+                    AssemblyName requestedName = new AssemblyName(args.Name);
                     Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
                     foreach (Assembly assembly in assemblies)
                     {
-                        AssemblyName name2 = assembly.GetName();
-                        if (string.Equals(name2.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(name2.CultureInfo.Name ?? "", assemblyName.CultureInfo.Name ?? "", StringComparison.InvariantCultureIgnoreCase))
+                        AssemblyName iteratedName = assembly.GetName();
+                        if (string.Equals(iteratedName.Name, requestedName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(iteratedName.CultureInfo.Name ?? "", requestedName.CultureInfo.Name ?? "", StringComparison.InvariantCultureIgnoreCase))
                         {
                             return assembly;
                         }
+                    }
+
+                    if (requestedName.Flags == AssemblyNameFlags.Retargetable)
+                    {
+                        return Assembly.Load(requestedName);
                     }
 
                     return null;
@@ -37,7 +42,7 @@ namespace Rocket.Eco.Launcher
             };
         }
 
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             string currentPath = Directory.GetCurrentDirectory();
 

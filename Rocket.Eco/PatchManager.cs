@@ -23,7 +23,7 @@ namespace Rocket.Eco
             logger.Info($"A patch for {patch.TargetAssembly} has been registered.");
         }
 
-        public Dictionary<string, byte[]> PatchAll(IDependencyResolver resolver, ILogger logger)
+        public void PatchAll(Dictionary<string, byte[]> output, IDependencyResolver resolver, ILogger logger)
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
@@ -35,12 +35,10 @@ namespace Rocket.Eco
             }
 
             var resources = eco.GetManifestResourceNames().Where(x => x.EndsWith(".compressed", StringComparison.InvariantCultureIgnoreCase)).Where(x => x.StartsWith("costura.", StringComparison.InvariantCultureIgnoreCase));
-
-            Dictionary<string, byte[]> assemblies = new Dictionary<string, byte[]>();
-
+            
             foreach (string resource in resources)
             {
-                string finalName = resource.Replace(".compressed", "").Replace("costura.", "");
+                string finalName = resource.Replace(".dll.compressed", "").Replace("costura.", "");
 
                 try
                 {
@@ -48,7 +46,7 @@ namespace Rocket.Eco
                     {
                         using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
                         {
-                            var targetedPatches = patches.Where(x => x.TargetAssembly.Equals(finalName.Replace(".dll", ""), StringComparison.InvariantCultureIgnoreCase));
+                            var targetedPatches = patches.Where(x => x.TargetAssembly.Equals(finalName, StringComparison.InvariantCultureIgnoreCase));
 
                             if (targetedPatches != null && targetedPatches.Count() != 0)
                             {
@@ -85,12 +83,12 @@ namespace Rocket.Eco
 
                                     asmDef.Write(memStream);
                                     memStream.Position = 0;
-                                    WriteAssembly(finalName, memStream, assemblies);
+                                    WriteAssembly(finalName, memStream, output);
                                 }
                             }
                             else
                             {
-                                WriteAssembly(finalName, deflateStream, assemblies);
+                                WriteAssembly(finalName, deflateStream, output);
                             }
                         }
                     }
@@ -102,8 +100,6 @@ namespace Rocket.Eco
                     logger.Error(e.StackTrace);
                 }
             }
-
-            return assemblies;
         }
 
         void WriteAssembly(string finalName, Stream stream, Dictionary<string, byte[]> dict)
@@ -138,7 +134,7 @@ namespace Rocket.Eco
 
             try
             {
-                Assembly.Load(finalAssembly, finalAssembly);
+                //Assembly.Load(finalAssembly, finalAssembly);
                 dict[finalName] = finalAssembly;
             }
             catch { }
@@ -148,6 +144,6 @@ namespace Rocket.Eco
     public interface IPatchManager
     {
         void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new();
-        Dictionary<string, byte[]> PatchAll(IDependencyResolver resolver, ILogger logger);
+        void PatchAll(Dictionary<string, byte[]> output, IDependencyResolver resolver, ILogger logger);
     }
 }
