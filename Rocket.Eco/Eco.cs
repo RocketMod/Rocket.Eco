@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+
+using Mono.Cecil;
 
 using Rocket.API;
-using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
+using Rocket.Eco.API;
 using Rocket.Eco.Patches;
 
 namespace Rocket.Eco
@@ -23,14 +26,23 @@ namespace Rocket.Eco
             var logger = runtime.Container.Get<ILogger>();
 
             patchManager.RegisterPatch<Eco_Simulation_AnimalSim>(runtime.Container, logger);
+            patchManager.RegisterPatch<Eco_Gameplayer_Players_UserManager>(runtime.Container, logger);
+            
+            var dict = patchManager.CollectAssemblies(runtime.Container);
 
-            var result = patchManager.PatchAll(runtime.Container, logger);
+            RunExtraction(dict, logger);
 
-            if (Arguments.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
+            var oof = new DefaultAssemblyResolver();
+            oof.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "PatchedAssemblies"));
+
+            patchManager.PatchAll(dict, runtime.Container.GetAll<IAssemblyPatch>().ToList(), oof);
+
+            for (int i = 0; i < dict.Values.Count; i++)
             {
-                RunExtraction(result, logger);
+                Assembly.Load(dict.Values.ElementAt(i));
             }
-            else
+
+            if (!Arguments.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
             {
                 logger.Info("Rocket.Eco.E has initialized.");
             }

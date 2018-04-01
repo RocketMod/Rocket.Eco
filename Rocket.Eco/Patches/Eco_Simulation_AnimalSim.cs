@@ -8,6 +8,7 @@ using Rocket.Eco.API;
 
 namespace Rocket.Eco.Patches
 {
+    [Serializable]
     public class Eco_Simulation_AnimalSim : IAssemblyPatch
     {
         public string TargetAssembly => "Eco.Simulation";

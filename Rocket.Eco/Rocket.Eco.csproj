@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Eco.cs" />
     <Compile Include="API\IAssemblyPatch.cs" />
+    <Compile Include="Patches\Eco_Gameplayer_Players_UserManager.cs" />
     <Compile Include="Patches\Eco_Simulation_AnimalSim.cs" />
     <Compile Include="PatchManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
