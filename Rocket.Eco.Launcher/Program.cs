@@ -64,8 +64,7 @@ namespace Rocket.Eco.Launcher
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
 
             Assembly.LoadFile(Path.Combine(currentPath, "EcoServer.exe"));
-
-            Eco.Arguments = args;
+            
             Runtime.Bootstrap();
 
             if (args.Length == 0 || !args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))

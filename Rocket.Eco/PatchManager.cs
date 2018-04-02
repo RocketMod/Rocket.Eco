@@ -13,7 +13,6 @@ using Rocket.API.DependencyInjection;
 
 namespace Rocket.Eco
 {
-    [Serializable]
     public sealed class PatchManager : IPatchManager
     {
         public void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new()
@@ -80,9 +79,9 @@ namespace Rocket.Eco
             return assemblies;
         }
 
-        public void PatchAll(Dictionary<string, byte[]> targets, List<IAssemblyPatch> patches, DefaultAssemblyResolver oof)
+        public void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver)
         {
-            Console.WriteLine(patches.Count);
+            var patches = resolver.GetAll<IAssemblyPatch>();
             foreach (KeyValuePair<string, byte[]> target in targets.ToList())
             {
                 string finalName = target.Key;
@@ -93,7 +92,7 @@ namespace Rocket.Eco
                 {
                     using (MemoryStream memStream = new MemoryStream(target.Value))
                     {
-                        AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream, new ReaderParameters { AssemblyResolver = oof });
+                        AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream, new ReaderParameters { AssemblyResolver = monoCecilResolver });
 
                         foreach (IAssemblyPatch patch in targetedPatches)
                         {
@@ -161,7 +160,7 @@ namespace Rocket.Eco
     public interface IPatchManager
     {
         void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new();
-        void PatchAll(Dictionary<string, byte[]> targets, List<IAssemblyPatch> resolver, DefaultAssemblyResolver oof);
+        void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver oof);
         Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver);
     }
 }

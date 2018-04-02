@@ -8,7 +8,6 @@ using Mono.Cecil;
 
 using Rocket.API;
 using Rocket.API.Logging;
-using Rocket.Eco.API;
 using Rocket.Eco.Patches;
 
 namespace Rocket.Eco
@@ -16,36 +15,30 @@ namespace Rocket.Eco
     public sealed class Eco : IImplementation
     {
         public string InstanceId => throw new NotImplementedException();
-        public IEnumerable<string> Capabilities => new List<string> { "idk" };
-
-        internal static string[] Arguments = default(string[]);
+        public IEnumerable<string> Capabilities => new List<string> { "NADA" };
 
         public void Load(IRuntime runtime)
         {
             var patchManager = runtime.Container.Get<IPatchManager>();
             var logger = runtime.Container.Get<ILogger>();
-
-            patchManager.RegisterPatch<Eco_Simulation_AnimalSim>(runtime.Container, logger);
-            patchManager.RegisterPatch<Eco_Gameplayer_Players_UserManager>(runtime.Container, logger);
             
+            patchManager.RegisterPatch<PlayerPatch>(runtime.Container, logger);
+
             var dict = patchManager.CollectAssemblies(runtime.Container);
 
-            RunExtraction(dict, logger);
+            RunExtraction(dict);
 
-            var oof = new DefaultAssemblyResolver();
-            oof.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "PatchedAssemblies"));
+            var monoAssemblyResolver = new DefaultAssemblyResolver();
+            monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
 
-            patchManager.PatchAll(dict, runtime.Container.GetAll<IAssemblyPatch>().ToList(), oof);
+            patchManager.PatchAll(dict, runtime.Container, monoAssemblyResolver);
 
             for (int i = 0; i < dict.Values.Count; i++)
             {
                 Assembly.Load(dict.Values.ElementAt(i));
             }
 
-            if (!Arguments.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
-            {
-                logger.Info("Rocket.Eco.E has initialized.");
-            }
+            logger.Info("Rocket.Eco.E has initialized.");
         }
 
         public void Shutdown()
@@ -58,15 +51,14 @@ namespace Rocket.Eco
 
         }
 
-        void RunExtraction(Dictionary<string, byte[]> asms, ILogger logger)
+        void RunExtraction(Dictionary<string, byte[]> asms)
         {
-            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "PatchedAssemblies");
+            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
             Directory.CreateDirectory(outputDir);
 
             foreach (KeyValuePair<string, byte[]> value in asms)
             {
                 File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
-                logger.Info($"\"{value.Key}\" has been patched and extracted to your file system.");
             }
         }
     }
