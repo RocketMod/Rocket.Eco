@@ -52,11 +52,12 @@ namespace Rocket.Eco.Launcher
         {
             string currentPath = Directory.GetCurrentDirectory();
 
-            foreach (string file in Directory.GetFiles(Path.Combine(currentPath, "Rocket")).Where(x => x.EndsWith(".dll")))
+            foreach (string file in Directory.GetFiles(Path.Combine(currentPath, "Rocket", "Binaries")).Where(x => x.EndsWith(".dll")))
             {
                 try
                 {
                     Assembly.LoadFile(file);
+                    Console.WriteLine(file);
                 }
                 catch { }
             }
@@ -78,6 +79,6 @@ namespace Rocket.Eco.Launcher
 
         static void StartServer(string[] args) => GetEcoAssembly().GetType("Eco.Server.Startup").GetMethod("Start", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] { args });
         static Assembly GetEcoAssembly() => AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
-        static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", args.Name.Remove(args.Name.IndexOf(",")) + ".dll"));
+        static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",")) + ".dll"));
     }
 }
