@@ -37,33 +37,43 @@
   <ItemGroup>
     <Reference Include="eco.core">
       <HintPath>lib\eco.core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.gameplay">
       <HintPath>lib\eco.gameplay.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.modkit">
       <HintPath>lib\eco.modkit.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.plugins">
       <HintPath>lib\eco.plugins.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.shared">
       <HintPath>lib\eco.shared.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.simulation">
       <HintPath>lib\eco.simulation.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.stats">
       <HintPath>lib\eco.stats.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.webserver">
       <HintPath>lib\eco.webserver.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.world">
       <HintPath>lib\eco.world.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="eco.worldgenerator">
       <HintPath>lib\eco.worldgenerator.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -99,7 +109,6 @@
       <HintPath>..\packages\Rocket.Runtime.5.0.0.133\lib\net35\Rocket.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Eco.cs" />

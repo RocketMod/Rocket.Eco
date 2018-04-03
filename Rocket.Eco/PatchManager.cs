@@ -160,7 +160,7 @@ namespace Rocket.Eco
     public interface IPatchManager
     {
         void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new();
-        void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver oof);
+        void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver);
         Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver);
     }
 }
