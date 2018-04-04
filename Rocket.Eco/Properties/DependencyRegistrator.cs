@@ -14,7 +14,7 @@ namespace Rocket.Eco.Properties
         {
             container.RegisterType<IPatchManager, PatchManager>();
             container.RegisterType<IPlayerManager, EcoPlayerManager>();
-            container.RegisterSingletonType<IImplementation, Eco>();
+            container.RegisterType<IImplementation, Eco>();
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Rocket.Eco
     {
         public string InstanceId => throw new NotImplementedException();
         public IEnumerable<string> Capabilities => new List<string> { "NADA" };
+        public bool IsAlive { get; } = false;
 
         public void Load(IRuntime runtime)
         {

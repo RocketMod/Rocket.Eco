@@ -3,6 +3,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Globalization;
+using Rocket.API.DependencyInjection;
 
 namespace Rocket.Eco.Launcher
 {
@@ -57,7 +58,6 @@ namespace Rocket.Eco.Launcher
                 try
                 {
                     Assembly.LoadFile(file);
-                    Console.WriteLine(file);
                 }
                 catch { }
             }
@@ -70,10 +70,7 @@ namespace Rocket.Eco.Launcher
 
             if (args.Length == 0 || !args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
             {
-                var list = args.ToList();
-                list.Add("-nogui");
-
-                StartServer(list.ToArray());
+                StartServer(args);
             }
         }
 

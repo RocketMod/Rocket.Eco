@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Rocket.API.Player;
 
 using BasePlayer = Eco.Gameplay.Players.Player;
@@ -10,14 +9,18 @@ namespace Rocket.Eco.Player
     public sealed class EcoPlayer : IPlayer, IComparable, IComparable<BasePlayer>, IEquatable<BasePlayer>, IComparable<BaseUser>, IEquatable<BaseUser>
     {
         public string UniqueID => User.SteamId;
-        public string DisplayName => User.Name;
+        public string Name => User.Name;
         public bool IsAdmin => User.IsAdmin;
+
 
         public BaseUser User => Player.User;
         public bool IsDev => User.IsDev;
         public bool IsOnline => User.LoggedIn;
 
         public BasePlayer Player { get; }
+        
+        public string Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public void SendMessage(string message) => throw new NotImplementedException();
 
         internal EcoPlayer(BasePlayer player)
         {
