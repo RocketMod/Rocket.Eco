@@ -2,8 +2,6 @@
 using System.Linq;
 using System.IO;
 using System.Reflection;
-using System.Globalization;
-using Rocket.API.DependencyInjection;
 
 namespace Rocket.Eco.Launcher
 {
@@ -22,8 +20,8 @@ namespace Rocket.Eco.Launcher
 
                     foreach (Assembly assembly in assemblies)
                     {
-                        AssemblyName name2 = assembly.GetName();
-                        if (string.Equals(name2.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(CultureToString(name2.CultureInfo), CultureToString(assemblyName.CultureInfo), StringComparison.InvariantCultureIgnoreCase))
+                        AssemblyName interatedName = assembly.GetName();
+                        if (string.Equals(interatedName.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(interatedName.CultureInfo.Name ?? "", assemblyName.CultureInfo.Name ?? "", StringComparison.InvariantCultureIgnoreCase))
                         {
                             return assembly;
                         }
@@ -37,16 +35,6 @@ namespace Rocket.Eco.Launcher
                     return null;
                 }
             };
-        }
-
-        static string CultureToString(CultureInfo culture)
-        {
-            if (culture == null)
-            {
-                return "";
-            }
-
-            return culture.Name;
         }
 
         public static void Main(string[] args)

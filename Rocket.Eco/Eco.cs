@@ -16,28 +16,16 @@ namespace Rocket.Eco
     {
         public string InstanceId => throw new NotImplementedException();
         public IEnumerable<string> Capabilities => new List<string> { "NADA" };
-        public bool IsAlive { get; } = false;
+        public bool IsAlive { get; } = true;
 
         public void Load(IRuntime runtime)
         {
             var patchManager = runtime.Container.Get<IPatchManager>();
             var logger = runtime.Container.Get<ILogger>();
             
-            patchManager.RegisterPatch<PlayerPatch>(runtime.Container, logger);
+            patchManager.RegisterPatch<UserPatch>(runtime.Container, logger);
 
-            var dict = patchManager.CollectAssemblies(runtime.Container);
-
-            RunExtraction(dict);
-
-            var monoAssemblyResolver = new DefaultAssemblyResolver();
-            monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
-
-            patchManager.PatchAll(dict, runtime.Container, monoAssemblyResolver);
-
-            for (int i = 0; i < dict.Values.Count; i++)
-            {
-                Assembly.Load(dict.Values.ElementAt(i));
-            }
+            RunPatching(runtime, patchManager);
 
             logger.Info("Rocket.Eco.E has initialized.");
         }
@@ -52,14 +40,27 @@ namespace Rocket.Eco
 
         }
 
-        void RunExtraction(Dictionary<string, byte[]> asms)
+        //TODO: Implement this into IPatchManager
+        void RunPatching(IRuntime runtime, IPatchManager patchManager)
         {
+            var dict = patchManager.CollectAssemblies(runtime.Container);
+
             string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
             Directory.CreateDirectory(outputDir);
 
-            foreach (KeyValuePair<string, byte[]> value in asms)
+            foreach (KeyValuePair<string, byte[]> value in dict)
             {
                 File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
+            }
+
+            var monoAssemblyResolver = new DefaultAssemblyResolver();
+            monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
+
+            patchManager.PatchAll(dict, runtime.Container, monoAssemblyResolver);
+
+            for (int i = 0; i < dict.Values.Count; i++)
+            {
+                Assembly.Load(dict.Values.ElementAt(i));
             }
         }
     }

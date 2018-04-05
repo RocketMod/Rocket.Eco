@@ -117,7 +117,8 @@
   <ItemGroup>
     <Compile Include="Eco.cs" />
     <Compile Include="API\IAssemblyPatch.cs" />
-    <Compile Include="Patches\PlayerPatch.cs" />
+    <Compile Include="Eventing\EventManagerPlaceholder.cs" />
+    <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="PatchManager.cs" />
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
