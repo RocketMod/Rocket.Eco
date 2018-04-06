@@ -16,20 +16,26 @@ namespace Rocket.Eco
 {
     public sealed class PatchManager : IPatchManager
     {
+        IDependencyContainer patchContainer;
+
+        public void Init(IRuntime runtime)
+        {
+            patchContainer = runtime.Container.CreateChildContainer();
+        }
+
         public void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new()
         {
-            var container = runtime.Container;
-            var logger = container.Get<ILogger>();
+            var logger = patchContainer.Get<ILogger>();
 
             T patch = new T();
-            container.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
+            patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
 
             logger.Info($"A patch for {patch.TargetAssembly} has been registered.");
         }
 
         public void RunPatching(IRuntime runtime)
         {
-            var dict = CollectAssemblies(runtime.Container);
+            var dict = CollectAssemblies();
 
             string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
             Directory.CreateDirectory(outputDir);
@@ -42,7 +48,7 @@ namespace Rocket.Eco
             var monoAssemblyResolver = new DefaultAssemblyResolver();
             monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
 
-            PatchAll(dict, runtime.Container, monoAssemblyResolver);
+            PatchAll(dict, patchContainer, monoAssemblyResolver);
 
             for (int i = 0; i < dict.Values.Count; i++)
             {
@@ -50,11 +56,11 @@ namespace Rocket.Eco
             }
         }
 
-        Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver)
+        Dictionary<string, byte[]> CollectAssemblies()
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
-            resolver.TryGetAll<IAssemblyPatch>(out var patches);
+            patchContainer.TryGetAll<IAssemblyPatch>(out var patches);
 
             if (patches == null)
             {

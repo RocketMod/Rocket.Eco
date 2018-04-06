@@ -117,7 +117,8 @@
   <ItemGroup>
     <Compile Include="Eco.cs" />
     <Compile Include="API\IAssemblyPatch.cs" />
-    <Compile Include="Eventing\EventManagerPlaceholder.cs" />
+    <Compile Include="Eventing\EcoEventListener.cs" />
+    <Compile Include="Eventing\Events.cs" />
     <Compile Include="Plugins\EcoPluginManager.cs" />
     <Compile Include="Plugins\IEcoPlugin.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />

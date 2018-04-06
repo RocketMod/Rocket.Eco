@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 
 using Rocket.API;
+using Rocket.API.Eventing;
 using Rocket.API.Logging;
 
-using Rocket.Eco.Patches;
+using Rocket.Eco.Eventing;
 
 namespace Rocket.Eco
 {
@@ -18,14 +19,12 @@ namespace Rocket.Eco
         {
             var patchManager = runtime.Container.Get<IPatchManager>();
             var logger = runtime.Container.Get<ILogger>();
+            var eventManager = runtime.Container.Get<IEventManager>();
             
-            patchManager.RegisterPatch<UserPatch>(runtime);
-
-            //PreLoad Plugins
-
+            //patchManager.RegisterPatch<UserPatch>(runtime);
             patchManager.RunPatching(runtime);
 
-            //Load Plugins
+            eventManager.AddEventListener(this, new EcoEventListener());
 
             logger.Info("Rocket.Eco.E has initialized.");
         }

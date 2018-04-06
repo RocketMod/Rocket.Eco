@@ -2,8 +2,11 @@
 
 using Rocket.API;
 using Rocket.API.DependencyInjection;
+using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.API.Plugin;
+
+using Rocket.Core.Eventing;
 
 using Rocket.Eco.Player;
 using Rocket.Eco.Plugins;
@@ -14,10 +17,12 @@ namespace Rocket.Eco.Properties
     {
         public void Register(IDependencyContainer container, IDependencyResolver resolver)
         {
-            container.RegisterType<IPatchManager, PatchManager>();
             container.RegisterType<IPlayerManager, EcoPlayerManager>();
 
-            container.RegisterSingletonInstance<IPluginManager>(container.Activate<EcoPluginManager>());
+            container.RegisterSingletonInstance<IEventManager>(container.Activate<EventManager>());
+
+            container.RegisterSingletonType<IPatchManager, PatchManager>();
+            container.RegisterSingletonType<IPluginManager, EcoPluginManager>();
             container.RegisterSingletonType<IImplementation, Eco>();
         }
     }

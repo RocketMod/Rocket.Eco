@@ -32,10 +32,10 @@ namespace Rocket.Eco.Patches
             Instruction[] injection = new Instruction[]
             {
                 //Load `this`
-                il.Create(OpCodes.Ldarg_0),
+                //il.Create(OpCodes.Ldarg_0),
 
                 //Call the event
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EventManagerPlaceholder).GetMethod("CallOnJoin")))
+                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EventManagerPlaceholder).GetMethod("CallOnJoin")))
             };
 
             for (int i = 0; i < injection.Length; i++)
@@ -51,10 +51,10 @@ namespace Rocket.Eco.Patches
             Instruction[] injection = new Instruction[]
             {
                 //Load `this`
-                il.Create(OpCodes.Ldarg_0),
+                //il.Create(OpCodes.Ldarg_0),
 
                 //Call the event
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EventManagerPlaceholder).GetMethod("CallOnLeave", BindingFlags.Static | BindingFlags.Public)))
+                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EventManagerPlaceholder).GetMethod("CallOnLeave", BindingFlags.Static | BindingFlags.Public)))
             };
 
             for (int i = 0; i < injection.Length; i++)
