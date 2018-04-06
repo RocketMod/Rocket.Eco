@@ -118,6 +118,8 @@
     <Compile Include="Eco.cs" />
     <Compile Include="API\IAssemblyPatch.cs" />
     <Compile Include="Eventing\EventManagerPlaceholder.cs" />
+    <Compile Include="Plugins\EcoPluginManager.cs" />
+    <Compile Include="Plugins\IEcoPlugin.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />
     <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="PatchManager.cs" />

@@ -3,8 +3,10 @@
 using Rocket.API;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
+using Rocket.API.Plugin;
 
 using Rocket.Eco.Player;
+using Rocket.Eco.Plugins;
 
 namespace Rocket.Eco.Properties
 {
@@ -14,7 +16,9 @@ namespace Rocket.Eco.Properties
         {
             container.RegisterType<IPatchManager, PatchManager>();
             container.RegisterType<IPlayerManager, EcoPlayerManager>();
-            container.RegisterType<IImplementation, Eco>();
+
+            container.RegisterSingletonInstance<IPluginManager>(container.Activate<EcoPluginManager>());
+            container.RegisterSingletonType<IImplementation, Eco>();
         }
     }
 }

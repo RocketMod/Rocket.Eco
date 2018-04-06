@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-
-using Mono.Cecil;
 
 using Rocket.API;
 using Rocket.API.Logging;
+
 using Rocket.Eco.Patches;
 
 namespace Rocket.Eco
@@ -23,9 +19,13 @@ namespace Rocket.Eco
             var patchManager = runtime.Container.Get<IPatchManager>();
             var logger = runtime.Container.Get<ILogger>();
             
-            patchManager.RegisterPatch<UserPatch>(runtime.Container, logger);
+            patchManager.RegisterPatch<UserPatch>(runtime);
 
-            RunPatching(runtime, patchManager);
+            //PreLoad Plugins
+
+            patchManager.RunPatching(runtime);
+
+            //Load Plugins
 
             logger.Info("Rocket.Eco.E has initialized.");
         }
@@ -38,31 +38,6 @@ namespace Rocket.Eco
         public void Reload()
         {
 
-        }
-
-        //TODO: Implement this into IPatchManager
-        //Low Priority
-        void RunPatching(IRuntime runtime, IPatchManager patchManager)
-        {
-            var dict = patchManager.CollectAssemblies(runtime.Container);
-
-            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
-            Directory.CreateDirectory(outputDir);
-
-            foreach (KeyValuePair<string, byte[]> value in dict)
-            {
-                File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
-            }
-
-            var monoAssemblyResolver = new DefaultAssemblyResolver();
-            monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
-
-            patchManager.PatchAll(dict, runtime.Container, monoAssemblyResolver);
-
-            for (int i = 0; i < dict.Values.Count; i++)
-            {
-                Assembly.Load(dict.Values.ElementAt(i));
-            }
         }
     }
 }

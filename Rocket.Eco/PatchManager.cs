@@ -10,20 +10,47 @@ using Mono.Cecil;
 using Rocket.Eco.API;
 using Rocket.API.Logging;
 using Rocket.API.DependencyInjection;
+using Rocket.API;
 
 namespace Rocket.Eco
 {
     public sealed class PatchManager : IPatchManager
     {
-        public void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new()
+        public void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new()
         {
+            var container = runtime.Container;
+            var logger = container.Get<ILogger>();
+
             T patch = new T();
             container.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
 
             logger.Info($"A patch for {patch.TargetAssembly} has been registered.");
         }
 
-        public Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver)
+        public void RunPatching(IRuntime runtime)
+        {
+            var dict = CollectAssemblies(runtime.Container);
+
+            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
+            Directory.CreateDirectory(outputDir);
+
+            foreach (KeyValuePair<string, byte[]> value in dict)
+            {
+                File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
+            }
+
+            var monoAssemblyResolver = new DefaultAssemblyResolver();
+            monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
+
+            PatchAll(dict, runtime.Container, monoAssemblyResolver);
+
+            for (int i = 0; i < dict.Values.Count; i++)
+            {
+                Assembly.Load(dict.Values.ElementAt(i));
+            }
+        }
+
+        Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver)
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
@@ -79,7 +106,7 @@ namespace Rocket.Eco
             return assemblies;
         }
 
-        public void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver)
+        void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver)
         {
             var patches = resolver.GetAll<IAssemblyPatch>();
             foreach (KeyValuePair<string, byte[]> target in targets.ToList())
@@ -159,8 +186,9 @@ namespace Rocket.Eco
 
     public interface IPatchManager
     {
-        void RegisterPatch<T>(IDependencyContainer container, ILogger logger) where T : IAssemblyPatch, new();
-        void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver);
-        Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver);
+        void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new();
+        void RunPatching(IRuntime runtime);
+        //void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver);
+        //Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver);
     }
 }
