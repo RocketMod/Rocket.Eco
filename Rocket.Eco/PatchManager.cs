@@ -20,7 +20,14 @@ namespace Rocket.Eco
 
         public void Init(IRuntime runtime)
         {
-            patchContainer = runtime.Container.CreateChildContainer();
+            if (Assembly.GetCallingAssembly().GetName().Name == "Rocket.Eco")
+            {
+                patchContainer = runtime.Container.CreateChildContainer();
+            }
+            else
+            {
+                throw new MethodAccessException("This method may only be called from the Rocket.Eco assembly.");
+            }
         }
 
         public void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new()
@@ -35,24 +42,31 @@ namespace Rocket.Eco
 
         public void RunPatching(IRuntime runtime)
         {
-            var dict = CollectAssemblies();
-
-            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
-            Directory.CreateDirectory(outputDir);
-
-            foreach (KeyValuePair<string, byte[]> value in dict)
+            if (Assembly.GetCallingAssembly().GetName().Name == "Rocket.Eco")
             {
-                File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
+                var dict = CollectAssemblies();
+
+                string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
+                Directory.CreateDirectory(outputDir);
+
+                foreach (KeyValuePair<string, byte[]> value in dict)
+                {
+                    File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
+                }
+
+                var monoAssemblyResolver = new DefaultAssemblyResolver();
+                monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
+
+                PatchAll(dict, patchContainer, monoAssemblyResolver);
+
+                for (int i = 0; i < dict.Values.Count; i++)
+                {
+                    Assembly.Load(dict.Values.ElementAt(i));
+                }
             }
-
-            var monoAssemblyResolver = new DefaultAssemblyResolver();
-            monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
-
-            PatchAll(dict, patchContainer, monoAssemblyResolver);
-
-            for (int i = 0; i < dict.Values.Count; i++)
+            else
             {
-                Assembly.Load(dict.Values.ElementAt(i));
+                throw new MethodAccessException("This method may only be called from the Rocket.Eco assembly.");
             }
         }
 
@@ -192,9 +206,8 @@ namespace Rocket.Eco
 
     public interface IPatchManager
     {
+        void Init(IRuntime runtime);
         void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new();
         void RunPatching(IRuntime runtime);
-        //void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver);
-        //Dictionary<string, byte[]> CollectAssemblies(IDependencyResolver resolver);
     }
 }

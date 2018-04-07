@@ -16,7 +16,7 @@ namespace Rocket.Eco
     public sealed class Eco : IImplementation, IEventEmitter
     {
         public string InstanceId => throw new NotImplementedException();
-        public IEnumerable<string> Capabilities => new List<string> { "NADA" };
+        public IEnumerable<string> Capabilities => new string[0];
         public bool IsAlive { get; } = true;
 
         public string Name => "Rocket.Eco";

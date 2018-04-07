@@ -24,6 +24,11 @@ namespace Rocket.Eco.Plugins
             
         }
 
+        public void PostInit()
+        {
+
+        }
+
         public bool ExecutePluginDependendCode(string pluginName, Action<IPlugin> action)
         {
             throw new NotImplementedException();
