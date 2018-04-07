@@ -31,11 +31,9 @@ namespace Rocket.Eco.Patches
 
             Instruction[] injection = new Instruction[]
             {
-                //Load `this`
-                //il.Create(OpCodes.Ldarg_0),
-
-                //Call the event
-                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EventManagerPlaceholder).GetMethod("CallOnJoin")))
+                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
+                il.Create(OpCodes.Ldarg_0),
+                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_EmitPlayerJoin", BindingFlags.Instance | BindingFlags.NonPublic)))
             };
 
             for (int i = 0; i < injection.Length; i++)
@@ -50,11 +48,9 @@ namespace Rocket.Eco.Patches
 
             Instruction[] injection = new Instruction[]
             {
-                //Load `this`
-                //il.Create(OpCodes.Ldarg_0),
-
-                //Call the event
-                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EventManagerPlaceholder).GetMethod("CallOnLeave", BindingFlags.Static | BindingFlags.Public)))
+                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
+                il.Create(OpCodes.Ldarg_0),
+                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_EmitPlayerLeave", BindingFlags.Instance | BindingFlags.NonPublic)))
             };
 
             for (int i = 0; i < injection.Length; i++)

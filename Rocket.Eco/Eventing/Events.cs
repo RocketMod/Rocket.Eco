@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Eco.Gameplay.Players;
+
 using Rocket.API.Eventing;
 
 using Rocket.Eco.Player;

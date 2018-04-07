@@ -41,8 +41,8 @@ namespace Rocket.Eco.Player
         {
             if (player is BasePlayer ecoPlayer)
             {
-                //I'll need to find a replacement for that second user.
-                UserManager.Kick(ecoPlayer.User, ecoPlayer.User, reason);
+                //TODO: I'll need to find a replacement for that second user.
+                //UserManager.Kick(ecoPlayer.User, ecoPlayer.User, reason);
             }
 
             return false;
