@@ -37,7 +37,7 @@ namespace Rocket.Eco
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
 
-            logger.Info($"A patch for {patch.TargetAssembly} has been registered.");
+            logger.LogInformation($"A patch for {patch.TargetAssembly} has been registered.");
         }
 
         public void RunPatching(IRuntime runtime)

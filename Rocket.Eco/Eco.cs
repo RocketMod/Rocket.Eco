@@ -40,7 +40,7 @@ namespace Rocket.Eco
 
             eventManager.AddEventListener(this, new EcoEventListener());
 
-            logger.Info("Rocket.Eco.E has initialized.");
+            logger.LogInformation("Rocket.Eco.E has initialized.");
         }
 
         public void Shutdown()
