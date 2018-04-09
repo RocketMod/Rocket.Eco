@@ -37,7 +37,7 @@ namespace Rocket.Eco
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
 
-            logger.LogInformation($"A patch for {patch.TargetAssembly} has been registered.");
+            logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
         }
 
         public void RunPatching(IRuntime runtime)
@@ -74,16 +74,8 @@ namespace Rocket.Eco
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
-            patchContainer.TryGetAll<IAssemblyPatch>(out var patches);
-
-            if (patches == null)
-            {
-                patches = new List<IAssemblyPatch>();
-            }
-
             var resources = eco.GetManifestResourceNames().Where(x => x.EndsWith(".compressed", StringComparison.InvariantCultureIgnoreCase)).Where(x => x.StartsWith("costura.", StringComparison.InvariantCultureIgnoreCase));
-
-            Dictionary<string, byte[]> assemblies = new Dictionary<string, byte[]>();
+            var assemblies = new Dictionary<string, byte[]>();
 
             foreach (string resource in resources)
             {
@@ -95,28 +87,7 @@ namespace Rocket.Eco
                     {
                         using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
                         {
-                            var targetedPatches = patches.Where(x => x.TargetAssembly.Equals(finalName.Replace(".dll", ""), StringComparison.InvariantCultureIgnoreCase));
-
-                            if (targetedPatches != null && targetedPatches.Count() != 0)
-                            {
-                                using (MemoryStream memStream = new MemoryStream())
-                                {
-                                    byte[] array = new byte[81920];
-                                    int count;
-
-                                    while ((count = deflateStream.Read(array, 0, array.Length)) != 0)
-                                    {
-                                        memStream.Write(array, 0, count);
-                                    }
-
-                                    memStream.Position = 0;
-                                    WriteAssembly(finalName, memStream, assemblies);
-                                }
-                            }
-                            else
-                            {
-                                WriteAssembly(finalName, deflateStream, assemblies);
-                            }
+                            WriteAssembly(finalName, deflateStream, assemblies);
                         }
                     }
                 }
@@ -170,30 +141,20 @@ namespace Rocket.Eco
         {
             byte[] finalAssembly;
 
-            if (stream is MemoryStream)
+            using (MemoryStream memStream = new MemoryStream())
             {
-                stream.Position = 0;
+                byte[] array = new byte[81920];
+                int count;
 
-                finalAssembly = new byte[stream.Length];
-                stream.Read(finalAssembly, 0, finalAssembly.Length);
-            }
-            else
-            {
-                using (MemoryStream memStream = new MemoryStream())
+                while ((count = stream.Read(array, 0, array.Length)) != 0)
                 {
-                    byte[] array = new byte[81920];
-                    int count;
-
-                    while ((count = stream.Read(array, 0, array.Length)) != 0)
-                    {
-                        memStream.Write(array, 0, count);
-                    }
-
-                    memStream.Position = 0;
-
-                    finalAssembly = new byte[memStream.Length];
-                    memStream.Read(finalAssembly, 0, finalAssembly.Length);
+                    memStream.Write(array, 0, count);
                 }
+
+                memStream.Position = 0;
+
+                finalAssembly = new byte[memStream.Length];
+                memStream.Read(finalAssembly, 0, finalAssembly.Length);
             }
 
             try

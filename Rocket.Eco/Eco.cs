@@ -38,7 +38,7 @@ namespace Rocket.Eco
             patchManager.RegisterPatch<UserPatch>(runtime);
             patchManager.RunPatching(runtime);
 
-            eventManager.AddEventListener(this, new EcoEventListener());
+            //eventManager.AddEventListener(this, new EcoEventListener());
 
             logger.LogInformation("Rocket.Eco.E has initialized.");
         }

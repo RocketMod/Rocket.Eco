@@ -6,7 +6,7 @@ namespace Rocket.Eco.Eventing
 {
     public sealed class EcoEventListener : IEventListener<EcoInitEvent>, IEventListener<PlayerJoinEvent>, IEventListener<PlayerLeaveEvent>
     {
-        internal EcoEventListener() { }
+        public EcoEventListener() { }
 
         public void HandleEvent(IEventEmitter emitter, EcoInitEvent @event)
         {
