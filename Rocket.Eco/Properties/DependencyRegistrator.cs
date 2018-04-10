@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Rocket.API;
+using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Player;
@@ -8,6 +9,7 @@ using Rocket.API.Plugin;
 
 using Rocket.Core.Eventing;
 
+using Rocket.Eco.Commands;
 using Rocket.Eco.Player;
 using Rocket.Eco.Plugins;
 
@@ -23,6 +25,7 @@ namespace Rocket.Eco.Properties
 
             container.RegisterSingletonType<IPatchManager, PatchManager>();
             container.RegisterSingletonType<IPluginManager, EcoPluginManager>();
+            container.RegisterSingletonType<ICommandHandler, EcoCommandHandler>();
             container.RegisterSingletonType<IImplementation, Eco>();
         }
     }

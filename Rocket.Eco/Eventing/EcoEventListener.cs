@@ -2,9 +2,11 @@
 
 using Rocket.API.Eventing;
 
+using Rocket.Core.Events.Player;
+
 namespace Rocket.Eco.Eventing
 {
-    public sealed class EcoEventListener : IEventListener<EcoInitEvent>, IEventListener<PlayerJoinEvent>, IEventListener<PlayerLeaveEvent>
+    public sealed class EcoEventListener : IEventListener<EcoInitEvent>, IEventListener<PlayerConnectEvent>, IEventListener<PlayerDisconnectEvent>
     {
         public EcoEventListener() { }
 
@@ -13,12 +15,12 @@ namespace Rocket.Eco.Eventing
             
         }
 
-        public void HandleEvent(IEventEmitter emitter, PlayerJoinEvent @event)
+        public void HandleEvent(IEventEmitter emitter, PlayerConnectEvent @event)
         {
             
         }
 
-        public void HandleEvent(IEventEmitter emitter, PlayerLeaveEvent @event)
+        public void HandleEvent(IEventEmitter emitter, PlayerDisconnectEvent @event)
         {
             
         }

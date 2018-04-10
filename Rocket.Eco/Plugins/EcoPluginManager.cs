@@ -12,6 +12,9 @@ namespace Rocket.Eco.Plugins
         public static string PluginsDir => Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Plugins");
         public static string PackagesDir => Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Packages");
 
+        public static string OldPluginsDir => Path.Combine(Directory.GetCurrentDirectory(), "Plugins");
+        public static string OldPackagesDir => Path.Combine(Directory.GetCurrentDirectory(), "Packages");
+
         IDependencyContainer pluginsContainer;
 
         public EcoPluginManager(IRuntime runtime)
@@ -21,7 +24,11 @@ namespace Rocket.Eco.Plugins
 
         public void Init()
         {
-            
+            Directory.Delete(OldPluginsDir);
+            Directory.Delete(OldPackagesDir);
+
+            Directory.CreateDirectory(PluginsDir);
+            Directory.CreateDirectory(PackagesDir);
         }
 
         public void PostInit()

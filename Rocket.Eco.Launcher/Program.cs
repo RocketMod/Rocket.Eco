@@ -3,6 +3,9 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
 namespace Rocket.Eco.Launcher
 {
     static class Program
@@ -21,7 +24,7 @@ namespace Rocket.Eco.Launcher
                     foreach (Assembly assembly in assemblies)
                     {
                         AssemblyName interatedName = assembly.GetName();
-                        if (string.Equals(interatedName.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(interatedName.CultureInfo.Name ?? "", assemblyName.CultureInfo.Name ?? "", StringComparison.InvariantCultureIgnoreCase))
+                        if (string.Equals(interatedName.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals((interatedName.CultureInfo == null) ? "" : interatedName.CultureInfo.Name , (assemblyName.CultureInfo == null) ? "" : assemblyName.CultureInfo.Name, StringComparison.InvariantCultureIgnoreCase))
                         {
                             return assembly;
                         }
@@ -29,7 +32,6 @@ namespace Rocket.Eco.Launcher
 
                     return null;
                 }
-
                 catch
                 {
                     return null;
@@ -40,6 +42,8 @@ namespace Rocket.Eco.Launcher
         public static void Main(string[] args)
         {
             string currentPath = Directory.GetCurrentDirectory();
+
+            bool isExtraction = (args.Length != 0 && args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase));
 
             foreach (string file in Directory.GetFiles(Path.Combine(currentPath, "Rocket", "Binaries")).Where(x => x.EndsWith(".dll")))
             {
@@ -52,13 +56,54 @@ namespace Rocket.Eco.Launcher
 
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
 
-            Assembly.LoadFile(Path.Combine(currentPath, "EcoServer.exe"));
-            
+            if (isExtraction)
+            {
+                Assembly.LoadFile(Path.Combine(currentPath, "EcoServer.exe"));
+            }
+            else
+            {
+                try
+                {
+                    var monoAssemblyResolver = new DefaultAssemblyResolver();
+                    monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
+
+                    AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly(Path.Combine(currentPath, "EcoServer.exe"), new ReaderParameters { AssemblyResolver = monoAssemblyResolver });
+                    TypeDefinition typeDefinition = ecoServer.MainModule.GetType("Eco.Server.PluginManager");
+
+                    ILProcessor il = typeDefinition.Methods.First(x => x.Name == ".ctor").Body.GetILProcessor();
+
+                    Instruction[] inject = new Instruction[]
+                    {
+                        il.Create(OpCodes.Call, typeDefinition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
+                        il.Create(OpCodes.Call, typeDefinition.Module.ImportReference(typeof(Eco).GetMethod("_EmitEcoInit", BindingFlags.Instance | BindingFlags.NonPublic)))
+                    };
+
+                    for (int i = 0; i < inject.Length; i++)
+                    {
+                        il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], inject[i]);
+                    }
+
+                    string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
+
+                    ecoServer.Write(outputDir);
+                    Assembly.LoadFile(outputDir);
+                }
+                catch
+                {
+                    Console.WriteLine("Please run `Rocket.Eco.Launcher.exe` at least once with the argument `-extract`!");
+                    throw;
+                }
+            }
+
             Runtime.Bootstrap();
 
-            if (args.Length == 0 || !args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
+            if (!isExtraction)
             {
                 StartServer(args);
+            }
+            else
+            {
+                Console.WriteLine("Extraction Finished.");
             }
         }
 

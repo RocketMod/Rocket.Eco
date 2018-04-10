@@ -6,7 +6,7 @@ using Eco.Gameplay.Players;
 using Rocket.API;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
-
+using Rocket.Core.Events.Player;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
@@ -31,16 +31,14 @@ namespace Rocket.Eco
             var eventManager = runtime.Container.Get<IEventManager>();
 
             _runtime = runtime;
-
-            //TODO: Add Init() to IPatchManager
-            (patchManager as PatchManager).Init(runtime);
-
+            
+            patchManager.Init(runtime);
             patchManager.RegisterPatch<UserPatch>(runtime);
             patchManager.RunPatching(runtime);
 
             //eventManager.AddEventListener(this, new EcoEventListener());
 
-            logger.LogInformation("Rocket.Eco.E has initialized.");
+            logger.LogInformation("Rocket bootstrapping is finished.");
         }
 
         public void Shutdown()
@@ -56,25 +54,29 @@ namespace Rocket.Eco
         internal void _EmitPlayerJoin(object player)
         {
             EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player);
-
-            PlayerJoinEvent e = new PlayerJoinEvent(ecoPlayer);
+            PlayerConnectEvent e = new PlayerConnectEvent(ecoPlayer, "");
 
             _runtime.Container.Get<IEventManager>().Emit(this, e);
+
+            _runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
         }
 
         internal void _EmitPlayerLeave(object player)
         {
             EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player);
-
-            PlayerLeaveEvent e = new PlayerLeaveEvent(ecoPlayer);
+            PlayerDisconnectEvent e = new PlayerDisconnectEvent(ecoPlayer, "");
 
             _runtime.Container.Get<IEventManager>().Emit(this, e);
+
+            _runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
 
         internal void _EmitEcoInit()
         {
             EcoInitEvent e = new EcoInitEvent();
             _runtime.Container.Get<IEventManager>().Emit(this, e);
+
+            _runtime.Container.Get<ILogger>().LogInformation("[EVENT] Eco has initialized!");
         }
     }
 }

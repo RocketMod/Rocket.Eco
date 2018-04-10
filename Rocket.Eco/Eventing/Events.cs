@@ -12,24 +12,4 @@ namespace Rocket.Eco.Eventing
     {
         internal EcoInitEvent() : base(null, EventExecutionTargetContext.Sync, true) { }
     }
-
-    public sealed class PlayerJoinEvent : Event
-    {
-        public EcoPlayer Player { get; }
-
-        internal PlayerJoinEvent(EcoPlayer player) : base(null, EventExecutionTargetContext.Sync, true)
-        {
-            Player = player;
-        }
-    }
-
-    public sealed class PlayerLeaveEvent : Event
-    {
-        public EcoPlayer Player { get; }
-
-        internal PlayerLeaveEvent(EcoPlayer player) : base(null, EventExecutionTargetContext.Sync, true)
-        {
-            Player = player;
-        }
-    }
 }
