@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO;
 using Eco.Gameplay.Players;
 
 using Rocket.API;
@@ -21,11 +21,15 @@ namespace Rocket.Eco
         public string InstanceId => throw new NotImplementedException();
         public IEnumerable<string> Capabilities => new string[0];
         public bool IsAlive { get; } = true;
-
+        public string WorkingDirectory => "./Rocket/";
         public string Name => "Rocket.Eco";
 
         public static Eco Instance => _runtime.Container.Get<IImplementation>() as Eco;
+
         static IRuntime _runtime = null;
+
+        internal static object[] launchArgs;
+        internal static bool isExtraction;
 
         public void Load(IRuntime runtime)
         {

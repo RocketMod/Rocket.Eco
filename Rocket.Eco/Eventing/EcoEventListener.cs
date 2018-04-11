@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Linq;
+using System.Reflection;
 using Rocket.API.Eventing;
 
 using Rocket.Core.Events.Player;
@@ -28,7 +29,14 @@ namespace Rocket.Eco.Eventing
 
         public void HandleEvent(IEventEmitter emitter, PluginManagerLoadEvent @event)
         {
-            
+            if (!Eco.isExtraction)
+            {
+                AppDomain.CurrentDomain.GetAssemblies()
+                    .First(x => x.GetName().Name.Equals("EcoServer"))
+                    .GetType("Eco.Server.Startup")
+                    .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
+                    .Invoke(null, new object[] { Eco.launchArgs });
+            }
         }
     }
 }

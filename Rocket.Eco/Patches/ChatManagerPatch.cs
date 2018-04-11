@@ -26,13 +26,11 @@ namespace Rocket.Eco.Patches
         void PatchProcessAsCommand(MethodDefinition definition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
-
-            il.
         }
 
         void PatchSendChat(MethodDefinition definition)
         {
-
+            ILProcessor il = definition.Body.GetILProcessor();
         }
     }
 }

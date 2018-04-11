@@ -37,3 +37,4 @@ using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("Eco.Gameplay")]
 [assembly: InternalsVisibleTo("EcoServer")]
+[assembly: InternalsVisibleTo("Rocket.Eco.Launcher")]
