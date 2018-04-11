@@ -7,6 +7,7 @@ using Rocket.API.Player;
 
 using Rocket.Eco.Commands;
 using Rocket.Eco.Player;
+using Rocket.Eco.Patching;
 
 namespace Rocket.Eco.Properties
 {

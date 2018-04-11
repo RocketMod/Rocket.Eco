@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+
 using Eco.Gameplay.Players;
 
 using Rocket.API;
@@ -11,7 +11,9 @@ using Rocket.API.Logging;
 using Rocket.Core.Events.Player;
 
 using Rocket.Eco.Eventing;
+using Rocket.Eco.Events;
 using Rocket.Eco.Patches;
+using Rocket.Eco.Patching;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco
@@ -24,28 +26,30 @@ namespace Rocket.Eco
         public string WorkingDirectory => "./Rocket/";
         public string Name => "Rocket.Eco";
 
-        public static Eco Instance => _runtime.Container.Get<IImplementation>() as Eco;
+        public static Eco Instance => runtime.Container.Get<IImplementation>() as Eco;
 
-        static IRuntime _runtime = null;
+        internal static IRuntime runtime = null;
 
         internal static object[] launchArgs;
         internal static bool isExtraction;
 
-        public void Load(IRuntime runtime)
+        public void Load(IRuntime _runtime)
         {
             var patchManager = runtime.Container.Get<IPatchManager>();
             var logger = runtime.Container.Get<ILogger>();
             var eventManager = runtime.Container.Get<IEventManager>();
 
-            _runtime = runtime;
+            runtime = _runtime;
             
             patchManager.Init(runtime);
             patchManager.RegisterPatch<UserPatch>(runtime);
-            patchManager.RunPatching(runtime);
+            
+            eventManager.AddEventListener(this, new EcoEventListener());
 
-            //eventManager.AddEventListener(this, new EcoEventListener());
-
-            logger.LogInformation("Rocket bootstrapping is finished.");
+            if (!isExtraction)
+            {
+                logger.LogInformation("Rocket bootstrapping is finished.");
+            }
         }
 
         public void Shutdown()
@@ -63,9 +67,9 @@ namespace Rocket.Eco
             EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player);
             PlayerConnectEvent e = new PlayerConnectEvent(ecoPlayer, "");
 
-            _runtime.Container.Get<IEventManager>().Emit(this, e);
+            runtime.Container.Get<IEventManager>().Emit(this, e);
 
-            _runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
+            runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
         }
 
         internal void _EmitPlayerLeave(object player)
@@ -73,17 +77,17 @@ namespace Rocket.Eco
             EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player);
             PlayerDisconnectEvent e = new PlayerDisconnectEvent(ecoPlayer, "");
 
-            _runtime.Container.Get<IEventManager>().Emit(this, e);
+            runtime.Container.Get<IEventManager>().Emit(this, e);
 
-            _runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
+            runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
 
         internal void _EmitEcoInit()
         {
             EcoInitEvent e = new EcoInitEvent();
-            _runtime.Container.Get<IEventManager>().Emit(this, e);
+            runtime.Container.Get<IEventManager>().Emit(this, e);
 
-            _runtime.Container.Get<ILogger>().LogInformation("[EVENT] Eco has initialized!");
+            runtime.Container.Get<ILogger>().LogInformation("[EVENT] Eco has initialized!");
         }
 
         internal bool _ProcessCommand(string text, object user)
@@ -91,7 +95,7 @@ namespace Rocket.Eco
             if (text.StartsWith("/"))
             {
                 EcoPlayer p = new EcoPlayer((user as User).Player);
-                bool wasHandled = _runtime.Container.Get<ICommandHandler>().HandleCommand(p, text);
+                bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text);
 
                 if (!wasHandled)
                 {
@@ -102,6 +106,11 @@ namespace Rocket.Eco
             }
 
             return false;
+        }
+
+        internal void _AwaitInput()
+        {
+
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Rocket.Eco.Commands
     public sealed class EcoCommandWrapper : ICommand
     {
         public string Name => command.CommandName;
-        public string[] Permissions => new string[] { $"Eco.Base.{Name}" };
+        public string Permission => $"Eco.Base.{Name}";
 
         readonly ChatCommandAttribute command;
 

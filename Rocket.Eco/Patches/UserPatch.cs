@@ -6,7 +6,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 using Rocket.Eco.API;
-using Rocket.Eco.Eventing;
 
 namespace Rocket.Eco.Patches
 {

@@ -12,7 +12,7 @@ using Rocket.API.Logging;
 using Rocket.API.DependencyInjection;
 using Rocket.API;
 
-namespace Rocket.Eco
+namespace Rocket.Eco.Patching
 {
     public sealed class PatchManager : IPatchManager
     {
@@ -27,6 +27,18 @@ namespace Rocket.Eco
             else
             {
                 throw new MethodAccessException("This method may only be called from the Rocket.Eco assembly.");
+            }
+        }
+
+        public void RegisterPatch(Type type, IRuntime runtime)
+        {
+            var logger = patchContainer.Get<ILogger>();
+
+            if (Activator.CreateInstance(type) is IAssemblyPatch patch)
+            {
+                patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{type.Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
+
+                logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
             }
         }
 
@@ -172,6 +184,7 @@ namespace Rocket.Eco
     {
         void Init(IRuntime runtime);
         void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new();
+        void RegisterPatch(Type type, IRuntime runtime);
         void RunPatching(IRuntime runtime);
     }
 }

@@ -17,7 +17,7 @@ namespace Rocket.Eco.Patches
         public void Patch(TypeDefinition definition)
         {
             MethodDefinition processAsCommandMethod = definition.Methods.First(x => x.Name.Equals("ProcessAsCommand"));
-            MethodDefinition sendChatMethod = definition.Methods.First(x => x.Name.Equals("ProcessAsCommand") && x.Parameters.Count == 3);
+            MethodDefinition sendChatMethod = definition.Methods.First(x => x.Name.Equals("SendChat") && x.Parameters.Count == 3);
 
             PatchProcessAsCommand(processAsCommandMethod);
             PatchSendChat(sendChatMethod);

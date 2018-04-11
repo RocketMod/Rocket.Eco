@@ -1,12 +1,8 @@
 ﻿using System;
 
-using Eco.Gameplay.Players;
-
 using Rocket.API.Eventing;
 
-using Rocket.Eco.Player;
-
-namespace Rocket.Eco.Eventing
+namespace Rocket.Eco.Events
 {
     public sealed class EcoInitEvent : Event
     {
