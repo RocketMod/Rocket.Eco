@@ -2,7 +2,7 @@
 
 using Rocket.API;
 using Rocket.API.Commands;
-using Rocket.API.DependencyInjection;
+using Rocket.API.Ioc;
 using Rocket.API.Player;
 
 using Rocket.Eco.Commands;

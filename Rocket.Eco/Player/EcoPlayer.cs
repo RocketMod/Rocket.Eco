@@ -23,7 +23,7 @@ namespace Rocket.Eco.Player
 
         public BasePlayer Player { get; }
 
-        public Type PlayerType => typeof(BasePlayer);
+        public Type PlayerType => typeof(EcoPlayer);
 
         internal EcoPlayer(BasePlayer player)
         {

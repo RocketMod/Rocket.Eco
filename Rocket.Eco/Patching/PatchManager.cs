@@ -9,7 +9,7 @@ using Mono.Cecil;
 
 using Rocket.Eco.API;
 using Rocket.API.Logging;
-using Rocket.API.DependencyInjection;
+using Rocket.API.Ioc;
 using Rocket.API;
 
 namespace Rocket.Eco.Patching
