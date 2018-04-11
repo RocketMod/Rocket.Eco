@@ -86,6 +86,9 @@ namespace Rocket.Eco.Launcher
                     string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
 
                     ecoServer.Write(outputDir);
+
+                    ecoServer.Dispose();
+
                     Assembly.LoadFile(outputDir);
                 }
                 catch

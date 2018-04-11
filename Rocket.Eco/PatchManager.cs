@@ -130,6 +130,9 @@ namespace Rocket.Eco
                         }
 
                         asmDef.Write(memStream);
+
+                        asmDef.Dispose();
+
                         memStream.Position = 0;
                         WriteAssembly(finalName, memStream, targets);
                     }

@@ -4,16 +4,19 @@ using System.Collections.Generic;
 using Eco.Gameplay.Players;
 
 using Rocket.API;
+using Rocket.API.Commands;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
+
 using Rocket.Core.Events.Player;
+
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco
 {
-    public sealed class Eco : IImplementation, IEventEmitter
+    public sealed class Eco : IImplementation
     {
         public string InstanceId => throw new NotImplementedException();
         public IEnumerable<string> Capabilities => new string[0];
@@ -77,6 +80,24 @@ namespace Rocket.Eco
             _runtime.Container.Get<IEventManager>().Emit(this, e);
 
             _runtime.Container.Get<ILogger>().LogInformation("[EVENT] Eco has initialized!");
+        }
+
+        internal bool _ProcessCommand(string text, object user)
+        {
+            if (text.StartsWith("/"))
+            {
+                EcoPlayer p = new EcoPlayer((user as User).Player);
+                bool wasHandled = _runtime.Container.Get<ICommandHandler>().HandleCommand(p, text);
+
+                if (!wasHandled)
+                {
+                    p.Player.SendTemporaryErrorLoc("That command could not be found!");
+                }
+
+                return true;
+            }
+
+            return false;
         }
     }
 }
