@@ -57,7 +57,7 @@ namespace Rocket.Eco.Commands
                 }
                 catch
                 {
-                    Eco.runtime.Container.Get<ILogger>().LogError($"{p.Name} failed to execute the command `{Name}`!");
+                    Eco.runtime.Container.Get<ILogger>().LogError($"{p.Name} failed to execute the vanilla command `{Name}`!");
                 }
             }
             else

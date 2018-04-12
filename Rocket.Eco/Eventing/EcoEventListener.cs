@@ -8,6 +8,7 @@ using Rocket.API.Logging;
 using Rocket.API.Plugin;
 
 using Rocket.Core.Events.Plugins;
+
 using Rocket.Eco.API;
 using Rocket.Eco.Patching;
 
@@ -55,7 +56,7 @@ namespace Rocket.Eco.Eventing
             }
             else
             {
-                Eco.runtime.Container.Get<ILogger>().LogInformation("Extraction has finished, please restart the program without the `-extract` argument to run!");
+                Eco.runtime.Container.Get<ILogger>().LogInformation("Extraction has finished, please restart the program without the `-extract` argument to run.");
             }
         }
     }
