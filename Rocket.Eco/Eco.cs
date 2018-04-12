@@ -84,10 +84,18 @@ namespace Rocket.Eco
 
         internal void _EmitEcoInit()
         {
-            EcoInitEvent e = new EcoInitEvent();
+            EcoReadyEvent e = new EcoReadyEvent();
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
             runtime.Container.Get<ILogger>().LogInformation("[EVENT] Eco has initialized!");
+        }
+
+        internal bool _EmitPlayerChat(string text, object user)
+        {
+            PlayerChatEvent e = new PlayerChatEvent(new EcoPlayer((user as User).Player), string.Empty, text);
+            runtime.Container.Get<IEventManager>().Emit(this, e);
+
+            return !e.IsCancelled;
         }
 
         internal bool _ProcessCommand(string text, object user)
@@ -95,7 +103,7 @@ namespace Rocket.Eco
             if (text.StartsWith("/"))
             {
                 EcoPlayer p = new EcoPlayer((user as User).Player);
-                bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text);
+                bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text.Remove(0, 1));
 
                 if (!wasHandled)
                 {
@@ -110,7 +118,22 @@ namespace Rocket.Eco
 
         internal void _AwaitInput()
         {
+            while (true)
+            {
+                string input = Console.ReadLine();
 
+                if (input.StartsWith("/"))
+                {
+                    input = input.Remove(0, 1);
+                }
+
+                bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(new EcoConsoleCommandCaller(), input);
+
+                if (!wasHandled)
+                {
+                    runtime.Container.Get<ILogger>().LogError("That command could not be found!");
+                }
+            }
         }
     }
 }

@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +35,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>bin\Release\Rocket.Eco.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="eco.core">
@@ -97,17 +99,17 @@
     <Reference Include="Mono.Cecil.Rocks, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.API, Version=5.0.0.226, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.API.5.0.0.226\lib\net35\Rocket.API.dll</HintPath>
+    <Reference Include="Rocket.API, Version=5.0.0.233, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.API.5.0.0.233\lib\net35\Rocket.API.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Compability, Version=5.0.0.226, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Compability.5.0.0.226\lib\net35\Rocket.Compability.dll</HintPath>
+    <Reference Include="Rocket.Compability, Version=5.0.0.233, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Compability.5.0.0.233\lib\net35\Rocket.Compability.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Core, Version=5.0.0.226, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Core.5.0.0.226\lib\net35\Rocket.Core.dll</HintPath>
+    <Reference Include="Rocket.Core, Version=5.0.0.233, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Core.5.0.0.233\lib\net35\Rocket.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Runtime, Version=5.0.0.226, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Runtime.5.0.0.226\lib\net35\Rocket.Runtime.dll</HintPath>
+    <Reference Include="Rocket.Runtime, Version=5.0.0.233, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Runtime.5.0.0.233\lib\net35\Rocket.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
@@ -117,10 +119,11 @@
     <Compile Include="Eco.cs" />
     <Compile Include="API\IAssemblyPatch.cs" />
     <Compile Include="Eventing\EcoEventListener.cs" />
-    <Compile Include="Events\Events.cs" />
+    <Compile Include="Events\EcoReadyEvent.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />
     <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="Patching\PatchManager.cs" />
+    <Compile Include="Player\EcoConsoleCommandCaller.cs" />
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -128,6 +131,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Events\Election\" />
+    <Folder Include="Events\Player\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -35,6 +35,26 @@ namespace Rocket.Eco.Player
             Player.SendTemporaryMessage(FormattableStringFactory.Create(message), ChatCategory.Info);
         }
 
+        public int CompareTo(string other)
+        {
+            if (other == null)
+            {
+                return 1;
+            }
+
+            return Id.CompareTo(other);
+        }
+
+        public bool Equals(string other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return Id.Equals(other);
+        }
+
         public int CompareTo(IIdentifiable other)
         {
             if (other == null)
@@ -97,6 +117,11 @@ namespace Rocket.Eco.Player
 
         public override bool Equals(object other)
         {
+            if (other == null)
+            {
+                return false;
+            }
+
             Type type = other.GetType();
 
             if (type == typeof(string))
@@ -124,6 +149,11 @@ namespace Rocket.Eco.Player
 
         public int CompareTo(object other)
         {
+            if (other == null)
+            {
+                return 1;
+            }
+
             Type type = other.GetType();
 
             if (type == typeof(string))
@@ -148,9 +178,6 @@ namespace Rocket.Eco.Player
 
             throw new ArgumentException($"Cannot compare the type \"{GetType().Name}\" to \"{type.Name}\".");
         }
-
-        public int CompareTo(string other) => Id.CompareTo(other);
-        public bool Equals(string other) => Id.Equals(other);
 
         public override string ToString() => Id;
         public override int GetHashCode() => BitConverter.ToInt32(BitConverter.GetBytes(ulong.Parse(Id)), 4);

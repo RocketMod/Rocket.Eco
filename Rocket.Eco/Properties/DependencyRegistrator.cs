@@ -2,12 +2,13 @@
 
 using Rocket.API;
 using Rocket.API.Commands;
-using Rocket.API.Ioc;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
 
 using Rocket.Eco.Commands;
 using Rocket.Eco.Player;
 using Rocket.Eco.Patching;
+using Rocket.Core.Events.Implementation;
 
 namespace Rocket.Eco.Properties
 {
