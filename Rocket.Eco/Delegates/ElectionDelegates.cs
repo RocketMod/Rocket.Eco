@@ -1,0 +1,4 @@
+﻿namespace Rocket.Eco.Delegates
+{
+
+}

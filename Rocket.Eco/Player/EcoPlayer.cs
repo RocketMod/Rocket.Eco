@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using Eco.Shared.Services;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
 using BasePlayer = Eco.Gameplay.Players.Player;
@@ -35,7 +34,12 @@ namespace Rocket.Eco.Player
 
         public void SendMessage(string message)
         {
-            Player.SendTemporaryMessage(FormattableStringFactory.Create(message), ChatCategory.Info);
+            Player.SendTemporaryMessage(FormattableStringFactory.Create(message));
+        }
+
+        public void SendErrorMessage(string message)
+        {
+            Player.SendTemporaryError(FormattableStringFactory.Create(message));
         }
 
         public int CompareTo(string other) => other == null ? 1 : string.Compare(Id, other, StringComparison.InvariantCulture);

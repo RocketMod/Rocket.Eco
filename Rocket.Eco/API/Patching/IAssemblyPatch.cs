@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil;
 
-namespace Rocket.Eco.API
+namespace Rocket.Eco.API.Patching
 {
     public interface IAssemblyPatch
     {

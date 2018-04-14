@@ -66,10 +66,8 @@ namespace Rocket.Eco.Launcher
                 try
                 {
                     TypeDefinition pluginManager = ecoServer.MainModule.GetType("Eco.Server.PluginManager");
-                    TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
 
                     PatchPluginManagerConstructor(pluginManager);
-                    PatchStartup(startup);
 
                     string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
 
@@ -116,33 +114,6 @@ namespace Rocket.Eco.Launcher
 
             foreach (Instruction t in inject)
                 il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
-        }
-
-        private static void PatchStartup(TypeDefinition definition)
-        {
-            ILProcessor il = definition.Methods.First(x => x.Name == "Start").Body.GetILProcessor();
-
-            //TODO
-            Instruction[] inject =
-            {
-                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
-                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_AwaitInput", BindingFlags.Instance | BindingFlags.NonPublic))),
-                il.Create(OpCodes.Ret)
-            };
-
-            int index = default(int);
-
-            for (int i = il.Body.Instructions.Count - 1; i != 0; i--)
-                if (il.Body.Instructions[i].OpCode == OpCodes.Newobj)
-                {
-                    index = i;
-                    break;
-                }
-
-            for (int i = index; i < il.Body.Instructions.Count; i++) il.Remove(il.Body.Instructions[i]);
-
-            foreach (Instruction t in inject)
-                il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
         }
 
         private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",")) + ".dll"));

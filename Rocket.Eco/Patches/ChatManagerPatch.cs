@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Rocket.Eco.API;
+using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Patches
 {

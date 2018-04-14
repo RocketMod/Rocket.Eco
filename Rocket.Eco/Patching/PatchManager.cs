@@ -8,7 +8,7 @@ using Mono.Cecil;
 using Rocket.API;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
-using Rocket.Eco.API;
+using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Patching
 {
@@ -163,12 +163,5 @@ namespace Rocket.Eco.Patching
 
             dict[finalName] = finalAssembly;
         }
-    }
-
-    public interface IPatchManager
-    {
-        void RegisterPatch<T>() where T : IAssemblyPatch, new();
-        void RegisterPatch(Type type);
-        void RunPatching();
     }
 }

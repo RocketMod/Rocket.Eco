@@ -7,11 +7,13 @@ using Rocket.API.Commands;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
+using Rocket.Core.Commands;
+using Rocket.Core.Events.Commands;
 using Rocket.Core.Events.Player;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Events;
 using Rocket.Eco.Patches;
-using Rocket.Eco.Patching;
+using Rocket.Eco.API.Patching;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco
@@ -90,10 +92,48 @@ namespace Rocket.Eco
 
         internal bool _EmitPlayerChat(string text, object user)
         {
-            PlayerChatEvent e = new PlayerChatEvent(new EcoPlayer((user as User).Player), string.Empty, text);
-            runtime.Container.Get<IEventManager>().Emit(this, e);
+            EcoPlayer p = new EcoPlayer((user as User).Player);
 
-            return !e.IsCancelled;
+            IEventManager eventManager = runtime.Container.Get<IEventManager>();
+
+            if (text.StartsWith("/", StringComparison.InvariantCulture))
+            {
+                PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(p, text.Remove(0, 1));
+                eventManager.Emit(this, e1);
+
+                if (e1.IsCancelled)
+                {
+                    p.SendErrorMessage("Execution of your command has been cancelled!");
+                    return true;
+                }
+
+                bool wasHandled = true;
+
+                try
+                {
+                    wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text.Remove(0, 1));
+                }
+                catch (NotEnoughPermissionsException)
+                {
+                    p.SendErrorMessage("You do not have enough permission to execute this command!");
+                }
+                catch (Exception e)
+                {
+                    ILogger logger = runtime.Container.Get<ILogger>();
+
+                    logger.LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!", e);
+                }
+
+                if (!wasHandled)
+                    p.SendErrorMessage("That command could not be found!");
+
+                return true;
+            }
+
+            PlayerChatEvent e2 = new PlayerChatEvent(new EcoPlayer((user as User).Player), string.Empty, text);
+            eventManager.Emit(this, e2);
+
+            return !e2.IsCancelled;
         }
 
         internal bool _ProcessCommand(string text, object user)
@@ -103,7 +143,7 @@ namespace Rocket.Eco
             EcoPlayer p = new EcoPlayer((user as User).Player);
             bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text.Remove(0, 1));
 
-            if (!wasHandled) p.Player.SendTemporaryErrorLoc("That command could not be found!");
+            if (!wasHandled) p.SendErrorMessage("That command could not be found!");
 
             return true;
         }

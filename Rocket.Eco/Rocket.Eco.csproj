@@ -117,10 +117,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Patching\IPatchManager.cs" />
     <Compile Include="Commands\EcoCommandProvider.cs" />
     <Compile Include="Commands\EcoCommandWrapper.cs" />
+    <Compile Include="Delegates\EcoDelegates.cs" />
+    <Compile Include="Delegates\ElectionDelegates.cs" />
+    <Compile Include="Delegates\UserDelegates.cs" />
     <Compile Include="EcoImplementation.cs" />
-    <Compile Include="API\IAssemblyPatch.cs" />
+    <Compile Include="API\Patching\IAssemblyPatch.cs" />
     <Compile Include="Eventing\EcoEventListener.cs" />
     <Compile Include="Events\EcoReadyEvent.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />

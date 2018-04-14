@@ -4,7 +4,6 @@ using System.Linq;
 using Eco.Gameplay.Players;
 using Rocket.API.Commands;
 using Rocket.API.Player;
-using BasePlayer = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco.Player
 {

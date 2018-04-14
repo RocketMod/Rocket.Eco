@@ -8,8 +8,7 @@ using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
 using Rocket.Core.Events.Plugins;
-using Rocket.Eco.API;
-using Rocket.Eco.Patching;
+using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Eventing
 {

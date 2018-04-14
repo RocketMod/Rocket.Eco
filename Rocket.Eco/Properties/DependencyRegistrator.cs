@@ -2,6 +2,7 @@
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
+using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;
 using Rocket.Eco.Patching;
 using Rocket.Eco.Player;
