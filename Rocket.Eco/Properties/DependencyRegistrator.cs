@@ -8,7 +8,6 @@ using Rocket.API.Player;
 using Rocket.Eco.Commands;
 using Rocket.Eco.Player;
 using Rocket.Eco.Patching;
-using Rocket.Core.Events.Implementation;
 
 namespace Rocket.Eco.Properties
 {
@@ -16,11 +15,11 @@ namespace Rocket.Eco.Properties
     {
         public void Register(IDependencyContainer container, IDependencyResolver resolver)
         {
-            container.RegisterType<IPlayerManager, EcoPlayerManager>();
-            
+            container.RegisterSingletonType<IPlayerManager, EcoPlayerManager>(null, "ecoplayermanager");
             container.RegisterSingletonType<ICommandProvider, EcoCommandProvider>("ecocommandprovider");
+            container.RegisterSingletonType<IImplementation, EcoImplementation>(null, "eco");
+
             container.RegisterSingletonType<IPatchManager, PatchManager>();
-            container.RegisterSingletonType<IImplementation, Eco>();
         }
     }
 }

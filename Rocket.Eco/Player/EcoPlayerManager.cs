@@ -6,6 +6,7 @@ using Rocket.API.Player;
 
 using Eco.Gameplay.Players;
 using BasePlayer = Eco.Gameplay.Players.Player;
+using Rocket.API.Commands;
 
 namespace Rocket.Eco.Player
 {
@@ -31,13 +32,13 @@ namespace Rocket.Eco.Player
             }
         }
 
-        public bool Ban(IPlayer player, string reason, TimeSpan? timeSpan = null)
+        public bool Ban(IPlayer player, ICommandCaller caller, string reason, TimeSpan? timeSpan = null)
         {
             throw new NotImplementedException();
             //UserManager.Ban()
         }
 
-        public bool Kick(IPlayer player, string reason)
+        public bool Kick(IPlayer player, ICommandCaller caller, string reason)
         {
             if (player is BasePlayer ecoPlayer)
             {
@@ -61,13 +62,13 @@ namespace Rocket.Eco.Player
 
             return new EcoPlayer(user.Player);
         }
-        
+
         public bool TryGetPlayer(string uniqueID, out IPlayer output)
         {
             User user =
                 UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueID) ??
                 UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueID);
-           
+
             if (user == null)
             {
                 output = null;

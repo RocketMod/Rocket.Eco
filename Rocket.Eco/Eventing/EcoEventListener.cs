@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
+using Rocket.API;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
@@ -16,12 +18,17 @@ namespace Rocket.Eco.Eventing
 {
     public sealed class EcoEventListener : IEventListener<PluginManagerLoadEvent>
     {
-        internal EcoEventListener() { }
+        readonly IRuntime runtime;
+
+        internal EcoEventListener(IRuntime runtime)
+        {
+            this.runtime = runtime;
+        }
 
         public void HandleEvent(IEventEmitter emitter, PluginManagerLoadEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
-            IPatchManager patchManager = Eco.runtime.Container.Get<IPatchManager>();
+            IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
 
             foreach (IPlugin plugin in plugins)
             {
@@ -40,23 +47,29 @@ namespace Rocket.Eco.Eventing
 
                 foreach (Type type in patches)
                 {
-                    patchManager.RegisterPatch(type, Eco.runtime);
+                    patchManager.RegisterPatch(type);
                 }
             }
 
-            patchManager.RunPatching(Eco.runtime);
+            patchManager.RunPatching();
 
-            if (!Eco.isExtraction)
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (!args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
             {
                 AppDomain.CurrentDomain.GetAssemblies()
                     .First(x => x.GetName().Name.Equals("EcoServer"))
                     .GetType("Eco.Server.Startup")
                     .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
-                    .Invoke(null, new object[] { Eco.launchArgs });
+                    .Invoke(null, new object[] { args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray() });
             }
             else
             {
-                Eco.runtime.Container.Get<ILogger>().LogInformation("Extraction has finished, please restart the program without the `-extract` argument to run.");
+                runtime.Container.Get<ILogger>().LogInformation("Extraction has finished, please restart the program without the `-extract` argument to run.");
+
+                Thread.Sleep(3000);
+
+                Environment.Exit(0);
             }
         }
     }

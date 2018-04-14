@@ -6,6 +6,6 @@ namespace Rocket.Eco.Events
 {
     public sealed class EcoReadyEvent : ImplementationReadyEvent
     {
-        internal EcoReadyEvent() : base(Eco.Instance) { }
+        internal EcoReadyEvent(EcoImplementation implementation) : base(implementation) { }
     }
 }

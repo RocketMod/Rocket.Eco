@@ -12,9 +12,12 @@ namespace Rocket.Eco.Player
         public string Id => "console";
 
         public Type PlayerType => typeof(EcoConsoleCommandCaller);
-        public void SendMessage(string message) => Eco.runtime.Container.Get<ILogger>().LogInformation(message);
+
+        public void SendMessage(string message) => throw new NotImplementedException(); //EcoImplementation.runtime.Container.Get<ILogger>().LogInformation(message);
 
         internal EcoConsoleCommandCaller() { }
+
+        public override int GetHashCode() => 0;
 
         public int CompareTo(object obj)
         {
@@ -40,7 +43,7 @@ namespace Rocket.Eco.Player
                 return 1;
             }
 
-            return Id.CompareTo(other.Id);
+            return string.Compare(Id, other.Id, StringComparison.InvariantCulture);
         }
 
         public int CompareTo(string other)
@@ -50,7 +53,24 @@ namespace Rocket.Eco.Player
                 return 1;
             }
 
-            return Id.CompareTo(other);
+            return string.Compare(Id, other, StringComparison.InvariantCulture);
+        }
+
+        public override bool Equals(object obj)
+        {
+            Type type = obj.GetType();
+
+            if (type == typeof(IIdentifiable))
+            {
+                return Equals((IIdentifiable)obj);
+            }
+
+            if (type == typeof(string))
+            {
+                return Equals((string)obj);
+            }
+
+            throw new ArgumentException($"Cannot equate the type \"{GetType().Name}\" to \"{type.Name}\".");
         }
 
         public bool Equals(IIdentifiable other)
@@ -60,7 +80,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            return Id.Equals(other.Id);
+            return Id.Equals(other.Id, StringComparison.InvariantCulture);
         }
 
         public bool Equals(string other)
@@ -70,7 +90,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            return Id.Equals(other);
+            return Id.Equals(other, StringComparison.InvariantCulture);
         }
 
         public static bool operator ==(EcoConsoleCommandCaller p1, IIdentifiable p2) => p1.Equals(p2);

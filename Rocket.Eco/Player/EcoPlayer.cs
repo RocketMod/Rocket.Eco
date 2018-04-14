@@ -13,10 +13,10 @@ namespace Rocket.Eco.Player
 {
     public sealed class EcoPlayer : IPlayer, IComparable<BasePlayer>, IEquatable<BasePlayer>, IComparable<BaseUser>, IEquatable<BaseUser>
     {
-        public string Id => User.SteamId; 
+        public string Id => User.SteamId;
         public string Name => User.Name;
         public bool IsAdmin => User.IsAdmin;
-        
+
         public BaseUser User => Player.User;
         public bool IsDev => User.IsDev;
         public bool IsOnline => User.LoggedIn;
@@ -42,7 +42,7 @@ namespace Rocket.Eco.Player
                 return 1;
             }
 
-            return Id.CompareTo(other);
+            return string.Compare(Id, other, StringComparison.InvariantCulture);
         }
 
         public bool Equals(string other)
@@ -52,7 +52,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            return Id.Equals(other);
+            return Id.Equals(other, StringComparison.InvariantCulture);
         }
 
         public int CompareTo(IIdentifiable other)
@@ -62,7 +62,7 @@ namespace Rocket.Eco.Player
                 return 1;
             }
 
-            return Id.CompareTo(other.Id);
+            return string.Compare(Id, other.Id, StringComparison.InvariantCulture);
         }
 
         public bool Equals(IIdentifiable other)
@@ -72,7 +72,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            return Id.Equals(other.Id);
+            return Id.Equals(other.Id, StringComparison.InvariantCulture);
         }
 
         public int CompareTo(BasePlayer other)
@@ -82,7 +82,7 @@ namespace Rocket.Eco.Player
                 return 1;
             }
 
-            return Id.CompareTo(other.User.SteamId);
+            return string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
         }
 
         public bool Equals(BasePlayer other)
@@ -92,7 +92,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            return Id.Equals(other.User.SteamId);
+            return Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
         }
 
         public int CompareTo(BaseUser other)
@@ -102,7 +102,7 @@ namespace Rocket.Eco.Player
                 return 1;
             }
 
-            return Id.CompareTo(other.SteamId);
+            return string.Compare(Id, other.SteamId, StringComparison.InvariantCulture);
         }
 
         public bool Equals(BaseUser other)
@@ -112,7 +112,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            return Id.Equals(other.SteamId);
+            return Id.Equals(other.SteamId, StringComparison.InvariantCulture);
         }
 
         public override bool Equals(object other)
@@ -196,7 +196,7 @@ namespace Rocket.Eco.Player
 
         public static bool operator ==(EcoPlayer p1, object p2) => p1.Equals(p2);
         public static bool operator !=(EcoPlayer p1, object p2) => !p1.Equals(p2);
-        
+
         public static bool operator >(EcoPlayer p1, string p2) => p1.CompareTo(p2) > 0;
         public static bool operator <(EcoPlayer p1, string p2) => p1.CompareTo(p2) < 0;
 

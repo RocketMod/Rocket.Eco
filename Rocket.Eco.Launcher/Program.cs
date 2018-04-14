@@ -8,6 +8,8 @@ using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
+using Rocket.API;
+
 namespace Rocket.Eco.Launcher
 {
     static class Program
@@ -106,13 +108,6 @@ namespace Rocket.Eco.Launcher
                 }
             }
 
-            Eco.isExtraction = isExtraction;
-
-            var listArgs = args.ToList();
-            listArgs.RemoveAll(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase));
-
-            Eco.launchArgs = listArgs.ToArray();
-
             Runtime.Bootstrap();
         }
 
@@ -120,10 +115,11 @@ namespace Rocket.Eco.Launcher
         {
             ILProcessor il = definition.Methods.First(x => x.Name == ".ctor").Body.GetILProcessor();
 
-            Instruction[] inject = new Instruction[]
+            //TODO
+            Instruction[] inject =
             {
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_EmitEcoInit", BindingFlags.Instance | BindingFlags.NonPublic)))
+                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
+                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_EmitEcoInit", BindingFlags.Instance | BindingFlags.NonPublic)))
             };
 
             for (int i = 0; i < inject.Length; i++)
@@ -136,10 +132,11 @@ namespace Rocket.Eco.Launcher
         {
             ILProcessor il = definition.Methods.First(x => x.Name == "Start").Body.GetILProcessor();
 
-            Instruction[] inject = new Instruction[]
+            //TODO
+            Instruction[] inject =
             {
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_AwaitInput", BindingFlags.Instance | BindingFlags.NonPublic))),
+                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
+                //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_AwaitInput", BindingFlags.Instance | BindingFlags.NonPublic))),
                 il.Create(OpCodes.Ret)
             };
 

@@ -4,8 +4,10 @@ using System.Reflection;
 
 using Eco.Gameplay.Systems.Chat;
 
+using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Logging;
+
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Commands
@@ -17,11 +19,12 @@ namespace Rocket.Eco.Commands
 
         readonly ChatCommandAttribute command;
         readonly MethodInfo commandMethod;
+        readonly IRuntime runtime;
 
         static ChatManager ecoChatManager;
         static MethodInfo execute;
 
-        internal EcoCommandWrapper(MethodInfo method)
+        internal EcoCommandWrapper(MethodInfo method, IRuntime runtime)
         {
             if (ecoChatManager == null)
             {
@@ -34,6 +37,7 @@ namespace Rocket.Eco.Commands
             }
 
             command = (ChatCommandAttribute)method.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
+            this.runtime = runtime;
 
             if (command != null)
             {
@@ -41,7 +45,7 @@ namespace Rocket.Eco.Commands
             }
             else
             {
-                Eco.runtime.Container.Get<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
+                runtime.Container.Get<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
             }
         }
 
@@ -55,9 +59,9 @@ namespace Rocket.Eco.Commands
                 {
                     execute.Invoke(ecoChatManager, new object[] { Name, commandMethod, args, p.User });
                 }
-                catch
+                catch (Exception e)
                 {
-                    Eco.runtime.Container.Get<ILogger>().LogError($"{p.Name} failed to execute the vanilla command `{Name}`!");
+                    runtime.Container.Get<ILogger>().LogError($"{p.Name} failed to execute the vanilla command `{Name}`!", e);
                 }
             }
             else

@@ -16,21 +16,16 @@ namespace Rocket.Eco.Patching
 {
     public sealed class PatchManager : IPatchManager
     {
-        IDependencyContainer patchContainer;
+        readonly IRuntime runtime;
+        readonly IDependencyContainer patchContainer;
 
-        public void Init(IRuntime runtime)
+        public PatchManager(IRuntime runtime)
         {
-            if (Assembly.GetCallingAssembly().GetName().Name == "Rocket.Eco")
-            {
-                patchContainer = runtime.Container.CreateChildContainer();
-            }
-            else
-            {
-                throw new MethodAccessException("This method may only be called from the Rocket.Eco assembly.");
-            }
+            this.runtime = runtime;
+            patchContainer = runtime.Container.CreateChildContainer();
         }
 
-        public void RegisterPatch(Type type, IRuntime runtime)
+        public void RegisterPatch(Type type)
         {
             var logger = patchContainer.Get<ILogger>();
 
@@ -42,7 +37,7 @@ namespace Rocket.Eco.Patching
             }
         }
 
-        public void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new()
+        public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
             var logger = patchContainer.Get<ILogger>();
 
@@ -52,7 +47,7 @@ namespace Rocket.Eco.Patching
             logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
         }
 
-        public void RunPatching(IRuntime runtime)
+        public void RunPatching()
         {
             if (Assembly.GetCallingAssembly().GetName().Name == "Rocket.Eco")
             {
@@ -103,7 +98,10 @@ namespace Rocket.Eco.Patching
                         }
                     }
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    runtime.Container.Get<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
+                }
             }
 
             return assemblies;
@@ -172,19 +170,15 @@ namespace Rocket.Eco.Patching
                 memStream.Read(finalAssembly, 0, finalAssembly.Length);
             }
 
-            try
-            {
-                dict[finalName] = finalAssembly;
-            }
-            catch { }
+            dict[finalName] = finalAssembly;
+
         }
     }
 
     public interface IPatchManager
     {
-        void Init(IRuntime runtime);
-        void RegisterPatch<T>(IRuntime runtime) where T : IAssemblyPatch, new();
-        void RegisterPatch(Type type, IRuntime runtime);
-        void RunPatching(IRuntime runtime);
+        void RegisterPatch<T>() where T : IAssemblyPatch, new();
+        void RegisterPatch(Type type);
+        void RunPatching();
     }
 }
