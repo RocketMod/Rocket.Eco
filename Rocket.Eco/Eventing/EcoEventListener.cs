@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-
 using Rocket.API;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
-
 using Rocket.Core.Events.Plugins;
-
 using Rocket.Eco.API;
 using Rocket.Eco.Patching;
 
@@ -18,7 +15,7 @@ namespace Rocket.Eco.Eventing
 {
     public sealed class EcoEventListener : IEventListener<PluginManagerLoadEvent>
     {
-        readonly IRuntime runtime;
+        private readonly IRuntime runtime;
 
         internal EcoEventListener(IRuntime runtime)
         {
@@ -45,10 +42,7 @@ namespace Rocket.Eco.Eventing
 
                 IEnumerable<Type> patches = types.Where(x => x.GetInterfaces().Contains(typeof(IAssemblyPatch)));
 
-                foreach (Type type in patches)
-                {
-                    patchManager.RegisterPatch(type);
-                }
+                foreach (Type type in patches) patchManager.RegisterPatch(type);
             }
 
             patchManager.RunPatching();
@@ -57,11 +51,7 @@ namespace Rocket.Eco.Eventing
 
             if (!args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
             {
-                AppDomain.CurrentDomain.GetAssemblies()
-                    .First(x => x.GetName().Name.Equals("EcoServer"))
-                    .GetType("Eco.Server.Startup")
-                    .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
-                    .Invoke(null, new object[] { args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray() });
+                AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name.Equals("EcoServer")).GetType("Eco.Server.Startup").GetMethod("Start", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] {args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
             }
             else
             {

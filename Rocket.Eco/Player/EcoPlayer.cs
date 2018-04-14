@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-
+using Eco.Shared.Services;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
-
-using Eco.Shared.Services;
-
 using BasePlayer = Eco.Gameplay.Players.Player;
 using BaseUser = Eco.Gameplay.Players.User;
 
@@ -13,8 +10,11 @@ namespace Rocket.Eco.Player
 {
     public sealed class EcoPlayer : IPlayer, IComparable<BasePlayer>, IEquatable<BasePlayer>, IComparable<BaseUser>, IEquatable<BaseUser>
     {
-        public string Id => User.SteamId;
-        public string Name => User.Name;
+        internal EcoPlayer(BasePlayer player)
+        {
+            Player = player;
+        }
+
         public bool IsAdmin => User.IsAdmin;
 
         public BaseUser User => Player.User;
@@ -23,160 +23,58 @@ namespace Rocket.Eco.Player
 
         public BasePlayer Player { get; }
 
-        public Type PlayerType => typeof(EcoPlayer);
+        public int CompareTo(BasePlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
+        public int CompareTo(BaseUser other) => other == null ? 1 : string.Compare(Id, other.SteamId, StringComparison.InvariantCulture);
+        public bool Equals(BasePlayer other) => other != null && Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
+        public bool Equals(BaseUser other) => other != null && Id.Equals(other.SteamId, StringComparison.InvariantCulture);
 
-        internal EcoPlayer(BasePlayer player)
-        {
-            Player = player;
-        }
+        public string Id => User.SteamId;
+        public string Name => User.Name;
+
+        public Type PlayerType => typeof(EcoPlayer);
 
         public void SendMessage(string message)
         {
             Player.SendTemporaryMessage(FormattableStringFactory.Create(message), ChatCategory.Info);
         }
 
-        public int CompareTo(string other)
+        public int CompareTo(string other) => other == null ? 1 : string.Compare(Id, other, StringComparison.InvariantCulture);
+        public bool Equals(string other) => other != null && Id.Equals(other, StringComparison.InvariantCulture);
+        public int CompareTo(IIdentifiable other) => other == null ? 1 : string.Compare(Id, other.Id, StringComparison.InvariantCulture);
+        public bool Equals(IIdentifiable other) => other != null && Id.Equals(other.Id, StringComparison.InvariantCulture);
+
+        public int CompareTo(object other)
         {
-            if (other == null)
-            {
-                return 1;
-            }
+            if (other == null) return 1;
 
-            return string.Compare(Id, other, StringComparison.InvariantCulture);
-        }
+            Type type = other.GetType();
 
-        public bool Equals(string other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
+            if (type == typeof(string)) return CompareTo((string) other);
 
-            return Id.Equals(other, StringComparison.InvariantCulture);
-        }
+            if (type == typeof(IPlayer)) return CompareTo((IPlayer) other);
 
-        public int CompareTo(IIdentifiable other)
-        {
-            if (other == null)
-            {
-                return 1;
-            }
+            if (type == typeof(BasePlayer)) return CompareTo((BasePlayer) other);
 
-            return string.Compare(Id, other.Id, StringComparison.InvariantCulture);
-        }
+            if (type == typeof(BaseUser)) return CompareTo((BaseUser) other);
 
-        public bool Equals(IIdentifiable other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Id.Equals(other.Id, StringComparison.InvariantCulture);
-        }
-
-        public int CompareTo(BasePlayer other)
-        {
-            if (other == null)
-            {
-                return 1;
-            }
-
-            return string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
-        }
-
-        public bool Equals(BasePlayer other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
-        }
-
-        public int CompareTo(BaseUser other)
-        {
-            if (other == null)
-            {
-                return 1;
-            }
-
-            return string.Compare(Id, other.SteamId, StringComparison.InvariantCulture);
-        }
-
-        public bool Equals(BaseUser other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Id.Equals(other.SteamId, StringComparison.InvariantCulture);
+            throw new ArgumentException($"Cannot compare the type \"{GetType().Name}\" to \"{type.Name}\".");
         }
 
         public override bool Equals(object other)
         {
-            if (other == null)
-            {
-                return false;
-            }
+            if (other == null) return false;
 
             Type type = other.GetType();
 
-            if (type == typeof(string))
-            {
-                return Equals((string)other);
-            }
+            if (type == typeof(string)) return Equals((string) other);
 
-            if (type == typeof(IPlayer))
-            {
-                return Equals((IPlayer)other);
-            }
+            if (type == typeof(IPlayer)) return Equals((IPlayer) other);
 
-            if (type == typeof(BasePlayer))
-            {
-                return Equals((BasePlayer)other);
-            }
+            if (type == typeof(BasePlayer)) return Equals((BasePlayer) other);
 
-            if (type == typeof(BaseUser))
-            {
-                return Equals((BaseUser)other);
-            }
+            if (type == typeof(BaseUser)) return Equals((BaseUser) other);
 
             throw new ArgumentException($"Cannot equate the type \"{GetType().Name}\" to \"{type.Name}\".");
-        }
-
-        public int CompareTo(object other)
-        {
-            if (other == null)
-            {
-                return 1;
-            }
-
-            Type type = other.GetType();
-
-            if (type == typeof(string))
-            {
-                return CompareTo((string)other);
-            }
-
-            if (type == typeof(IPlayer))
-            {
-                return CompareTo((IPlayer)other);
-            }
-
-            if (type == typeof(BasePlayer))
-            {
-                return CompareTo((BasePlayer)other);
-            }
-
-            if (type == typeof(BaseUser))
-            {
-                return CompareTo((BaseUser)other);
-            }
-
-            throw new ArgumentException($"Cannot compare the type \"{GetType().Name}\" to \"{type.Name}\".");
         }
 
         public override string ToString() => Id;

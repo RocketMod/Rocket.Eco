@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-
+﻿using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-
 using Rocket.Eco.API;
 
 namespace Rocket.Eco.Patches
@@ -23,12 +20,12 @@ namespace Rocket.Eco.Patches
             PatchSendChat(sendChatMethod);
         }
 
-        void PatchProcessAsCommand(MethodDefinition definition)
+        private static void PatchProcessAsCommand(MethodDefinition definition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
         }
 
-        void PatchSendChat(MethodDefinition definition)
+        private static void PatchSendChat(MethodDefinition definition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
         }

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("Rocket.Eco.Launcher")]
 [assembly: AssemblyCompany("52 Piece Games")]

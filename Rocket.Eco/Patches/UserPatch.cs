@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-
+﻿using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-
 using Rocket.Eco.API;
 
 namespace Rocket.Eco.Patches
@@ -24,38 +20,34 @@ namespace Rocket.Eco.Patches
             PatchLogout(logout);
         }
 
-        void PatchLogin(MethodDefinition definition)
+        private static void PatchLogin(MethodDefinition definition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
 
-            Instruction[] injection = new Instruction[]
+            Instruction[] injection =
             {
                 //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
                 //il.Create(OpCodes.Ldarg_0),
                 //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_EmitPlayerJoin", BindingFlags.Instance | BindingFlags.NonPublic)))
             };
 
-            for (int i = 0; i < injection.Length; i++)
-            {
-                il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], injection[i]);
-            }
+            foreach (Instruction t in injection)
+                il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
         }
 
-        void PatchLogout(MethodDefinition definition)
+        private static void PatchLogout(MethodDefinition definition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
 
-            Instruction[] injection = new Instruction[]
+            Instruction[] injection =
             {
                 //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetProperty("Instance").GetGetMethod())),
                 //il.Create(OpCodes.Ldarg_0),
                 //il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(Eco).GetMethod("_EmitPlayerLeave", BindingFlags.Instance | BindingFlags.NonPublic)))
             };
 
-            for (int i = 0; i < injection.Length; i++)
-            {
-                il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], injection[i]);
-            }
+            foreach (Instruction t in injection)
+                il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
         }
     }
 }

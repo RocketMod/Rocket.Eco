@@ -1,23 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Generic;
-
 using Mono.Cecil;
-
-using Rocket.Eco.API;
-using Rocket.API.Logging;
-using Rocket.API.DependencyInjection;
 using Rocket.API;
+using Rocket.API.DependencyInjection;
+using Rocket.API.Logging;
+using Rocket.Eco.API;
 
 namespace Rocket.Eco.Patching
 {
     public sealed class PatchManager : IPatchManager
     {
-        readonly IRuntime runtime;
-        readonly IDependencyContainer patchContainer;
+        private readonly IDependencyContainer patchContainer;
+        private readonly IRuntime runtime;
 
         public PatchManager(IRuntime runtime)
         {
@@ -27,19 +25,17 @@ namespace Rocket.Eco.Patching
 
         public void RegisterPatch(Type type)
         {
-            var logger = patchContainer.Get<ILogger>();
+            ILogger logger = patchContainer.Get<ILogger>();
 
-            if (Activator.CreateInstance(type) is IAssemblyPatch patch)
-            {
-                patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{type.Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
+            if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;
 
-                logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
-            }
+            patchContainer.RegisterInstance(patch, $"{type.Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
+            logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
         }
 
         public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
-            var logger = patchContainer.Get<ILogger>();
+            ILogger logger = patchContainer.Get<ILogger>();
 
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
@@ -51,25 +47,21 @@ namespace Rocket.Eco.Patching
         {
             if (Assembly.GetCallingAssembly().GetName().Name == "Rocket.Eco")
             {
-                var dict = CollectAssemblies();
+                Dictionary<string, byte[]> dict = CollectAssemblies();
 
                 string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
                 Directory.CreateDirectory(outputDir);
 
                 foreach (KeyValuePair<string, byte[]> value in dict)
-                {
                     File.WriteAllBytes(Path.Combine(outputDir, value.Key), value.Value);
-                }
 
-                var monoAssemblyResolver = new DefaultAssemblyResolver();
+                DefaultAssemblyResolver monoAssemblyResolver = new DefaultAssemblyResolver();
                 monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
 
                 PatchAll(dict, patchContainer, monoAssemblyResolver);
 
                 for (int i = 0; i < dict.Values.Count; i++)
-                {
                     Assembly.Load(dict.Values.ElementAt(i));
-                }
             }
             else
             {
@@ -77,12 +69,12 @@ namespace Rocket.Eco.Patching
             }
         }
 
-        Dictionary<string, byte[]> CollectAssemblies()
+        private Dictionary<string, byte[]> CollectAssemblies()
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
-            var resources = eco.GetManifestResourceNames().Where(x => x.EndsWith(".compressed", StringComparison.InvariantCultureIgnoreCase)).Where(x => x.StartsWith("costura.", StringComparison.InvariantCultureIgnoreCase));
-            var assemblies = new Dictionary<string, byte[]>();
+            IEnumerable<string> resources = eco.GetManifestResourceNames().Where(x => x.EndsWith(".compressed", StringComparison.InvariantCultureIgnoreCase)).Where(x => x.StartsWith("costura.", StringComparison.InvariantCultureIgnoreCase));
+            Dictionary<string, byte[]> assemblies = new Dictionary<string, byte[]>();
 
             foreach (string resource in resources)
             {
@@ -107,50 +99,51 @@ namespace Rocket.Eco.Patching
             return assemblies;
         }
 
-        void PatchAll(Dictionary<string, byte[]> targets, IDependencyResolver resolver, DefaultAssemblyResolver monoCecilResolver)
+        private static void PatchAll(IDictionary<string, byte[]> targets, IDependencyResolver resolver, IAssemblyResolver monoCecilResolver)
         {
-            var patches = resolver.GetAll<IAssemblyPatch>();
+            IEnumerable<IAssemblyPatch> patches = resolver.GetAll<IAssemblyPatch>();
             foreach (KeyValuePair<string, byte[]> target in targets.ToList())
             {
                 string finalName = target.Key;
 
-                var targetedPatches = patches.Where(x => x.TargetAssembly.Equals(finalName.Replace(".dll", ""), StringComparison.InvariantCultureIgnoreCase));
+                IEnumerable<IAssemblyPatch> targetedPatches = patches.Where(x => x.TargetAssembly.Equals(finalName.Replace(".dll", ""), StringComparison.InvariantCultureIgnoreCase));
 
-                if (targetedPatches != null && targetedPatches.Count() != 0)
+                if (!targetedPatches.Any())
+                    continue;
+
+                using (MemoryStream memStream = new MemoryStream(target.Value))
                 {
-                    using (MemoryStream memStream = new MemoryStream(target.Value))
+                    AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream, new ReaderParameters
                     {
-                        AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream, new ReaderParameters { AssemblyResolver = monoCecilResolver });
+                        AssemblyResolver = monoCecilResolver
+                    });
 
-                        foreach (IAssemblyPatch patch in targetedPatches)
+                    foreach (IAssemblyPatch patch in targetedPatches)
+                    {
+                        foreach (ModuleDefinition modDef in asmDef.Modules)
                         {
-                            foreach (ModuleDefinition modDef in asmDef.Modules)
-                            {
-                                TypeDefinition typeDef = modDef.Types.FirstOrDefault(x => x.FullName.Equals(patch.TargetType, StringComparison.InvariantCultureIgnoreCase));
+                            TypeDefinition typeDef = modDef.Types.FirstOrDefault(x => x.FullName.Equals(patch.TargetType, StringComparison.InvariantCultureIgnoreCase));
 
-                                if (typeDef == null)
-                                {
-                                    continue;
-                                }
+                            if (typeDef == null)
+                                continue;
 
-                                patch.Patch(typeDef);
+                            patch.Patch(typeDef);
 
-                                break;
-                            }
+                            break;
                         }
-
-                        asmDef.Write(memStream);
-
-                        asmDef.Dispose();
-
-                        memStream.Position = 0;
-                        WriteAssembly(finalName, memStream, targets);
                     }
+
+                    asmDef.Write(memStream);
+
+                    asmDef.Dispose();
+
+                    memStream.Position = 0;
+                    WriteAssembly(finalName, memStream, targets);
                 }
             }
         }
 
-        void WriteAssembly(string finalName, Stream stream, Dictionary<string, byte[]> dict)
+        private static void WriteAssembly(string finalName, Stream stream, IDictionary<string, byte[]> dict)
         {
             byte[] finalAssembly;
 
@@ -160,9 +153,7 @@ namespace Rocket.Eco.Patching
                 int count;
 
                 while ((count = stream.Read(array, 0, array.Length)) != 0)
-                {
                     memStream.Write(array, 0, count);
-                }
 
                 memStream.Position = 0;
 
@@ -171,7 +162,6 @@ namespace Rocket.Eco.Patching
             }
 
             dict[finalName] = finalAssembly;
-
         }
     }
 

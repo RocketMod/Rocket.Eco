@@ -1,13 +1,10 @@
-﻿using System;
-
-using Rocket.API;
+﻿using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
-
 using Rocket.Eco.Commands;
-using Rocket.Eco.Player;
 using Rocket.Eco.Patching;
+using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Properties
 {

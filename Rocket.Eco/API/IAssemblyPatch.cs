@@ -1,6 +1,4 @@
-﻿using System;
-
-using Mono.Cecil;
+﻿using Mono.Cecil;
 
 namespace Rocket.Eco.API
 {

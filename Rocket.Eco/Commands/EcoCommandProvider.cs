@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿using System.Collections.Generic;
 using Rocket.API.Commands;
 
 namespace Rocket.Eco.Commands
 {
     public sealed class EcoCommandProvider : ICommandProvider
     {
+        private readonly List<EcoCommandWrapper> commands = new List<EcoCommandWrapper>();
         public IEnumerable<ICommand> Commands => commands;
 
-        private readonly List<EcoCommandWrapper> commands = new List<EcoCommandWrapper>();
-
-        internal void CollectCommands()
-        {
-
-        }
+        internal void CollectCommands() { }
     }
 }
