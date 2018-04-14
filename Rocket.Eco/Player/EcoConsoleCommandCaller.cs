@@ -1,18 +1,26 @@
 ﻿using System;
+using Rocket.API;
 using Rocket.API.Commands;
+using Rocket.API.Logging;
 using Rocket.API.Permissions;
 
 namespace Rocket.Eco.Player
 {
     public sealed class EcoConsoleCommandCaller : IConsoleCommandCaller
     {
-        internal EcoConsoleCommandCaller() { }
+        internal EcoConsoleCommandCaller(IRuntime runtime)
+        {
+            this.runtime = runtime;
+        }
+
+        private readonly IRuntime runtime;
+        
         public string Name => "Console";
         public string Id => "console";
 
         public Type PlayerType => typeof(EcoConsoleCommandCaller);
 
-        public void SendMessage(string message) => throw new NotImplementedException(); //EcoImplementation.runtime.Container.Get<ILogger>().LogInformation(message);
+        public void SendMessage(string message) => runtime.Container.Get<ILogger>().LogInformation(message);
 
         public int CompareTo(object obj)
         {
@@ -34,11 +42,9 @@ namespace Rocket.Eco.Player
         {
             Type type = obj.GetType();
 
-            if (type == typeof(IIdentifiable))
-                return Equals((IIdentifiable) obj);
+            if (type == typeof(IIdentifiable)) return Equals((IIdentifiable) obj);
 
-            if (type == typeof(string))
-                return Equals((string) obj);
+            if (type == typeof(string)) return Equals((string) obj);
 
             throw new ArgumentException($"Cannot equate the type \"{GetType().Name}\" to \"{type.Name}\".");
         }

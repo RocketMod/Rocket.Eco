@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
+using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Eventing;
@@ -35,12 +36,40 @@ namespace Rocket.Eco
             ILogger logger = runtime.Container.Get<ILogger>();
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
             IPluginManager pluginManager = runtime.Container.Get<IPluginManager>();
+            ICommandHandler commandHandler = runtime.Container.Get<ICommandHandler>();
+
+            ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime);
+
+            Action<object> playerJoin = _EmitPlayerJoin;
+            Action<object> playerLeave = _EmitPlayerLeave;
+
+            Type type = typeof(ChatManager);
+
+            type.GetField("OnUserLogin").SetValue(typeof(ChatServer).GetField("netChatManager").GetValue(ChatServer.Obj), playerJoin);
+            type.GetField("OnUserLogout").SetValue(typeof(ChatServer).GetField("netChatManager").GetValue(ChatServer.Obj), playerLeave);
 
             patchManager.RegisterPatch<UserPatch>();
             eventManager.AddEventListener(this, new EcoEventListener(runtime));
+            
             pluginManager.Init();
 
-            logger.LogInformation("Rocket bootstrapping is finished.");
+            EcoReadyEvent e = new EcoReadyEvent(this);
+            runtime.Container.Get<IEventManager>().Emit(this, e);
+
+            logger.LogInformation("[EVENT] Eco has initialized!");
+
+            while (true)
+            {
+                string input = Console.ReadLine();
+
+                if (input.StartsWith("/", StringComparison.InvariantCulture))
+                    input = input.Remove(0, 1);
+
+                bool wasHandled = commandHandler.HandleCommand(consoleCommandCaller, input);
+
+                if (!wasHandled)
+                    logger.LogError("That command could not be found!");
+            }
         }
 
         public void Shutdown()
@@ -81,15 +110,8 @@ namespace Rocket.Eco
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
-
-        internal void _EmitEcoInit()
-        {
-            EcoReadyEvent e = new EcoReadyEvent(this);
-            runtime.Container.Get<IEventManager>().Emit(this, e);
-
-            runtime.Container.Get<ILogger>().LogInformation("[EVENT] Eco has initialized!");
-        }
-
+        
+        //TODO: Implement
         internal bool _EmitPlayerChat(string text, object user)
         {
             EcoPlayer p = new EcoPlayer((user as User).Player);
@@ -134,33 +156,6 @@ namespace Rocket.Eco
             eventManager.Emit(this, e2);
 
             return !e2.IsCancelled;
-        }
-
-        internal bool _ProcessCommand(string text, object user)
-        {
-            if (!text.StartsWith("/", StringComparison.InvariantCulture)) return false;
-
-            EcoPlayer p = new EcoPlayer((user as User).Player);
-            bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text.Remove(0, 1));
-
-            if (!wasHandled) p.SendErrorMessage("That command could not be found!");
-
-            return true;
-        }
-
-        //TODO
-        internal void _AwaitInput()
-        {
-            while (true)
-            {
-                string input = Console.ReadLine();
-
-                if (input.StartsWith("/", StringComparison.InvariantCulture)) input = input.Remove(0, 1);
-
-                bool wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(new EcoConsoleCommandCaller(), input);
-
-                if (!wasHandled) runtime.Container.Get<ILogger>().LogError("That command could not be found!");
-            }
         }
     }
 }
