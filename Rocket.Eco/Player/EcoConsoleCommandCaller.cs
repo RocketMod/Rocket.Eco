@@ -8,17 +8,17 @@ namespace Rocket.Eco.Player
 {
     public sealed class EcoConsoleCommandCaller : IConsoleCommandCaller
     {
+        private readonly IRuntime runtime;
+
         internal EcoConsoleCommandCaller(IRuntime runtime)
         {
             this.runtime = runtime;
         }
 
-        private readonly IRuntime runtime;
-        
         public string Name => "Console";
         public string Id => "console";
 
-        public Type PlayerType => typeof(EcoConsoleCommandCaller);
+        public Type CallerType => typeof(EcoConsoleCommandCaller);
 
         public void SendMessage(string message) => runtime.Container.Get<ILogger>().LogInformation(message);
 

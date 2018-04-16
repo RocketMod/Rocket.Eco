@@ -2,32 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using Eco.Gameplay.Players;
+using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Player;
 
 namespace Rocket.Eco.Player
 {
-    public class PlayerNotFoundException : Exception
-    {
-        public PlayerNotFoundException() : base($"Could not find the requested player.") { }
-    }
-
     public class EcoPlayerManager : IPlayerManager
     {
-        public IEnumerable<IPlayer> Players => UserManager.Users.Select(user => new EcoPlayer(user.Player)).Cast<IPlayer>().ToList();
+        private readonly IRuntime runtime;
 
-        public IPlayer GetPlayer(string uniqueID)
+        public EcoPlayerManager(IRuntime runtime)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueID) ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueID);
-
-            if (user == null) throw new PlayerNotFoundException();
-
-            return new EcoPlayer(user.Player);
+            this.runtime = runtime;
         }
 
-        public bool TryGetPlayer(string uniqueID, out IPlayer output)
+        public IEnumerable<IPlayer> Players => UserManager.Users.Select(user => new EcoPlayer(user.Player, runtime.Container)).Cast<IPlayer>().ToList();
+
+        public IPlayer GetPlayer(string uniqueId)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueID) ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueID);
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueId) ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueId);
+
+            return user == null ? null : new EcoPlayer(user.Player, runtime.Container);
+        }
+
+        public bool TryGetPlayer(string uniqueId, out IPlayer output)
+        {
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueId) ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueId);
 
             if (user == null)
             {
@@ -35,27 +36,25 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new EcoPlayer(user.Player);
+            output = new EcoPlayer(user.Player, runtime.Container);
             return true;
         }
 
         public IPlayer GetPlayerByName(string name)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase)) 
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Contains(name)) 
-                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase)) 
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Contains(name))
+                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
                 ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Contains(name));
 
-            if (user == null) throw new PlayerNotFoundException();
-
-            return new EcoPlayer(user.Player);
+            return user == null ? null : new EcoPlayer(user.Player, runtime.Container);
         }
 
         public bool TryGetPlayerByName(string name, out IPlayer output)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase)) 
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Contains(name)) 
-                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase)) 
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Contains(name))
+                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
                 ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Contains(name));
 
             if (user == null)
@@ -64,7 +63,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new EcoPlayer(user.Player);
+            output = new EcoPlayer(user.Player, runtime.Container);
             return true;
         }
 

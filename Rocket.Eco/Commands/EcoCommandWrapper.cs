@@ -35,6 +35,7 @@ namespace Rocket.Eco.Commands
                 runtime.Container.Get<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
         }
 
+        public bool SupportsCaller(ICommandCaller caller) => caller is EcoPlayer;
         public string Name => command.CommandName;
         public string Permission => $"Eco.Base.{Name}";
 

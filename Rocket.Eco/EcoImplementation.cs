@@ -8,13 +8,13 @@ using Rocket.API.Commands;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
-using Rocket.Core.Commands;
-using Rocket.Core.Events.Commands;
-using Rocket.Core.Events.Player;
+using Rocket.Core.Commands.Events;
+using Rocket.Core.Permissions;
+using Rocket.Core.Player.Events;
+using Rocket.Eco.API.Patching;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Events;
 using Rocket.Eco.Patches;
-using Rocket.Eco.API.Patching;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco
@@ -22,13 +22,17 @@ namespace Rocket.Eco
     public sealed class EcoImplementation : IImplementation
     {
         private IRuntime runtime;
-        public string InstanceId => throw new NotImplementedException();
         public IEnumerable<string> Capabilities => new string[0];
+
+        public IConsoleCommandCaller GetConsoleCaller() => new EcoConsoleCommandCaller(runtime);
+
+        public string InstanceId => throw new NotImplementedException();
         public bool IsAlive { get; } = true;
         public string WorkingDirectory => "./Rocket/";
+        public string ConfigurationName => Name;
         public string Name => "Rocket.Eco";
 
-        public void Load(IRuntime runtime)
+        public void Init(IRuntime runtime)
         {
             this.runtime = runtime;
 
@@ -50,7 +54,7 @@ namespace Rocket.Eco
 
             patchManager.RegisterPatch<UserPatch>();
             eventManager.AddEventListener(this, new EcoEventListener(runtime));
-            
+
             pluginManager.Init();
 
             EcoReadyEvent e = new EcoReadyEvent(this);
@@ -93,7 +97,7 @@ namespace Rocket.Eco
 
         internal void _EmitPlayerJoin(object player)
         {
-            EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player);
+            EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player, runtime.Container);
             PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -103,18 +107,18 @@ namespace Rocket.Eco
 
         internal void _EmitPlayerLeave(object player)
         {
-            EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player);
+            EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player, runtime.Container);
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
-        
+
         //TODO: Implement
         internal bool _EmitPlayerChat(string text, object user)
         {
-            EcoPlayer p = new EcoPlayer((user as User).Player);
+            EcoPlayer p = new EcoPlayer((user as User).Player, runtime.Container);
 
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
 
@@ -152,7 +156,7 @@ namespace Rocket.Eco
                 return true;
             }
 
-            PlayerChatEvent e2 = new PlayerChatEvent(new EcoPlayer((user as User).Player), string.Empty, text);
+            PlayerChatEvent e2 = new PlayerChatEvent(new EcoPlayer((user as User).Player, runtime.Container), string.Empty, text);
             eventManager.Emit(this, e2);
 
             return !e2.IsCancelled;

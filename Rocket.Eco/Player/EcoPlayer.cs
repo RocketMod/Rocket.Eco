@@ -1,38 +1,62 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Rocket.API.DependencyInjection;
+using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
-using BasePlayer = Eco.Gameplay.Players.Player;
-using BaseUser = Eco.Gameplay.Players.User;
+using Rocket.Core.Plugins;
+using BaseEcoPlayer = Eco.Gameplay.Players.Player;
+using BaseEcoUser = Eco.Gameplay.Players.User;
 
 namespace Rocket.Eco.Player
 {
-    public sealed class EcoPlayer : IPlayer, IComparable<BasePlayer>, IEquatable<BasePlayer>, IComparable<BaseUser>, IEquatable<BaseUser>
+    public sealed class EcoPlayer : BasePlayer, IComparable<BaseEcoPlayer>, IEquatable<BaseEcoPlayer>, IComparable<BaseEcoUser>, IEquatable<BaseEcoUser>
     {
-        internal EcoPlayer(BasePlayer player)
+        internal EcoPlayer(BaseEcoPlayer player, IDependencyContainer container) : base(container)
         {
             Player = player;
         }
 
         public bool IsAdmin => User.IsAdmin;
 
-        public BaseUser User => Player.User;
+        public BaseEcoUser User => Player.User;
         public bool IsDev => User.IsDev;
         public bool IsOnline => User.LoggedIn;
 
-        public BasePlayer Player { get; }
+        public BaseEcoPlayer Player { get; }
 
-        public int CompareTo(BasePlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
-        public int CompareTo(BaseUser other) => other == null ? 1 : string.Compare(Id, other.SteamId, StringComparison.InvariantCulture);
-        public bool Equals(BasePlayer other) => other != null && Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
-        public bool Equals(BaseUser other) => other != null && Id.Equals(other.SteamId, StringComparison.InvariantCulture);
+        public override string Id
+        {
+            get => User.SteamId;
+            protected set => throw new NotSupportedException();
+        }
 
-        public string Id => User.SteamId;
-        public string Name => User.Name;
+        public override string Name
+        {
+            get => User.Name;
+            protected set => throw new NotSupportedException();
+        }
 
-        public Type PlayerType => typeof(EcoPlayer);
+        public override double Health
+        {
+            get => -1;
+            set => Container.Get<ILogger>().LogWarning("Setting player health is not supported in Eco!");
+        }
 
-        public void SendMessage(string message)
+        public override double MaxHealth
+        {
+            get => -1;
+            set => Container.Get<ILogger>().LogWarning("Setting player health is not supported in Eco!");
+        }
+
+        public override Type CallerType => typeof(EcoPlayer);
+
+        public int CompareTo(BaseEcoPlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
+        public int CompareTo(BaseEcoUser other) => other == null ? 1 : string.Compare(Id, other.SteamId, StringComparison.InvariantCulture);
+        public bool Equals(BaseEcoPlayer other) => other != null && Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
+        public bool Equals(BaseEcoUser other) => other != null && Id.Equals(other.SteamId, StringComparison.InvariantCulture);
+
+        public override void SendMessage(string message)
         {
             Player.SendTemporaryMessage(FormattableStringFactory.Create(message));
         }
@@ -57,9 +81,9 @@ namespace Rocket.Eco.Player
 
             if (type == typeof(IPlayer)) return CompareTo((IPlayer) other);
 
-            if (type == typeof(BasePlayer)) return CompareTo((BasePlayer) other);
+            if (type == typeof(BaseEcoPlayer)) return CompareTo((BaseEcoPlayer) other);
 
-            if (type == typeof(BaseUser)) return CompareTo((BaseUser) other);
+            if (type == typeof(BaseEcoUser)) return CompareTo((BaseEcoUser) other);
 
             throw new ArgumentException($"Cannot compare the type \"{GetType().Name}\" to \"{type.Name}\".");
         }
@@ -74,9 +98,9 @@ namespace Rocket.Eco.Player
 
             if (type == typeof(IPlayer)) return Equals((IPlayer) other);
 
-            if (type == typeof(BasePlayer)) return Equals((BasePlayer) other);
+            if (type == typeof(BaseEcoPlayer)) return Equals((BaseEcoPlayer) other);
 
-            if (type == typeof(BaseUser)) return Equals((BaseUser) other);
+            if (type == typeof(BaseEcoUser)) return Equals((BaseEcoUser) other);
 
             throw new ArgumentException($"Cannot equate the type \"{GetType().Name}\" to \"{type.Name}\".");
         }
@@ -90,11 +114,11 @@ namespace Rocket.Eco.Player
         public static bool operator ==(EcoPlayer p1, IIdentifiable p2) => p1.Equals(p2);
         public static bool operator !=(EcoPlayer p1, IIdentifiable p2) => !p1.Equals(p2);
 
-        public static bool operator ==(EcoPlayer p1, BasePlayer p2) => p1.Equals(p2);
-        public static bool operator !=(EcoPlayer p1, BasePlayer p2) => !p1.Equals(p2);
+        public static bool operator ==(EcoPlayer p1, BaseEcoPlayer p2) => p1.Equals(p2);
+        public static bool operator !=(EcoPlayer p1, BaseEcoPlayer p2) => !p1.Equals(p2);
 
-        public static bool operator ==(EcoPlayer p1, BaseUser p2) => p1.Equals(p2);
-        public static bool operator !=(EcoPlayer p1, BaseUser p2) => !p1.Equals(p2);
+        public static bool operator ==(EcoPlayer p1, BaseEcoUser p2) => p1.Equals(p2);
+        public static bool operator !=(EcoPlayer p1, BaseEcoUser p2) => !p1.Equals(p2);
 
         public static bool operator ==(EcoPlayer p1, object p2) => p1.Equals(p2);
         public static bool operator !=(EcoPlayer p1, object p2) => !p1.Equals(p2);
@@ -105,11 +129,11 @@ namespace Rocket.Eco.Player
         public static bool operator >(EcoPlayer p1, IIdentifiable p2) => p1.CompareTo(p2) > 0;
         public static bool operator <(EcoPlayer p1, IIdentifiable p2) => p1.CompareTo(p2) < 0;
 
-        public static bool operator >(EcoPlayer p1, BasePlayer p2) => p1.CompareTo(p2) > 0;
-        public static bool operator <(EcoPlayer p1, BasePlayer p2) => p1.CompareTo(p2) < 0;
+        public static bool operator >(EcoPlayer p1, BaseEcoPlayer p2) => p1.CompareTo(p2) > 0;
+        public static bool operator <(EcoPlayer p1, BaseEcoPlayer p2) => p1.CompareTo(p2) < 0;
 
-        public static bool operator >(EcoPlayer p1, BaseUser p2) => p1.CompareTo(p2) > 0;
-        public static bool operator <(EcoPlayer p1, BaseUser p2) => p1.CompareTo(p2) < 0;
+        public static bool operator >(EcoPlayer p1, BaseEcoUser p2) => p1.CompareTo(p2) > 0;
+        public static bool operator <(EcoPlayer p1, BaseEcoUser p2) => p1.CompareTo(p2) < 0;
 
         public static bool operator >(EcoPlayer p1, object p2) => p1.CompareTo(p2) > 0;
         public static bool operator <(EcoPlayer p1, object p2) => p1.CompareTo(p2) < 0;
@@ -120,11 +144,11 @@ namespace Rocket.Eco.Player
         public static bool operator >=(EcoPlayer p1, IIdentifiable p2) => p1.CompareTo(p2) >= 0;
         public static bool operator <=(EcoPlayer p1, IIdentifiable p2) => p1.CompareTo(p2) <= 0;
 
-        public static bool operator >=(EcoPlayer p1, BasePlayer p2) => p1.CompareTo(p2) >= 0;
-        public static bool operator <=(EcoPlayer p1, BasePlayer p2) => p1.CompareTo(p2) <= 0;
+        public static bool operator >=(EcoPlayer p1, BaseEcoPlayer p2) => p1.CompareTo(p2) >= 0;
+        public static bool operator <=(EcoPlayer p1, BaseEcoPlayer p2) => p1.CompareTo(p2) <= 0;
 
-        public static bool operator >=(EcoPlayer p1, BaseUser p2) => p1.CompareTo(p2) >= 0;
-        public static bool operator <=(EcoPlayer p1, BaseUser p2) => p1.CompareTo(p2) <= 0;
+        public static bool operator >=(EcoPlayer p1, BaseEcoUser p2) => p1.CompareTo(p2) >= 0;
+        public static bool operator <=(EcoPlayer p1, BaseEcoUser p2) => p1.CompareTo(p2) <= 0;
 
         public static bool operator >=(EcoPlayer p1, object p2) => p1.CompareTo(p2) >= 0;
         public static bool operator <=(EcoPlayer p1, object p2) => p1.CompareTo(p2) <= 0;

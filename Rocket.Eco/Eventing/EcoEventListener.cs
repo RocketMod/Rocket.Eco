@@ -7,12 +7,12 @@ using Rocket.API;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
-using Rocket.Core.Events.Plugins;
+using Rocket.Core.Plugins.Events;
 using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Eventing
 {
-    public sealed class EcoEventListener : IEventListener<PluginManagerLoadEvent>
+    public sealed class EcoEventListener : IEventListener<PluginManagerInitEvent>
     {
         private readonly IRuntime runtime;
 
@@ -21,7 +21,7 @@ namespace Rocket.Eco.Eventing
             this.runtime = runtime;
         }
 
-        public void HandleEvent(IEventEmitter emitter, PluginManagerLoadEvent @event)
+        public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
             IPatchManager patchManager = runtime.Container.Get<IPatchManager>();

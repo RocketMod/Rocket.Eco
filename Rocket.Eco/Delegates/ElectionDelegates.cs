@@ -1,4 +1,1 @@
-﻿namespace Rocket.Eco.Delegates
-{
-
-}
+﻿namespace Rocket.Eco.Delegates {}

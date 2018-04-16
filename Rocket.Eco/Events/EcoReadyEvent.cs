@@ -1,4 +1,4 @@
-﻿using Rocket.Core.Events.Implementation;
+﻿using Rocket.Core.Implementation.Events;
 
 namespace Rocket.Eco.Events
 {
