@@ -73,6 +73,8 @@ namespace Rocket.Eco.Patching
         {
             Assembly eco = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name.Equals("EcoServer", StringComparison.InvariantCultureIgnoreCase));
 
+            if (eco == null) throw new Exception("The Eco assembly could not be found!");
+
             IEnumerable<string> resources = eco.GetManifestResourceNames().Where(x => x.EndsWith(".compressed", StringComparison.InvariantCultureIgnoreCase)).Where(x => x.StartsWith("costura.", StringComparison.InvariantCultureIgnoreCase));
             Dictionary<string, byte[]> assemblies = new Dictionary<string, byte[]>();
 
@@ -84,6 +86,12 @@ namespace Rocket.Eco.Patching
                 {
                     using (Stream stream = eco.GetManifestResourceStream(resource))
                     {
+                        if (stream == null)
+                        {
+                            runtime.Container.Get<ILogger>().LogError("A manifest stream return null!");
+                            continue;
+                        }
+
                         using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
                         {
                             WriteAssembly(finalName, deflateStream, assemblies);

@@ -24,6 +24,8 @@ namespace Rocket.Eco.Player
 
         public int CompareTo(object obj)
         {
+            if (obj == null) return 1;
+
             Type type = obj.GetType();
 
             if (type == typeof(IIdentifiable)) return CompareTo((IIdentifiable) obj);
@@ -40,6 +42,8 @@ namespace Rocket.Eco.Player
 
         public override bool Equals(object obj)
         {
+            if (obj == null) return false;
+
             Type type = obj.GetType();
 
             if (type == typeof(IIdentifiable)) return Equals((IIdentifiable) obj);

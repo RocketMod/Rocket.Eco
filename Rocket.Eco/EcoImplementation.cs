@@ -65,6 +65,8 @@ namespace Rocket.Eco
             while (true)
             {
                 string input = Console.ReadLine();
+                
+                if (input == null) continue;
 
                 if (input.StartsWith("/", StringComparison.InvariantCulture))
                     input = input.Remove(0, 1);
@@ -95,9 +97,11 @@ namespace Rocket.Eco
                     pluginManager.LoadPlugin(plugin.Name);
         }
 
-        internal void _EmitPlayerJoin(object player)
+        internal void _EmitPlayerJoin(object user)
         {
-            EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player, runtime.Container);
+            if (user == null || !(user is User castedUser)) return;
+
+            EcoPlayer ecoPlayer = new EcoPlayer(castedUser.Player, runtime.Container);
             PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -107,7 +111,9 @@ namespace Rocket.Eco
 
         internal void _EmitPlayerLeave(object player)
         {
-            EcoPlayer ecoPlayer = new EcoPlayer((player as User).Player, runtime.Container);
+            if (player == null || !(player is User castedUser)) return;
+
+            EcoPlayer ecoPlayer = new EcoPlayer(castedUser.Player, runtime.Container);
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -118,7 +124,9 @@ namespace Rocket.Eco
         //TODO: Implement
         internal bool _EmitPlayerChat(string text, object user)
         {
-            EcoPlayer p = new EcoPlayer((user as User).Player, runtime.Container);
+            if (user == null || !(user is User castedUser)) return true;
+
+            EcoPlayer p = new EcoPlayer(castedUser.Player, runtime.Container);
 
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
 
@@ -145,9 +153,7 @@ namespace Rocket.Eco
                 }
                 catch (Exception e)
                 {
-                    ILogger logger = runtime.Container.Get<ILogger>();
-
-                    logger.LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!", e);
+                    runtime.Container.Get<ILogger>().LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!", e);
                 }
 
                 if (!wasHandled)
@@ -156,7 +162,7 @@ namespace Rocket.Eco
                 return true;
             }
 
-            PlayerChatEvent e2 = new PlayerChatEvent(new EcoPlayer((user as User).Player, runtime.Container), string.Empty, text);
+            PlayerChatEvent e2 = new PlayerChatEvent(p, string.Empty, text);
             eventManager.Emit(this, e2);
 
             return !e2.IsCancelled;

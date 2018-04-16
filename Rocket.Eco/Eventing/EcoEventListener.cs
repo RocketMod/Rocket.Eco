@@ -50,14 +50,23 @@ namespace Rocket.Eco.Eventing
 
             if (!args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase))
             {
-                AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name.Equals("EcoServer")).GetType("Eco.Server.Startup").GetMethod("Start", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] {args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
+                try
+                {
+                    AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name.Equals("EcoServer")).GetType("Eco.Server.Startup").GetMethod("Start", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] {args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
+                }
+                catch (NullReferenceException)
+                {
+                    runtime.Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
+
+                    Thread.Sleep(3000);
+                    Environment.Exit(0);
+                }
             }
             else
             {
                 runtime.Container.Get<ILogger>().LogInformation("Extraction has finished, please restart the program without the `-extract` argument to run.");
 
                 Thread.Sleep(3000);
-
                 Environment.Exit(0);
             }
         }
