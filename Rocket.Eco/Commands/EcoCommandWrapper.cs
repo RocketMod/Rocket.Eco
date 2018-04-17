@@ -43,7 +43,7 @@ namespace Rocket.Eco.Commands
         public List<ISubCommand> ChildCommands => new List<ISubCommand>();
 
         public string Name => command.CommandName;
-        public string Permission => $"Eco.Base.{Aliases[0]}";
+        public string Permission => $"Eco.Base.{Name}";
         public string Description => command.HelpText;
 
         //TODO: Make this match the parameter list of `commandMethod`
