@@ -65,13 +65,13 @@ namespace Rocket.Eco
             while (true)
             {
                 string input = Console.ReadLine();
-                
+
                 if (input == null) continue;
 
                 if (input.StartsWith("/", StringComparison.InvariantCulture))
                     input = input.Remove(0, 1);
 
-                bool wasHandled = commandHandler.HandleCommand(consoleCommandCaller, input);
+                bool wasHandled = commandHandler.HandleCommand(consoleCommandCaller, input, string.Empty);
 
                 if (!wasHandled)
                     logger.LogError("That command could not be found!");
@@ -101,7 +101,7 @@ namespace Rocket.Eco
         {
             if (user == null || !(user is User castedUser)) return;
 
-            EcoPlayer ecoPlayer = new EcoPlayer(castedUser.Player, runtime.Container);
+            OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
             PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -113,7 +113,7 @@ namespace Rocket.Eco
         {
             if (player == null || !(player is User castedUser)) return;
 
-            EcoPlayer ecoPlayer = new EcoPlayer(castedUser.Player, runtime.Container);
+            EcoPlayer ecoPlayer = new EcoPlayer(castedUser, runtime.Container);
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -124,9 +124,9 @@ namespace Rocket.Eco
         //TODO: Implement
         internal bool _EmitPlayerChat(string text, object user)
         {
-            if (user == null || !(user is User castedUser)) return true;
+            if (user == null || !(user is User castedUser) || !castedUser.LoggedIn) return true;
 
-            EcoPlayer p = new EcoPlayer(castedUser.Player, runtime.Container);
+            OnlineEcoPlayer p = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
 
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
 
@@ -145,7 +145,7 @@ namespace Rocket.Eco
 
                 try
                 {
-                    wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text.Remove(0, 1));
+                    wasHandled = runtime.Container.Get<ICommandHandler>().HandleCommand(p, text.Remove(0, 1), string.Empty);
                 }
                 catch (NotEnoughPermissionsException)
                 {

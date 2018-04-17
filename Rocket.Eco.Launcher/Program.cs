@@ -66,7 +66,7 @@ namespace Rocket.Eco.Launcher
                 try
                 {
                     TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
-                    
+
                     PatchStartup(startup);
 
                     string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
@@ -115,7 +115,7 @@ namespace Rocket.Eco.Launcher
                 }
 
             for (int i = index; i < il.Body.Instructions.Count; i++) il.Remove(il.Body.Instructions[i]);
-            
+
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
         }
 

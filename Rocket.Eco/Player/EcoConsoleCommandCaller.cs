@@ -20,7 +20,7 @@ namespace Rocket.Eco.Player
 
         public Type CallerType => typeof(EcoConsoleCommandCaller);
 
-        public void SendMessage(string message) => runtime.Container.Get<ILogger>().LogInformation(message);
+        public void SendMessage(string message, ConsoleColor? color) => runtime.Container.Get<ILogger>().LogInformation(message, color);
 
         public int CompareTo(object obj)
         {
@@ -39,6 +39,20 @@ namespace Rocket.Eco.Player
         public int CompareTo(string other) => other == null ? 1 : string.Compare(Id, other, StringComparison.InvariantCulture);
         public bool Equals(IIdentifiable other) => other != null && Id.Equals(other.Id, StringComparison.InvariantCulture);
         public bool Equals(string other) => other != null && Id.Equals(other, StringComparison.InvariantCulture);
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null)
+                return Name.ToString(formatProvider);
+
+            if (format.Equals("id", StringComparison.InvariantCultureIgnoreCase))
+                return Id.ToString(formatProvider);
+
+            if (format.Equals("name", StringComparison.InvariantCultureIgnoreCase))
+                return Name.ToString(formatProvider);
+
+            throw new FormatException($"\"{format}\" is not a valid format.");
+        }
 
         public override bool Equals(object obj)
         {

@@ -99,17 +99,17 @@
     <Reference Include="Mono.Cecil.Rocks, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.API, Version=5.0.0.294, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.API.5.0.0.294\lib\net35\Rocket.API.dll</HintPath>
+    <Reference Include="Rocket.API, Version=5.0.0.304, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.API.5.0.0.304\lib\net35\Rocket.API.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Compability, Version=5.0.0.294, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Compability.5.0.0.294\lib\net35\Rocket.Compability.dll</HintPath>
+    <Reference Include="Rocket.Compability, Version=5.0.0.304, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Compability.5.0.0.304\lib\net35\Rocket.Compability.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Core, Version=5.0.0.294, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Core.5.0.0.294\lib\net35\Rocket.Core.dll</HintPath>
+    <Reference Include="Rocket.Core, Version=5.0.0.304, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Core.5.0.0.304\lib\net35\Rocket.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Runtime, Version=5.0.0.294, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Runtime.5.0.0.294\lib\net35\Rocket.Runtime.dll</HintPath>
+    <Reference Include="Rocket.Runtime, Version=5.0.0.304, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Runtime.5.0.0.304\lib\net35\Rocket.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="Newtonsoft.Json">
@@ -127,12 +127,14 @@
     <Compile Include="API\Patching\IAssemblyPatch.cs" />
     <Compile Include="Eventing\EcoEventListener.cs" />
     <Compile Include="Events\EcoReadyEvent.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />
     <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="Patching\PatchManager.cs" />
     <Compile Include="Player\EcoConsoleCommandCaller.cs" />
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
+    <Compile Include="Player\OnlineEcoPlayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DependencyRegistrator.cs" />
   </ItemGroup>

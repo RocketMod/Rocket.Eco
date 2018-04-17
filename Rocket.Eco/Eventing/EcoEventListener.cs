@@ -52,7 +52,12 @@ namespace Rocket.Eco.Eventing
             {
                 try
                 {
-                    AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name.Equals("EcoServer")).GetType("Eco.Server.Startup").GetMethod("Start", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] {args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
+                    AppDomain.CurrentDomain.GetAssemblies()
+                             .First(x => x.GetName().Name.Equals("EcoServer"))
+                             .GetType("Eco.Server.Startup")
+                             .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
+                             .Invoke(null, new object[]
+                                 {args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
                 }
                 catch (NullReferenceException)
                 {
@@ -64,7 +69,7 @@ namespace Rocket.Eco.Eventing
             }
             else
             {
-                runtime.Container.Get<ILogger>().LogInformation("Extraction has finished, please restart the program without the `-extract` argument to run.");
+                runtime.Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
                 Thread.Sleep(3000);
                 Environment.Exit(0);

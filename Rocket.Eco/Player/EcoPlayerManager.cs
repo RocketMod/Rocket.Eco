@@ -17,18 +17,36 @@ namespace Rocket.Eco.Player
             this.runtime = runtime;
         }
 
-        public IEnumerable<IPlayer> Players => UserManager.Users.Select(user => new EcoPlayer(user.Player, runtime.Container)).Cast<IPlayer>().ToList();
+        public IEnumerable<IOnlinePlayer> OnlinePlayers => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, runtime.Container)).ToList();
 
-        public IPlayer GetPlayer(string uniqueId)
+        public IPlayer GetPlayer(string id)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueId) ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueId);
+            User user = UserManager.Users.FirstOrDefault(x => x.SteamId == id);
 
-            return user == null ? null : new EcoPlayer(user.Player, runtime.Container);
+            if (user == null) return new EcoPlayer(null, runtime.Container);
+
+            return user.LoggedIn ? new OnlineEcoPlayer(user.Player, runtime.Container) : new EcoPlayer(user, runtime.Container);
         }
 
-        public bool TryGetPlayer(string uniqueId, out IPlayer output)
+        [Obsolete("Use `IEnumerable<IOnlinePlayer> OnlinePlayers` instead.")]
+        public IEnumerable<IPlayer> Players => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, runtime.Container)).Cast<IPlayer>().ToList();
+
+        public IOnlinePlayer GetOnlinePlayer(string idOrName)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == uniqueId) ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && x.SteamId == uniqueId);
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == idOrName)
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.ComparerContains(idOrName));
+
+            if (user == null) throw new PlayerNotFoundException(idOrName);
+
+            return new OnlineEcoPlayer(user.Player, runtime.Container);
+        }
+
+        public bool TryGetOnlinePlayer(string idOrName, out IOnlinePlayer output)
+        {
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == idOrName)
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.ComparerContains(idOrName));
 
             if (user == null)
             {
@@ -36,26 +54,22 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new EcoPlayer(user.Player, runtime.Container);
+            output = new OnlineEcoPlayer(user.Player, runtime.Container);
             return true;
         }
 
-        public IPlayer GetPlayerByName(string name)
+        public IOnlinePlayer GetOnlinePlayerById(string id)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Contains(name))
-                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Contains(name));
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == id);
 
-            return user == null ? null : new EcoPlayer(user.Player, runtime.Container);
+            if (user == null) throw new PlayerNotFoundException(id);
+
+            return new OnlineEcoPlayer(user.Player, runtime.Container);
         }
 
-        public bool TryGetPlayerByName(string name, out IPlayer output)
+        public bool TryGetOnlinePlayerById(string id, out IOnlinePlayer output)
         {
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Contains(name))
-                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => !x.LoggedIn && (x.Name ?? string.Empty).Contains(name));
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == id);
 
             if (user == null)
             {
@@ -63,7 +77,32 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new EcoPlayer(user.Player, runtime.Container);
+            output = new OnlineEcoPlayer(user.Player, runtime.Container);
+            return true;
+        }
+
+        public IOnlinePlayer GetOnlinePlayerByName(string displayName)
+        {
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).ComparerContains(displayName));
+
+            if (user == null) throw new PlayerNotFoundException(displayName);
+
+            return new OnlineEcoPlayer(user.Player, runtime.Container);
+        }
+
+        public bool TryGetOnlinePlayerByName(string displayName, out IOnlinePlayer output)
+        {
+            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
+                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).ComparerContains(displayName));
+
+            if (user == null)
+            {
+                output = null;
+                return false;
+            }
+
+            output = new OnlineEcoPlayer(user.Player, runtime.Container);
             return true;
         }
 
