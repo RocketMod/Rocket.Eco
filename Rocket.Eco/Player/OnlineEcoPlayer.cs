@@ -13,7 +13,7 @@ namespace Rocket.Eco.Player
 
         public OnlineEcoPlayer(EcoPlayer player, IDependencyContainer container) : base(player.User, container)
         {
-            if (container == null) throw new ArgumentException("Argument may not be null!", nameof(container));
+            if (container == null) throw new ArgumentNullException(nameof(container));
 
             if (player.User == null || !player.IsOnline) throw new InvalidOperationException("The player must be online to cast to an OnlineEcoPlayer");
         }
@@ -45,6 +45,8 @@ namespace Rocket.Eco.Player
 
         public void SendMessage(string message, ConsoleColor? color = null)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
             if (IsOnline) User.Player.SendTemporaryMessage(FormattableStringFactory.Create(message));
 
             throw new InvalidOperationException("This player reference is currently offline.");
@@ -52,6 +54,8 @@ namespace Rocket.Eco.Player
 
         public void SendErrorMessage(string message)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
             if (IsOnline) User.Player.SendTemporaryError(FormattableStringFactory.Create(message));
 
             throw new InvalidOperationException("This player reference is currently offline.");

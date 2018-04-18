@@ -68,23 +68,5 @@ namespace Rocket.Eco.Player
         }
 
         public override int GetHashCode() => 0;
-
-        public static bool operator ==(EcoConsoleCommandCaller p1, IIdentifiable p2) => p1.Equals(p2);
-        public static bool operator !=(EcoConsoleCommandCaller p1, IIdentifiable p2) => !p1.Equals(p2);
-
-        public static bool operator ==(EcoConsoleCommandCaller p1, string p2) => p1.Equals(p2);
-        public static bool operator !=(EcoConsoleCommandCaller p1, string p2) => !p1.Equals(p2);
-
-        public static bool operator <(EcoConsoleCommandCaller p1, IIdentifiable p2) => p1.CompareTo(p2) < 0;
-        public static bool operator >(EcoConsoleCommandCaller p1, IIdentifiable p2) => p1.CompareTo(p2) > 0;
-
-        public static bool operator <(EcoConsoleCommandCaller p1, string p2) => p1.CompareTo(p2) < 0;
-        public static bool operator >(EcoConsoleCommandCaller p1, string p2) => p1.CompareTo(p2) > 0;
-
-        public static bool operator <=(EcoConsoleCommandCaller p1, IIdentifiable p2) => p1.CompareTo(p2) <= 0;
-        public static bool operator >=(EcoConsoleCommandCaller p1, IIdentifiable p2) => p1.CompareTo(p2) >= 0;
-
-        public static bool operator <=(EcoConsoleCommandCaller p1, string p2) => p1.CompareTo(p2) <= 0;
-        public static bool operator >=(EcoConsoleCommandCaller p1, string p2) => p1.CompareTo(p2) >= 0;
     }
 }

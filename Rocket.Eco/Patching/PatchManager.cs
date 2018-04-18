@@ -19,12 +19,15 @@ namespace Rocket.Eco.Patching
 
         public PatchManager(IRuntime runtime)
         {
-            this.runtime = runtime;
+            this.runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
+
             patchContainer = runtime.Container.CreateChildContainer();
         }
 
         public void RegisterPatch(Type type)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             ILogger logger = patchContainer.Get<ILogger>();
 
             if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;

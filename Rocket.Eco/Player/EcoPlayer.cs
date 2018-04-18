@@ -13,13 +13,19 @@ namespace Rocket.Eco.Player
             User = user;
         }
 
+        internal EcoPlayer(string id, IDependencyContainer container) : base(container)
+        {
+            this.id = id;
+        }
+
         public BaseEcoUser User { get; }
+        private readonly string id;
 
         public bool IsAdmin => User?.IsAdmin ?? false;
         public bool IsDev => User?.IsDev ?? false;
         public override bool IsOnline => User?.LoggedIn ?? false;
 
-        public override string Id => User?.SteamId ?? string.Empty;
+        public override string Id => User?.SteamId ?? id ?? string.Empty;
         public override string Name => User?.Name ?? string.Empty;
 
         public override Type CallerType => typeof(EcoPlayer);

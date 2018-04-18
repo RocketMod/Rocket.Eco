@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
@@ -34,6 +35,9 @@ namespace Rocket.Eco
 
         public void Init(IRuntime runtime)
         {
+            if (Assembly.GetCallingAssembly().GetName().Name != "Rocket.Core")
+                throw new MethodAccessException();
+
             this.runtime = runtime;
 
             IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
