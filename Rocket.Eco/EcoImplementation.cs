@@ -35,10 +35,14 @@ namespace Rocket.Eco
 
         public void Init(IRuntime runtime)
         {
-            if (Assembly.GetCallingAssembly().GetName().Name != "Rocket.Core")
+            Console.WriteLine("A");
+
+            if (Assembly.GetCallingAssembly().GetName().Name != "Rocket.Runtime")
                 throw new MethodAccessException();
 
             this.runtime = runtime;
+
+            Console.WriteLine("A");
 
             IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
             ILogger logger = runtime.Container.Get<ILogger>();
@@ -48,6 +52,22 @@ namespace Rocket.Eco
 
             ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime);
 
+            Console.WriteLine("A");
+
+            patchManager.RegisterPatch<UserPatch>();
+            eventManager.AddEventListener(this, new EcoEventListener(runtime));
+
+            Console.WriteLine("A");
+
+            pluginManager.Init();
+
+            Console.WriteLine("A");
+
+            PostInit(logger, consoleCommandCaller, commandHandler);
+        }
+
+        private void PostInit(ILogger logger, ICommandCaller consoleCommandCaller, ICommandHandler commandHandler)
+        {
             Action<object> playerJoin = _EmitPlayerJoin;
             Action<object> playerLeave = _EmitPlayerLeave;
 
@@ -56,10 +76,7 @@ namespace Rocket.Eco
             type.GetField("OnUserLogin").SetValue(typeof(ChatServer).GetField("netChatManager").GetValue(ChatServer.Obj), playerJoin);
             type.GetField("OnUserLogout").SetValue(typeof(ChatServer).GetField("netChatManager").GetValue(ChatServer.Obj), playerLeave);
 
-            patchManager.RegisterPatch<UserPatch>();
-            eventManager.AddEventListener(this, new EcoEventListener(runtime));
-
-            pluginManager.Init();
+            Console.WriteLine("A");
 
             EcoReadyEvent e = new EcoReadyEvent(this);
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -70,7 +87,8 @@ namespace Rocket.Eco
             {
                 string input = Console.ReadLine();
 
-                if (input == null) continue;
+                if (input == null)
+                    continue;
 
                 if (input.StartsWith("/", StringComparison.InvariantCulture))
                     input = input.Remove(0, 1);
