@@ -52,6 +52,8 @@ namespace Rocket.Eco.Eventing
             {
                 try
                 {
+                    // It's legit in a try/catch block...
+                    // ReSharper disable once PossibleNullReferenceException
                     AppDomain.CurrentDomain.GetAssemblies()
                              .First(x => x.GetName().Name.Equals("EcoServer"))
                              .GetType("Eco.Server.Startup")
@@ -63,17 +65,21 @@ namespace Rocket.Eco.Eventing
                 {
                     runtime.Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
 
-                    Thread.Sleep(3000);
-                    Environment.Exit(0);
+                    WaitAndExit();
                 }
             }
             else
             {
                 runtime.Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
-                Thread.Sleep(3000);
-                Environment.Exit(0);
+                WaitAndExit();
             }
+        }
+
+        private static void WaitAndExit()
+        {
+            Thread.Sleep(3000);
+            Environment.Exit(0);
         }
     }
 }

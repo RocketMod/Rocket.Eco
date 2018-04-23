@@ -60,5 +60,9 @@ namespace Rocket.Eco.Player
 
             throw new InvalidOperationException("This player reference is currently offline.");
         }
+
+        public DateTime SessionConnectTime { get; }
+        public DateTime? SessionDisconnectTime { get; }
+        public TimeSpan SessionOnlineTime { get; }
     }
 }

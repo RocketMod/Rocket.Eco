@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
@@ -13,10 +14,12 @@ using Rocket.Core.Commands.Events;
 using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API.Patching;
+using Rocket.Eco.Delegates;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Events;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
+using Players_Player = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco
 {
@@ -35,15 +38,11 @@ namespace Rocket.Eco
 
         public void Init(IRuntime runtime)
         {
-            Console.WriteLine("A");
-
             if (Assembly.GetCallingAssembly().GetName().Name != "Rocket.Runtime")
                 throw new MethodAccessException();
 
             this.runtime = runtime;
-
-            Console.WriteLine("A");
-
+            
             IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
             ILogger logger = runtime.Container.Get<ILogger>();
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
@@ -51,33 +50,25 @@ namespace Rocket.Eco
             ICommandHandler commandHandler = runtime.Container.Get<ICommandHandler>();
 
             ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime);
-
-            Console.WriteLine("A");
-
+            
             patchManager.RegisterPatch<UserPatch>();
             eventManager.AddEventListener(this, new EcoEventListener(runtime));
-
-            Console.WriteLine("A");
-
+            
             pluginManager.Init();
-
-            Console.WriteLine("A");
-
+            
             PostInit(logger, consoleCommandCaller, commandHandler);
         }
 
         private void PostInit(ILogger logger, ICommandCaller consoleCommandCaller, ICommandHandler commandHandler)
         {
-            Action<object> playerJoin = _EmitPlayerJoin;
-            Action<object> playerLeave = _EmitPlayerLeave;
+            EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
+            EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
 
-            Type type = typeof(ChatManager);
-
-            type.GetField("OnUserLogin").SetValue(typeof(ChatServer).GetField("netChatManager").GetValue(ChatServer.Obj), playerJoin);
-            type.GetField("OnUserLogout").SetValue(typeof(ChatServer).GetField("netChatManager").GetValue(ChatServer.Obj), playerLeave);
-
-            Console.WriteLine("A");
-
+            Type type = typeof(User);
+            
+            type.GetField("OnUserLogin").SetValue(null, playerJoin);
+            type.GetField("OnUserLogout").SetValue(null, playerLeave);
+            
             EcoReadyEvent e = new EcoReadyEvent(this);
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
@@ -133,9 +124,10 @@ namespace Rocket.Eco
 
         internal void _EmitPlayerLeave(object player)
         {
+            Console.WriteLine(Thread.CurrentThread.Name);
             if (player == null || !(player is User castedUser)) return;
 
-            EcoPlayer ecoPlayer = new EcoPlayer(castedUser, runtime.Container);
+            OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, "");
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
@@ -146,6 +138,7 @@ namespace Rocket.Eco
         //TODO: Implement
         internal bool _EmitPlayerChat(string text, object user)
         {
+            Console.WriteLine(Thread.CurrentThread.Name);
             if (user == null || !(user is User castedUser) || !castedUser.LoggedIn) return true;
 
             OnlineEcoPlayer p = new OnlineEcoPlayer(castedUser.Player, runtime.Container);

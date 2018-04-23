@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 namespace Rocket.Eco.Launcher
 {
@@ -110,13 +112,24 @@ namespace Rocket.Eco.Launcher
             for (int i = il.Body.Instructions.Count - 1; i != 0; i--)
                 if (il.Body.Instructions[i].OpCode == OpCodes.Newobj)
                 {
-                    index = i;
+                    index = i + 2;
                     break;
                 }
 
-            for (int i = index; i < il.Body.Instructions.Count; i++) il.Remove(il.Body.Instructions[i]);
+            List<Instruction> removedInstructions = new List<Instruction>();
 
+            for (int i = index; i < il.Body.Instructions.Count; i++)
+                removedInstructions.Add(il.Body.Instructions[i]);
+
+            foreach (var i in removedInstructions) il.Remove(i); 
+            
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
+
+            il.Body.Variables.Clear();
+            il.Body.InitLocals = false;
+
+            il.Body.Optimize();
+            il.Body.OptimizeMacros();
         }
 
         private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));

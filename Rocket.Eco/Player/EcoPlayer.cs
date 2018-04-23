@@ -24,6 +24,7 @@ namespace Rocket.Eco.Player
         public bool IsAdmin => User?.IsAdmin ?? false;
         public bool IsDev => User?.IsDev ?? false;
         public override bool IsOnline => User?.LoggedIn ?? false;
+        public override DateTime? LastSeen => null;
 
         public override string Id => User?.SteamId ?? id ?? string.Empty;
         public override string Name => User?.Name ?? string.Empty;

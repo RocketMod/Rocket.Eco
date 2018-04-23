@@ -132,6 +132,8 @@ namespace Rocket.Eco.Player
             return true;
         }
 
+        public bool Kick(IOnlinePlayer player, ICommandCaller caller = null, string reason = null) => throw new NotImplementedException();
+
         public bool Ban(IPlayer player, ICommandCaller caller, string reason, TimeSpan? timeSpan = null) => throw new NotImplementedException();
 
         public bool Kick(IPlayer player, ICommandCaller caller, string reason) => throw new NotImplementedException();

@@ -12,11 +12,11 @@ namespace Rocket.Eco.Patches
         public string TargetAssembly => "Eco.Gameplay";
 
         public string TargetType => "Eco.Gameplay.Players.User";
-
+        
         public void Patch(TypeDefinition definition)
         {
-            FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));
-            FieldDefinition logoutDelegate = new FieldDefinition("OnUserLogout", FieldAttributes.Public, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));
+            FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));
+            FieldDefinition logoutDelegate = new FieldDefinition("OnUserLogout", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));
 
             definition.Fields.Add(loginDelegate);
             definition.Fields.Add(logoutDelegate);
@@ -34,14 +34,9 @@ namespace Rocket.Eco.Patches
 
             Instruction[] injection =
             {
-                il.Create(OpCodes.Ldfld, delegateDefinition),
-                il.Create(OpCodes.Ldc_I4_1),
-                il.Create(OpCodes.Newarr, definition.Module.ImportReference(typeof(object))),
-                il.Create(OpCodes.Dup),
-                il.Create(OpCodes.Ldc_I4_0),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Stelem_I4),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Action).GetMethod("DynamicInvoke")))
+                il.Create(OpCodes.Ldfld, delegateDefinition),
+                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
             };
 
             foreach (Instruction t in injection)
@@ -54,14 +49,9 @@ namespace Rocket.Eco.Patches
 
             Instruction[] injection =
             {
-                il.Create(OpCodes.Ldfld, delegateDefinition),
-                il.Create(OpCodes.Ldc_I4_1),
-                il.Create(OpCodes.Newarr, definition.Module.ImportReference(typeof(object))),
-                il.Create(OpCodes.Dup),
-                il.Create(OpCodes.Ldc_I4_0),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Stelem_I4),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Action).GetMethod("DynamicInvoke")))
+                il.Create(OpCodes.Ldfld, delegateDefinition),
+                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
             };
 
             foreach (Instruction t in injection)

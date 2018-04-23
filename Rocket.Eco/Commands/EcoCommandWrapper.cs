@@ -39,8 +39,8 @@ namespace Rocket.Eco.Commands
                 runtime.Container.Get<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
         }
 
-        public List<string> Aliases => new List<string>();
-        public List<ISubCommand> ChildCommands => new List<ISubCommand>();
+        public string[] Aliases => new string[0];
+        public ISubCommand[] ChildCommands => new ISubCommand[0];
 
         public string Name => command.CommandName;
         public string Permission => $"Eco.Base.{Name}";
