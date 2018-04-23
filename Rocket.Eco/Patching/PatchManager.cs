@@ -145,6 +145,7 @@ namespace Rocket.Eco.Patching
                     }
 
                     asmDef.Write(memStream);
+                    //asmDef.Write($@"C:\Users\Graybad1\Desktop\PATCHED\{finalName}.dll");
 
                     asmDef.Dispose();
 
@@ -171,7 +172,8 @@ namespace Rocket.Eco.Patching
                 finalAssembly = new byte[memStream.Length];
                 memStream.Read(finalAssembly, 0, finalAssembly.Length);
             }
-
+   
+            File.WriteAllBytes($@"C:\Users\Graybad1\Desktop\PATCHED\{finalName}.dll", finalAssembly);
             dict[finalName] = finalAssembly;
         }
     }

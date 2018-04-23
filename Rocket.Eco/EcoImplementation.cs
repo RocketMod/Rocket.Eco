@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using Eco.Core.Plugins;
@@ -120,11 +121,19 @@ namespace Rocket.Eco
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
+
+            StackTrace trace = new StackTrace();
+
+            foreach (StackFrame frame in trace.GetFrames())
+            {
+                Console.Write(frame.GetMethod().ReflectedType);
+                Console.Write(".");
+                Console.WriteLine(frame.GetMethod().Name);
+            }
         }
 
         internal void _EmitPlayerLeave(object player)
         {
-            Console.WriteLine(Thread.CurrentThread.Name);
             if (player == null || !(player is User castedUser)) return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
@@ -133,6 +142,15 @@ namespace Rocket.Eco
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
+
+            StackTrace trace = new StackTrace();
+
+            foreach (StackFrame frame in trace.GetFrames())
+            {
+                Console.Write(frame.GetMethod().ReflectedType);
+                Console.Write(".");
+                Console.WriteLine(frame.GetMethod().Name);
+            }
         }
 
         //TODO: Implement

@@ -60,11 +60,13 @@ namespace Rocket.Eco.Launcher
                 DefaultAssemblyResolver monoAssemblyResolver = new DefaultAssemblyResolver();
                 monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
 
-                AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly(Path.Combine(currentPath, "EcoServer.exe"), new ReaderParameters
+                var reader = new ReaderParameters
                 {
                     AssemblyResolver = monoAssemblyResolver
-                });
-
+                };
+                
+                AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly(Path.Combine(currentPath, "EcoServer.exe"), reader);
+                
                 try
                 {
                     TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
@@ -73,12 +75,21 @@ namespace Rocket.Eco.Launcher
 
                     string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
 
-                    ecoServer.Write(outputDir);
+                    var writer = new WriterParameters();
+
+                    using (FileStream file = new FileStream(outputDir, FileMode.Create))
+                    {   
+                        ecoServer.Write(file, writer);
+                    }
 
                     Assembly.LoadFile(outputDir);
                 }
-                catch
+                //TODO: Make this WAY better!
+                catch(Exception e)
                 {
+                    Console.WriteLine(e.GetType().ToString());
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.StackTrace);
                     Console.WriteLine("Launching failed, you may not have extracted. Running the extraction now...");
 
                     Thread.Sleep(2000);
@@ -86,8 +97,7 @@ namespace Rocket.Eco.Launcher
                     ProcessStartInfo info = new ProcessStartInfo
                     {
                         FileName = typeof(Program).Assembly.Location,
-                        Arguments = "-extract",
-                        CreateNoWindow = false
+                        Arguments = "-extract"
                     };
 
                     Process.Start(info);
@@ -125,7 +135,9 @@ namespace Rocket.Eco.Launcher
             
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
 
+            il.Body.ExceptionHandlers.Clear();
             il.Body.Variables.Clear();
+            
             il.Body.InitLocals = false;
 
             il.Body.Optimize();

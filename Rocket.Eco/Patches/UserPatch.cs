@@ -34,8 +34,8 @@ namespace Rocket.Eco.Patches
 
             Instruction[] injection =
             {
+                il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Ldfld, delegateDefinition),
                 il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
             };
 
@@ -49,9 +49,9 @@ namespace Rocket.Eco.Patches
 
             Instruction[] injection =
             {
+                il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Ldfld, delegateDefinition),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
+                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
             };
 
             foreach (Instruction t in injection)
