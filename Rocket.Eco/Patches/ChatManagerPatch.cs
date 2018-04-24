@@ -2,6 +2,7 @@
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Rocket.Eco.API.Patching;
+using Rocket.Eco.Delegates;
 
 namespace Rocket.Eco.Patches
 {
@@ -13,6 +14,10 @@ namespace Rocket.Eco.Patches
 
         public void Patch(TypeDefinition definition)
         {
+            FieldDefinition chatDelegate = new FieldDefinition("OnUserChat", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserChatDelegate)));
+
+            definition.Fields.Add(chatDelegate);
+
             MethodDefinition processAsCommandMethod = definition.Methods.First(x => x.Name.Equals("ProcessAsCommand"));
             MethodDefinition sendChatMethod = definition.Methods.First(x => x.Name.Equals("SendChat") && x.Parameters.Count == 3);
 

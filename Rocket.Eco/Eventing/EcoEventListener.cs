@@ -26,22 +26,29 @@ namespace Rocket.Eco.Eventing
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
             IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
 
+            List<Assembly> registered = new List<Assembly>();
+
             foreach (IPlugin plugin in plugins)
             {
-                Type[] types;
-
-                try
+                if (registered.Contains(plugin.GetType().Assembly))
                 {
-                    types = plugin.GetType().Assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    types = e.Types;
-                }
+                    registered.Add(plugin.GetType().Assembly);
 
-                IEnumerable<Type> patches = types.Where(x => x.GetInterfaces().Contains(typeof(IAssemblyPatch)));
+                    Type[] types;
 
-                foreach (Type type in patches) patchManager.RegisterPatch(type);
+                    try
+                    {
+                        types = plugin.GetType().Assembly.GetTypes();
+                    }
+                    catch (ReflectionTypeLoadException e)
+                    {
+                        types = e.Types;
+                    }
+
+                    IEnumerable<Type> patches = types.Where(x => x.GetInterfaces().Contains(typeof(IAssemblyPatch)));
+
+                    foreach (Type type in patches) patchManager.RegisterPatch(type);
+                }
             }
 
             patchManager.RunPatching();

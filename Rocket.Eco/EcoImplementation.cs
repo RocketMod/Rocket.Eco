@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
-using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Eventing;
@@ -20,7 +19,6 @@ using Rocket.Eco.Eventing;
 using Rocket.Eco.Events;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
-using Players_Player = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco
 {
