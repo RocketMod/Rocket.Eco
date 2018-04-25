@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -124,6 +124,7 @@
     <Compile Include="Delegates\EcoDelegates.cs" />
     <Compile Include="Delegates\ElectionDelegates.cs" />
     <Compile Include="Delegates\UserDelegates.cs" />
+    <Compile Include="Chat\EcoChatManager.cs" />
     <Compile Include="EcoImplementation.cs" />
     <Compile Include="API\Patching\IAssemblyPatch.cs" />
     <Compile Include="Eventing\EcoEventListener.cs" />
