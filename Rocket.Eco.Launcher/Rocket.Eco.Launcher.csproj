@@ -76,11 +76,5 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Rocket.Eco\Rocket.Eco.csproj">
-      <Project>{a4344501-4c40-4222-acd2-255200d78c59}</Project>
-      <Name>Rocket.Eco</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

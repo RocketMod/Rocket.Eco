@@ -114,49 +114,57 @@ namespace Rocket.Eco
 
         internal void _EmitPlayerJoin(object user)
         {
-            if (user == null || !(user is User castedUser)) return;
+            if (user == null || !(user is User castedUser))
+                return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
 
-            //TODO: This will be broken until I implement the EcoTaskScheduler.
+            /* TODO: This will be broken until I implement the EcoTaskScheduler.
             PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
-
             runtime.Container.Get<IEventManager>().Emit(this, e);
+            */
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
         }
 
         internal void _EmitPlayerLeave(object player)
         {
-            if (player == null || !(player is User castedUser)) return;
+            if (player == null || !(player is User castedUser))
+                return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
 
-            //TODO: This will be broken until I implement the EcoTaskScheduler.
+            /* TODO: This will be broken until I implement the EcoTaskScheduler.
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
-
             runtime.Container.Get<IEventManager>().Emit(this, e);
+            */
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
 
         internal bool _EmitPlayerChat(object user, string text)
         {
-            if (user == null || !(user is User castedUser) || !castedUser.LoggedIn) return true;
+            if (user == null || !(user is User castedUser) || !castedUser.LoggedIn)
+                return true;
 
             OnlineEcoPlayer p = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
 
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
+            ILogger logger = runtime.Container.Get<ILogger>();
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
                 PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(p, text.Remove(0, 1));
                 eventManager.Emit(this, e1);
 
+                bool wasCancelled = false;
+
                 if (e1.IsCancelled)
                 {
                     p.SendErrorMessage("Execution of your command has been cancelled!");
-                    return true;
+                    wasCancelled = true;
+
+                    goto RETURN;
                 }
 
                 bool wasHandled = true;
@@ -168,25 +176,42 @@ namespace Rocket.Eco
                 catch (NotEnoughPermissionsException)
                 {
                     p.SendErrorMessage("You do not have enough permission to execute this command!");
+                    wasCancelled = true;
                 }
                 catch (Exception e)
                 {
-                    ILogger logger = runtime.Container.Get<ILogger>();
                     logger.LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
-                    logger.LogError(e.Message);
-                    logger.LogError(e.StackTrace);
+                    logger.LogError($"{e.Message}\n{e.StackTrace}");
+
+                    p.SendErrorMessage("A runtime error occurred while executing this command, please contact an administrator!");
+
+                    return true;
                 }
 
                 if (!wasHandled)
                     p.SendErrorMessage("That command could not be found!");
 
+                RETURN:
+
+                string canceled1 = wasCancelled ? ": CANCELLED" : "";
+
+                logger.LogInformation($"[EVENT{canceled1}] [{p.Id}] {p.Name}: {text}");
+
                 return true;
             }
 
-            PlayerChatEvent e2 = new PlayerChatEvent(p, text);
+            PlayerChatEvent e2 = new PlayerChatEvent(p, text)
+            {
+                IsCancelled = false
+            };
+
             eventManager.Emit(this, e2);
 
-            return !e2.IsCancelled;
+            string canceled2 = e2.IsCancelled ? ": CANCELLED" : "";
+
+            logger.LogInformation($"[EVENT{canceled2}] [{p.Id}] {p.Name}: {text}");
+
+            return e2.IsCancelled;
         }
     }
 }

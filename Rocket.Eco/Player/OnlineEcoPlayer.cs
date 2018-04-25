@@ -47,9 +47,10 @@ namespace Rocket.Eco.Player
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            if (IsOnline) User.Player.SendTemporaryMessage(FormattableStringFactory.Create(message));
+            if (!IsOnline)
+                throw new InvalidOperationException("This player reference is currently offline.");
 
-            throw new InvalidOperationException("This player reference is currently offline.");
+            User.Player.SendTemporaryMessage(FormattableStringFactory.Create(message));
         }
 
         public DateTime SessionConnectTime { get; }
@@ -60,9 +61,10 @@ namespace Rocket.Eco.Player
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            if (IsOnline) User.Player.SendTemporaryError(FormattableStringFactory.Create(message));
+            if (!IsOnline)
+                throw new InvalidOperationException("This player reference is currently offline.");
 
-            throw new InvalidOperationException("This player reference is currently offline.");
+            User.Player.SendTemporaryError(FormattableStringFactory.Create(message));
         }
     }
 }

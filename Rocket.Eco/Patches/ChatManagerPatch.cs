@@ -48,7 +48,7 @@ namespace Rocket.Eco.Patches
                 il.Create(OpCodes.Ldarg_3),
                 il.Create(OpCodes.Ldarg_2),
                 il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserChatDelegate).GetMethod("Invoke"))),
-                il.Create(OpCodes.Brfalse_S, il.Body.Instructions[index])
+                il.Create(OpCodes.Brfalse_S, il.Body.Instructions[index + 2])
             };
 
             for (int i = 0; i < injection.Length; i++)

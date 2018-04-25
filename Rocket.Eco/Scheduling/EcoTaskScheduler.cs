@@ -12,7 +12,9 @@ namespace Rocket.Eco.Scheduling
     public sealed class EcoTaskScheduler : ContainerAccessor, ITaskScheduler
     {
         private readonly IEnumerable<ITask> tasks = new List<ITask>();
+
         internal EcoTaskScheduler(IDependencyContainer container) : base(container) { }
+
         public ReadOnlyCollection<ITask> Tasks => tasks.Where(c => c.Owner.IsAlive).ToList().AsReadOnly();
 
         public ITask Schedule(ILifecycleObject @object, Action action, ExecutionTargetContext target) => throw new NotImplementedException();

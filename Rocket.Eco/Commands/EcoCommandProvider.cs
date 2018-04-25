@@ -9,7 +9,7 @@ namespace Rocket.Eco.Commands
     {
         private readonly List<EcoCommandWrapper> commands = new List<EcoCommandWrapper>();
 
-        internal EcoCommandProvider(IDependencyContainer container) : base(container) { }
+        public EcoCommandProvider(IDependencyContainer container) : base(container) { }
         public IEnumerable<ICommand> Commands => commands;
 
         internal void CollectCommands() { }
