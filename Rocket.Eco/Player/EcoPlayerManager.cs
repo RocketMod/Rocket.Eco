@@ -9,13 +9,10 @@ using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
-    public class EcoPlayerManager : ContainerAccessor, IPlayerManager
+    public sealed class EcoPlayerManager : ContainerAccessor, IPlayerManager
     {
         public EcoPlayerManager(IDependencyContainer container) : base(container) { }
-
-        [Obsolete("Use `IEnumerable<IOnlinePlayer> OnlinePlayers` instead.")]
-        public IEnumerable<IPlayer> Players => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Container)).Cast<IPlayer>().ToList();
-
+        
         public IEnumerable<IOnlinePlayer> OnlinePlayers => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Container)).ToList();
 
         public IPlayer GetPlayer(string id)

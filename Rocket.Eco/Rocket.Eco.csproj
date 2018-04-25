@@ -138,6 +138,8 @@
     <Compile Include="Player\OnlineEcoPlayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DependencyRegistrator.cs" />
+    <Compile Include="Scheduling\BaseTask.cs" />
+    <Compile Include="Scheduling\EcoTaskScheduler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Events\Election\" />
