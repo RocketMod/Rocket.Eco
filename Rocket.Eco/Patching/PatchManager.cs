@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
-using Rocket.API;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Eco.API;
@@ -13,13 +12,13 @@ using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Patching
 {
-    public sealed class PatchManager : RuntimeObject, IPatchManager
+    public sealed class PatchManager : ContainerAccessor, IPatchManager
     {
         private readonly IDependencyContainer patchContainer;
 
-        public PatchManager(IRuntime runtime) : base(runtime)
+        public PatchManager(IDependencyContainer container) : base(container)
         {
-            patchContainer = runtime.Container.CreateChildContainer();
+            patchContainer = Container.CreateChildContainer();
         }
 
         public void RegisterPatch(Type type)
@@ -89,7 +88,7 @@ namespace Rocket.Eco.Patching
                     {
                         if (stream == null)
                         {
-                            Runtime.Container.Get<ILogger>().LogError("A manifest stream return null!");
+                            Container.Get<ILogger>().LogError("A manifest stream return null!");
                             continue;
                         }
 
@@ -101,7 +100,7 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    Runtime.Container.Get<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
+                    Container.Get<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
                 }
             }
 
@@ -143,7 +142,6 @@ namespace Rocket.Eco.Patching
                     }
 
                     asmDef.Write(memStream);
-                    //asmDef.Write($@"C:\Users\Graybad1\Desktop\PATCHED\{finalName}.dll");
 
                     asmDef.Dispose();
 

@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using Eco.Gameplay.Players;
-using Rocket.API;
 using Rocket.API.Commands;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
 using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
-    public class EcoPlayerManager : RuntimeObject, IPlayerManager
+    public class EcoPlayerManager : ContainerAccessor, IPlayerManager
     {
-        public EcoPlayerManager(IRuntime runtime) : base(runtime) { }
+        public EcoPlayerManager(IDependencyContainer container) : base(container) { }
 
         [Obsolete("Use `IEnumerable<IOnlinePlayer> OnlinePlayers` instead.")]
-        public IEnumerable<IPlayer> Players => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Runtime.Container)).Cast<IPlayer>().ToList();
+        public IEnumerable<IPlayer> Players => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Container)).Cast<IPlayer>().ToList();
 
-        public IEnumerable<IOnlinePlayer> OnlinePlayers => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Runtime.Container)).ToList();
+        public IEnumerable<IOnlinePlayer> OnlinePlayers => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Container)).ToList();
 
         public IPlayer GetPlayer(string id)
         {
@@ -24,9 +24,9 @@ namespace Rocket.Eco.Player
 
             User user = UserManager.Users.FirstOrDefault(x => x.SteamId == id);
 
-            if (user == null) return new EcoPlayer(id, Runtime.Container);
+            if (user == null) return new EcoPlayer(id, Container);
 
-            return user.LoggedIn ? new OnlineEcoPlayer(user.Player, Runtime.Container) : new EcoPlayer(user, Runtime.Container);
+            return user.LoggedIn ? new OnlineEcoPlayer(user.Player, Container) : new EcoPlayer(user, Container);
         }
 
         public IOnlinePlayer GetOnlinePlayer(string idOrName)
@@ -39,7 +39,7 @@ namespace Rocket.Eco.Player
 
             if (user == null) throw new PlayerNotFoundException(idOrName);
 
-            return new OnlineEcoPlayer(user.Player, Runtime.Container);
+            return new OnlineEcoPlayer(user.Player, Container);
         }
 
         public bool TryGetOnlinePlayer(string idOrName, out IOnlinePlayer output)
@@ -60,7 +60,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new OnlineEcoPlayer(user.Player, Runtime.Container);
+            output = new OnlineEcoPlayer(user.Player, Container);
             return true;
         }
 
@@ -72,7 +72,7 @@ namespace Rocket.Eco.Player
 
             if (user == null) throw new PlayerNotFoundException(id);
 
-            return new OnlineEcoPlayer(user.Player, Runtime.Container);
+            return new OnlineEcoPlayer(user.Player, Container);
         }
 
         public bool TryGetOnlinePlayerById(string id, out IOnlinePlayer output)
@@ -91,7 +91,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new OnlineEcoPlayer(user.Player, Runtime.Container);
+            output = new OnlineEcoPlayer(user.Player, Container);
             return true;
         }
 
@@ -104,7 +104,7 @@ namespace Rocket.Eco.Player
 
             if (user == null) throw new PlayerNotFoundException(displayName);
 
-            return new OnlineEcoPlayer(user.Player, Runtime.Container);
+            return new OnlineEcoPlayer(user.Player, Container);
         }
 
         public bool TryGetOnlinePlayerByName(string displayName, out IOnlinePlayer output)
@@ -124,7 +124,7 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            output = new OnlineEcoPlayer(user.Player, Runtime.Container);
+            output = new OnlineEcoPlayer(user.Player, Container);
             return true;
         }
 

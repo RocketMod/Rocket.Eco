@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Rocket.API;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
@@ -13,14 +13,14 @@ using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Eventing
 {
-    public sealed class EcoEventListener : RuntimeObject, IEventListener<PluginManagerInitEvent>
+    public sealed class EcoEventListener : ContainerAccessor, IEventListener<PluginManagerInitEvent>
     {
-        internal EcoEventListener(IRuntime runtime) : base(runtime) { }
+        internal EcoEventListener(IDependencyContainer container) : base(container) { }
 
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
-            IPatchManager patchManager = Runtime.Container.Get<IPatchManager>();
+            IPatchManager patchManager = Container.Get<IPatchManager>();
 
             List<Assembly> registered = new List<Assembly>();
 
@@ -64,14 +64,14 @@ namespace Rocket.Eco.Eventing
                 }
                 catch (NullReferenceException)
                 {
-                    Runtime.Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
+                    Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
 
                     WaitAndExit();
                 }
             }
             else
             {
-                Runtime.Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
+                Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
                 WaitAndExit();
             }

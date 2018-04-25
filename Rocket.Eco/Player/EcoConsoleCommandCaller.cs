@@ -1,22 +1,22 @@
 ﻿using System;
-using Rocket.API;
 using Rocket.API.Commands;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
-    public sealed class EcoConsoleCommandCaller : RuntimeObject, IConsoleCommandCaller
+    public sealed class EcoConsoleCommandCaller : ContainerAccessor, IConsoleCommandCaller
     {
-        internal EcoConsoleCommandCaller(IRuntime runtime) : base(runtime) { }
+        internal EcoConsoleCommandCaller(IDependencyContainer container) : base(container) { }
 
         public string Name => "Console";
         public string Id => "console";
 
         public Type CallerType => typeof(EcoConsoleCommandCaller);
 
-        public void SendMessage(string message, ConsoleColor? color) => Runtime.Container.Get<ILogger>().LogInformation(message, color);
+        public void SendMessage(string message, ConsoleColor? color) => Container.Get<ILogger>().LogInformation(message, color);
 
         public int CompareTo(object obj)
         {

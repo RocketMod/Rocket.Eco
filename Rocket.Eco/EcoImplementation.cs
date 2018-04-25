@@ -27,7 +27,7 @@ namespace Rocket.Eco
         private IRuntime runtime;
         public IEnumerable<string> Capabilities => new string[0];
 
-        public IConsoleCommandCaller GetConsoleCaller() => new EcoConsoleCommandCaller(runtime);
+        public IConsoleCommandCaller GetConsoleCaller() => new EcoConsoleCommandCaller(runtime.Container);
 
         public string InstanceId => throw new NotImplementedException();
         public bool IsAlive { get; } = true;
@@ -48,11 +48,11 @@ namespace Rocket.Eco
             IPluginManager pluginManager = runtime.Container.Get<IPluginManager>();
             ICommandHandler commandHandler = runtime.Container.Get<ICommandHandler>();
 
-            ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime);
+            ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime.Container);
 
             patchManager.RegisterPatch<UserPatch>();
             patchManager.RegisterPatch<ChatManagerPatch>();
-            eventManager.AddEventListener(this, new EcoEventListener(runtime));
+            eventManager.AddEventListener(this, new EcoEventListener(runtime.Container));
 
             pluginManager.Init();
 
@@ -123,15 +123,6 @@ namespace Rocket.Eco
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
-
-            StackTrace trace = new StackTrace();
-
-            foreach (StackFrame frame in trace.GetFrames())
-            {
-                Console.Write(frame.GetMethod().ReflectedType);
-                Console.Write(".");
-                Console.WriteLine(frame.GetMethod().Name);
-            }
         }
 
         internal void _EmitPlayerLeave(object player)
@@ -144,15 +135,6 @@ namespace Rocket.Eco
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
-
-            StackTrace trace = new StackTrace();
-
-            foreach (StackFrame frame in trace.GetFrames())
-            {
-                Console.Write(frame.GetMethod().ReflectedType);
-                Console.Write(".");
-                Console.WriteLine(frame.GetMethod().Name);
-            }
         }
 
         internal bool _EmitPlayerChat(object user, string text)
