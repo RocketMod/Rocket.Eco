@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Patching\IPatchManager.cs" />
+    <Compile Include="API\RuntimeObject.cs" />
     <Compile Include="Commands\EcoCommandProvider.cs" />
     <Compile Include="Commands\EcoCommandWrapper.cs" />
     <Compile Include="Delegates\EcoDelegates.cs" />

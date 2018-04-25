@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Threading;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
+using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Eventing;
@@ -41,7 +41,7 @@ namespace Rocket.Eco
                 throw new MethodAccessException();
 
             this.runtime = runtime;
-            
+
             IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
             ILogger logger = runtime.Container.Get<ILogger>();
             IEventManager eventManager = runtime.Container.Get<IEventManager>();
@@ -49,25 +49,48 @@ namespace Rocket.Eco
             ICommandHandler commandHandler = runtime.Container.Get<ICommandHandler>();
 
             ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime);
-            
+
             patchManager.RegisterPatch<UserPatch>();
+            patchManager.RegisterPatch<ChatManagerPatch>();
             eventManager.AddEventListener(this, new EcoEventListener(runtime));
-            
+
             pluginManager.Init();
-            
+
             PostInit(logger, consoleCommandCaller, commandHandler);
+        }
+
+        public void Shutdown()
+        {
+            StorageManager.SaveAndFlush();
+
+            foreach (IPlugin plugin in runtime.Container.Get<IPluginManager>())
+                plugin.Unload();
+
+            Environment.Exit(0);
+        }
+
+        public void Reload()
+        {
+            IPluginManager pluginManager = runtime.Container.Get<IPluginManager>();
+
+            foreach (IPlugin plugin in runtime.Container.Get<IPluginManager>())
+                if (pluginManager.UnloadPlugin(plugin.Name))
+                    pluginManager.LoadPlugin(plugin.Name);
         }
 
         private void PostInit(ILogger logger, ICommandCaller consoleCommandCaller, ICommandHandler commandHandler)
         {
             EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
             EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
+            EcoUserChatDelegate playerChat = _EmitPlayerChat;
 
-            Type type = typeof(User);
-            
-            type.GetField("OnUserLogin").SetValue(null, playerJoin);
-            type.GetField("OnUserLogout").SetValue(null, playerLeave);
-            
+            Type userType = typeof(User);
+            Type chatManagerType = typeof(ChatManager);
+
+            userType.GetField("OnUserLogin").SetValue(null, playerJoin);
+            userType.GetField("OnUserLogout").SetValue(null, playerLeave);
+            chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
+
             EcoReadyEvent e = new EcoReadyEvent(this);
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
@@ -88,25 +111,6 @@ namespace Rocket.Eco
                 if (!wasHandled)
                     logger.LogError("That command could not be found!");
             }
-        }
-
-        public void Shutdown()
-        {
-            StorageManager.SaveAndFlush();
-
-            foreach (IPlugin plugin in runtime.Container.Get<IPluginManager>())
-                plugin.Unload();
-
-            Environment.Exit(0);
-        }
-
-        public void Reload()
-        {
-            IPluginManager pluginManager = runtime.Container.Get<IPluginManager>();
-
-            foreach (IPlugin plugin in runtime.Container.Get<IPluginManager>())
-                if (pluginManager.UnloadPlugin(plugin.Name))
-                    pluginManager.LoadPlugin(plugin.Name);
         }
 
         internal void _EmitPlayerJoin(object user)
@@ -151,10 +155,8 @@ namespace Rocket.Eco
             }
         }
 
-        //TODO: Implement
-        internal bool _EmitPlayerChat(string text, object user)
+        internal bool _EmitPlayerChat(object user, string text)
         {
-            Console.WriteLine(Thread.CurrentThread.Name);
             if (user == null || !(user is User castedUser) || !castedUser.LoggedIn) return true;
 
             OnlineEcoPlayer p = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
@@ -184,7 +186,10 @@ namespace Rocket.Eco
                 }
                 catch (Exception e)
                 {
-                    runtime.Container.Get<ILogger>().LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!", e);
+                    ILogger logger = runtime.Container.Get<ILogger>();
+                    logger.LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
+                    logger.LogError(e.Message);
+                    logger.LogError(e.StackTrace);
                 }
 
                 if (!wasHandled)

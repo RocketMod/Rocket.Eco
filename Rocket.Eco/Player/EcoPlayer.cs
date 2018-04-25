@@ -8,6 +8,8 @@ namespace Rocket.Eco.Player
 {
     public class EcoPlayer : BasePlayer, IComparable<BaseEcoUser>, IEquatable<BaseEcoUser>
     {
+        private readonly string id;
+
         internal EcoPlayer(BaseEcoUser user, IDependencyContainer container) : base(container)
         {
             User = user;
@@ -19,7 +21,6 @@ namespace Rocket.Eco.Player
         }
 
         public BaseEcoUser User { get; }
-        private readonly string id;
 
         public bool IsAdmin => User?.IsAdmin ?? false;
         public bool IsDev => User?.IsDev ?? false;

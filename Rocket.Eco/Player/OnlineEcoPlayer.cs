@@ -28,9 +28,6 @@ namespace Rocket.Eco.Player
             }
         }
 
-        public int CompareTo(BaseEcoPlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
-        public bool Equals(BaseEcoPlayer other) => other != null && Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
-
         public double Health
         {
             get => -1;
@@ -43,6 +40,9 @@ namespace Rocket.Eco.Player
             set => Container.Get<ILogger>().LogWarning("Setting player health is not supported in Eco!");
         }
 
+        public int CompareTo(BaseEcoPlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
+        public bool Equals(BaseEcoPlayer other) => other != null && Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
+
         public void SendMessage(string message, ConsoleColor? color = null)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
@@ -52,6 +52,10 @@ namespace Rocket.Eco.Player
             throw new InvalidOperationException("This player reference is currently offline.");
         }
 
+        public DateTime SessionConnectTime { get; }
+        public DateTime? SessionDisconnectTime { get; }
+        public TimeSpan SessionOnlineTime { get; }
+
         public void SendErrorMessage(string message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
@@ -60,9 +64,5 @@ namespace Rocket.Eco.Player
 
             throw new InvalidOperationException("This player reference is currently offline.");
         }
-
-        public DateTime SessionConnectTime { get; }
-        public DateTime? SessionDisconnectTime { get; }
-        public TimeSpan SessionOnlineTime { get; }
     }
 }

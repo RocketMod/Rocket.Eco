@@ -3,24 +3,20 @@ using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
+using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
-    public sealed class EcoConsoleCommandCaller : IConsoleCommandCaller
+    public sealed class EcoConsoleCommandCaller : RuntimeObject, IConsoleCommandCaller
     {
-        private readonly IRuntime runtime;
-
-        internal EcoConsoleCommandCaller(IRuntime runtime)
-        {
-            this.runtime = runtime;
-        }
+        internal EcoConsoleCommandCaller(IRuntime runtime) : base(runtime) { }
 
         public string Name => "Console";
         public string Id => "console";
 
         public Type CallerType => typeof(EcoConsoleCommandCaller);
 
-        public void SendMessage(string message, ConsoleColor? color) => runtime.Container.Get<ILogger>().LogInformation(message, color);
+        public void SendMessage(string message, ConsoleColor? color) => Runtime.Container.Get<ILogger>().LogInformation(message, color);
 
         public int CompareTo(object obj)
         {

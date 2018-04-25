@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Rocket.Eco.API.Patching;
@@ -12,7 +11,7 @@ namespace Rocket.Eco.Patches
         public string TargetAssembly => "Eco.Gameplay";
 
         public string TargetType => "Eco.Gameplay.Players.User";
-        
+
         public void Patch(TypeDefinition definition)
         {
             FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));

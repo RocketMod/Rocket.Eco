@@ -8,28 +8,23 @@ using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Plugin;
 using Rocket.Core.Plugins.Events;
+using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Eventing
 {
-    public sealed class EcoEventListener : IEventListener<PluginManagerInitEvent>
+    public sealed class EcoEventListener : RuntimeObject, IEventListener<PluginManagerInitEvent>
     {
-        private readonly IRuntime runtime;
-
-        internal EcoEventListener(IRuntime runtime)
-        {
-            this.runtime = runtime;
-        }
+        internal EcoEventListener(IRuntime runtime) : base(runtime) { }
 
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
-            IPatchManager patchManager = runtime.Container.Get<IPatchManager>();
+            IPatchManager patchManager = Runtime.Container.Get<IPatchManager>();
 
             List<Assembly> registered = new List<Assembly>();
 
             foreach (IPlugin plugin in plugins)
-            {
                 if (registered.Contains(plugin.GetType().Assembly))
                 {
                     registered.Add(plugin.GetType().Assembly);
@@ -49,7 +44,6 @@ namespace Rocket.Eco.Eventing
 
                     foreach (Type type in patches) patchManager.RegisterPatch(type);
                 }
-            }
 
             patchManager.RunPatching();
 
@@ -70,14 +64,14 @@ namespace Rocket.Eco.Eventing
                 }
                 catch (NullReferenceException)
                 {
-                    runtime.Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
+                    Runtime.Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
 
                     WaitAndExit();
                 }
             }
             else
             {
-                runtime.Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
+                Runtime.Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
                 WaitAndExit();
             }

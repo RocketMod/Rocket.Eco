@@ -1,28 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Logging;
+using Rocket.Eco.API;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Commands
 {
-    public sealed class EcoCommandWrapper : ICommand
+    public sealed class EcoCommandWrapper : RuntimeObject, ICommand
     {
         private static ChatManager ecoChatManager;
         private static MethodInfo execute;
 
         private readonly ChatCommandAttribute command;
         private readonly MethodInfo commandMethod;
-        private readonly IRuntime runtime;
 
-        internal EcoCommandWrapper(MethodInfo method, IRuntime runtime)
+        internal EcoCommandWrapper(MethodInfo method, IRuntime runtime) : base(runtime)
         {
-            this.runtime = runtime;
-
             if (ecoChatManager == null)
                 ecoChatManager = (ChatManager) typeof(ChatServer).GetField("netChatManager", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatServer.Obj)
                     ?? throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
@@ -61,7 +58,7 @@ namespace Rocket.Eco.Commands
             }
             catch (Exception e)
             {
-                runtime.Container.Get<ILogger>().LogError($"{context.Caller.Name} failed to execute the vanilla command `{Name}`!", e);
+                Runtime.Container.Get<ILogger>().LogError($"{context.Caller.Name} failed to execute the vanilla command `{Name}`!", e);
             }
         }
     }

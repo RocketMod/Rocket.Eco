@@ -60,13 +60,13 @@ namespace Rocket.Eco.Launcher
                 DefaultAssemblyResolver monoAssemblyResolver = new DefaultAssemblyResolver();
                 monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
 
-                var reader = new ReaderParameters
+                ReaderParameters reader = new ReaderParameters
                 {
                     AssemblyResolver = monoAssemblyResolver
                 };
-                
+
                 AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly(Path.Combine(currentPath, "EcoServer.exe"), reader);
-                
+
                 try
                 {
                     TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
@@ -75,17 +75,17 @@ namespace Rocket.Eco.Launcher
 
                     string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
 
-                    var writer = new WriterParameters();
+                    WriterParameters writer = new WriterParameters();
 
                     using (FileStream file = new FileStream(outputDir, FileMode.Create))
-                    {   
+                    {
                         ecoServer.Write(file, writer);
                     }
 
                     Assembly.LoadFile(outputDir);
                 }
                 //TODO: Make this WAY better!
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e.GetType().ToString());
                     Console.WriteLine(e.Message);
@@ -131,13 +131,13 @@ namespace Rocket.Eco.Launcher
             for (int i = index; i < il.Body.Instructions.Count; i++)
                 removedInstructions.Add(il.Body.Instructions[i]);
 
-            foreach (var i in removedInstructions) il.Remove(i); 
-            
+            foreach (Instruction i in removedInstructions) il.Remove(i);
+
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
 
             il.Body.ExceptionHandlers.Clear();
             il.Body.Variables.Clear();
-            
+
             il.Body.InitLocals = false;
 
             il.Body.Optimize();

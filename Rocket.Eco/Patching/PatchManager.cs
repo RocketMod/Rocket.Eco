@@ -8,19 +8,17 @@ using Mono.Cecil;
 using Rocket.API;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
+using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Patching
 {
-    public sealed class PatchManager : IPatchManager
+    public sealed class PatchManager : RuntimeObject, IPatchManager
     {
         private readonly IDependencyContainer patchContainer;
-        private readonly IRuntime runtime;
 
-        public PatchManager(IRuntime runtime)
+        public PatchManager(IRuntime runtime) : base(runtime)
         {
-            this.runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
-
             patchContainer = runtime.Container.CreateChildContainer();
         }
 
@@ -91,7 +89,7 @@ namespace Rocket.Eco.Patching
                     {
                         if (stream == null)
                         {
-                            runtime.Container.Get<ILogger>().LogError("A manifest stream return null!");
+                            Runtime.Container.Get<ILogger>().LogError("A manifest stream return null!");
                             continue;
                         }
 
@@ -103,7 +101,7 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    runtime.Container.Get<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
+                    Runtime.Container.Get<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
                 }
             }
 
@@ -172,7 +170,7 @@ namespace Rocket.Eco.Patching
                 finalAssembly = new byte[memStream.Length];
                 memStream.Read(finalAssembly, 0, finalAssembly.Length);
             }
-   
+
             File.WriteAllBytes($@"C:\Users\Graybad1\Desktop\PATCHED\{finalName}.dll", finalAssembly);
             dict[finalName] = finalAssembly;
         }
