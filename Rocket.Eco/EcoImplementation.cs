@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
@@ -118,7 +117,9 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser)) return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
-            PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, "");
+
+            //TODO: This will be broken until I implement the EcoTaskScheduler.
+            PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, "", EventExecutionTargetContext.NextFrame);
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
@@ -130,7 +131,9 @@ namespace Rocket.Eco
             if (player == null || !(player is User castedUser)) return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
-            PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, "");
+
+            //TODO: This will be broken until I implement the EcoTaskScheduler.
+            PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, "", EventExecutionTargetContext.NextFrame);
 
             runtime.Container.Get<IEventManager>().Emit(this, e);
 
@@ -147,7 +150,7 @@ namespace Rocket.Eco
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
-                PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(p, text.Remove(0, 1));
+                PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(p, text.Remove(0, 1), EventExecutionTargetContext.Sync);
                 eventManager.Emit(this, e1);
 
                 if (e1.IsCancelled)

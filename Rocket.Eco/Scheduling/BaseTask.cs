@@ -17,12 +17,13 @@ namespace Rocket.Eco.Scheduling
             ExecutionTarget = executionTargetContext;
         }
 
+        public Exception Exception { get; protected set; }
+
         public ILifecycleObject Owner { get; }
         public Action Action { get; }
         public ExecutionTargetContext ExecutionTarget { get; }
 
         public bool IsCancelled { get; protected set; }
-        public Exception Exception { get; protected set; }
         public bool IsFinished { get; protected set; }
 
         public virtual void Cancel()

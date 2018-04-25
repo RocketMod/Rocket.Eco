@@ -12,7 +12,7 @@ namespace Rocket.Eco.Player
     public sealed class EcoPlayerManager : ContainerAccessor, IPlayerManager
     {
         public EcoPlayerManager(IDependencyContainer container) : base(container) { }
-        
+
         public IEnumerable<IOnlinePlayer> OnlinePlayers => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Container)).ToList();
 
         public IPlayer GetPlayer(string id)

@@ -35,6 +35,5 @@ namespace Rocket.Eco
 
             Broadcast(message);
         }
-        
     }
 }
