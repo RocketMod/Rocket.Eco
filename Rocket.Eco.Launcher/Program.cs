@@ -125,14 +125,10 @@ namespace Rocket.Eco.Launcher
                     index = i + 2;
                     break;
                 }
-
-            List<Instruction> removedInstructions = new List<Instruction>();
-
+            
             for (int i = index; i < il.Body.Instructions.Count; i++)
-                removedInstructions.Add(il.Body.Instructions[i]);
-
-            foreach (Instruction i in removedInstructions) il.Remove(i);
-
+                il.Remove(il.Body.Instructions[index]);
+            
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
 
             il.Body.ExceptionHandlers.Clear();

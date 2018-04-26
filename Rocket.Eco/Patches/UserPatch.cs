@@ -23,11 +23,11 @@ namespace Rocket.Eco.Patches
             MethodDefinition login = definition.Methods.First(x => x.Name.Equals("Login"));
             MethodDefinition logout = definition.Methods.First(x => x.Name.Equals("Logout"));
 
-            PatchLogin(login, loginDelegate);
-            PatchLogout(logout, logoutDelegate);
+            PatchMethod(login, loginDelegate);
+            PatchMethod(logout, logoutDelegate);
         }
 
-        private static void PatchLogin(MethodDefinition definition, FieldReference delegateDefinition)
+        private static void PatchMethod(MethodDefinition definition, FieldReference delegateDefinition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
 
@@ -36,21 +36,6 @@ namespace Rocket.Eco.Patches
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
                 il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
-            };
-
-            foreach (Instruction t in injection)
-                il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
-        }
-
-        private static void PatchLogout(MethodDefinition definition, FieldReference delegateDefinition)
-        {
-            ILProcessor il = definition.Body.GetILProcessor();
-
-            Instruction[] injection =
-            {
-                il.Create(OpCodes.Ldsfld, delegateDefinition),
-                il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Call, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
             };
 
             foreach (Instruction t in injection)
