@@ -12,15 +12,15 @@ namespace Rocket.Eco.Legislation
     {
         private readonly EcoLegislation ecoLegislation;
 
-        public IElection CurrentElection { get; private set; }
-        public EcoPlayer CurrentLeader { get; private set; }
-
         public EcoGovernment(EcoLegislation ecoLegislation, IDependencyContainer container) : base(container)
         {
             this.ecoLegislation = ecoLegislation;
 
             //TODO: Pull all info from EcoLegislation.
         }
+
+        public IElection CurrentElection { get; private set; }
+        public EcoPlayer CurrentLeader { get; private set; }
 
         public IEnumerable<ILaw> Laws => throw new NotImplementedException();
 
