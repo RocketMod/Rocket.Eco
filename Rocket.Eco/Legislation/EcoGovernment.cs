@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Eco.Shared.Utils;
 using Rocket.API.DependencyInjection;
 using Rocket.Eco.API;
 using Rocket.Eco.API.Legislation;
@@ -12,9 +13,9 @@ namespace Rocket.Eco.Legislation
     {
         private readonly EcoLegislation ecoLegislation;
 
-        public EcoGovernment(EcoLegislation ecoLegislation, IDependencyContainer container) : base(container)
+        public EcoGovernment( IDependencyContainer container) : base(container)
         {
-            this.ecoLegislation = ecoLegislation;
+            ecoLegislation = Singleton<EcoLegislation>.Obj;
 
             //TODO: Pull all info from EcoLegislation.
         }
