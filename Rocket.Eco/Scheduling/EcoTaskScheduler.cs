@@ -110,7 +110,7 @@ namespace Rocket.Eco.Scheduling
 
                 long time = watch.ElapsedMilliseconds - 1000 / mainTargetTickrate;
 
-                if (time >= 0)
+                if (time < 0)
                 {
                     Thread.Sleep((int) -time);
                 }
