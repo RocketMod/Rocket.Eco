@@ -118,12 +118,10 @@ namespace Rocket.Eco
                 return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
-
-            /* TODO: This will be broken until I implement the EcoTaskScheduler.
+            
             PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.Get<IEventManager>().Emit(this, e);
-            */
-
+            
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
         }
 
@@ -133,11 +131,10 @@ namespace Rocket.Eco
                 return;
 
             OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
-
-            /* TODO: This will be broken until I implement the EcoTaskScheduler.
+            
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.Get<IEventManager>().Emit(this, e);
-            */
+            
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
