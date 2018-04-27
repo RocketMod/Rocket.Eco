@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Eco.Shared.Utils;
 using Eco.Gameplay.Players;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
 using Rocket.Eco.API;
+using Eco.Core.Plugins.Interfaces;
 
 namespace Rocket.Eco.Player
 {
@@ -125,10 +127,56 @@ namespace Rocket.Eco.Player
             return true;
         }
 
-        public bool Kick(IOnlinePlayer player, ICommandCaller caller = null, string reason = null) => throw new NotImplementedException();
+        public bool Kick(IOnlinePlayer player, ICommandCaller caller = null, string reason = null)
+        {
+            if (player is OnlineEcoPlayer ecoPlayer && player.IsOnline)
+            {
+                ecoPlayer.User.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
+                return true;
+            }
 
-        public bool Ban(IPlayer player, ICommandCaller caller, string reason, TimeSpan? timeSpan = null) => throw new NotImplementedException();
+            return false;
+        }
 
-        public bool Kick(IPlayer player, ICommandCaller caller, string reason) => throw new NotImplementedException();
+        public bool Ban(IPlayer player, ICommandCaller caller, string reason, TimeSpan? timeSpan = null)
+        {
+            if (player == null) throw new ArgumentNullException(nameof(player));
+
+            if (string.IsNullOrWhiteSpace(player.Id)) throw new ArgumentException("The argument has invalid members.", nameof(player));
+
+            if (reason == null) reason = string.Empty;
+
+            if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
+            {
+                if (AddBanBlacklist(ecoPlayer.User.SlgId) || AddBanBlacklist(ecoPlayer.User.SteamId))
+                {
+                    UserManager.Obj.SaveConfig();
+
+                    if (player.IsOnline)
+                    {
+                        ecoPlayer.User.Client.Disconnect("You have been banned.", reason ?? string.Empty, false);
+                    }
+
+                    return true;
+                }
+            }
+            else
+            {
+                if (AddBanBlacklist(player.Id))
+                {
+                    UserManager.Obj.SaveConfig();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool AddBanBlacklist(string user)
+        {
+            if (string.IsNullOrWhiteSpace(user)) return false;
+
+            return UserManager.Config.BlackList.AddUnique(user);
+        }
     }
 }
