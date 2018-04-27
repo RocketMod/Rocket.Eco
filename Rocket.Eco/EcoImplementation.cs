@@ -138,7 +138,7 @@ namespace Rocket.Eco
 
             runtime.Container.Get<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
-
+        
         internal bool _EmitPlayerChat(object user, string text)
         {
             if (user == null || !(user is User castedUser) || !castedUser.LoggedIn)

@@ -8,6 +8,9 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
 using Rocket.Eco.API;
 using Eco.Core.Plugins.Interfaces;
+using Rocket.Core.Player.Events;
+using Rocket.API.Eventing;
+using Rocket.API;
 
 namespace Rocket.Eco.Player
 {
@@ -131,6 +134,11 @@ namespace Rocket.Eco.Player
         {
             if (player is OnlineEcoPlayer ecoPlayer && player.IsOnline)
             {
+                PlayerKickEvent e = new PlayerKickEvent(player, caller, reason);
+                Container.Get<IEventManager>().Emit(Container.Get<IImplementation>(), e);
+
+                if (e.IsCancelled) return false;
+
                 ecoPlayer.User.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
                 return true;
             }
@@ -145,6 +153,11 @@ namespace Rocket.Eco.Player
             if (string.IsNullOrWhiteSpace(player.Id)) throw new ArgumentException("The argument has invalid members.", nameof(player));
 
             if (reason == null) reason = string.Empty;
+
+            PlayerBanEvent e = new PlayerBanEvent(player, caller, reason, null);
+            Container.Get<IEventManager>().Emit(Container.Get<IImplementation>(), e);
+
+            if (e.IsCancelled) return false;
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
             {
