@@ -60,7 +60,7 @@ namespace Rocket.Eco.Eventing
                              .GetType("Eco.Server.Startup")
                              .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
                              .Invoke(null, new object[]
-                                 {args.Where(x => x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
+                                 {args.Where(x => !x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
                 }
                 catch (NullReferenceException)
                 {
