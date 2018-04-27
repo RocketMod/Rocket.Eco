@@ -16,8 +16,7 @@ namespace Rocket.Eco.Scheduling
     {
         //TODO: Make this configurable
         private const long mainTargetTickrate = 60;
-        private readonly Thread asyncContinousThread;
-        private readonly Thread asyncSingleThread;
+        private readonly Thread asyncThread;
 
         private readonly object lockObj = new object();
 
@@ -27,12 +26,10 @@ namespace Rocket.Eco.Scheduling
         internal EcoTaskScheduler(IDependencyContainer container) : base(container)
         {
             mainThread = new Thread(MainThreadWork);
-            asyncSingleThread = new Thread(AsyncSingleThreadWork);
-            asyncContinousThread = new Thread(AsyncContinousThreadWork);
+            asyncThread = new Thread(AsyncThreadWork);
 
             mainThread.Start();
-            asyncSingleThread.Start();
-            asyncContinousThread.Start();
+            asyncThread.Start();
         }
 
         //Creating a clone to ensure the collection will always be the same as the moment it was accessed.
@@ -47,21 +44,38 @@ namespace Rocket.Eco.Scheduling
             }
         }
 
-        public ITask Schedule(ILifecycleObject @object, Action action, ExecutionTargetContext target) => throw new NotImplementedException();
+        public ITask Schedule(ILifecycleObject @object, Action action, ExecutionTargetContext target)
+        {
+            ThreadSafeTask task = new ThreadSafeTask(this, @object, action, target);
 
-        public ITask ScheduleNextFrame(ILifecycleObject @object, Action action) => throw new NotImplementedException();
+            lock (lockObj)
+            {
+                tasks.Add(task);
+            }
 
-        public ITask ScheduleEveryFrame(ILifecycleObject @object, Action action) => throw new NotImplementedException();
+            return task;
+        }
 
-        public ITask ScheduleNextPhysicUpdate(ILifecycleObject @object, Action action) => throw new NotImplementedException();
+        public ITask ScheduleNextFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextFrame);
 
-        public ITask ScheduleEveryPhysicUpdate(ILifecycleObject @object, Action action) => throw new NotImplementedException();
+        public ITask ScheduleEveryFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryFrame);
 
-        public ITask ScheduleNextAsyncFrame(ILifecycleObject @object, Action action) => throw new NotImplementedException();
+        public ITask ScheduleNextPhysicUpdate(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextPhysicsUpdate);
 
-        public ITask ScheduleEveryAsyncFrame(ILifecycleObject @object, Action action) => throw new NotImplementedException();
+        public ITask ScheduleEveryPhysicUpdate(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryPhysicsUpdate);
 
-        public bool CancelTask(ITask task) => throw new NotImplementedException();
+        public ITask ScheduleNextAsyncFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextAsyncFrame);
+
+        public ITask ScheduleEveryAsyncFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryAsyncFrame);
+
+        public bool CancelTask(ITask task)
+        {
+            if (!(task is ThreadSafeTask threadSafeTask)) return false;
+
+            threadSafeTask.IsCancelled = true;
+
+            return true;
+        }
 
         private void MainThreadWork()
         {
@@ -78,7 +92,7 @@ namespace Rocket.Eco.Scheduling
 
                 foreach (ITask task in newTasks)
                 {
-                    if (!task.IsCancelled)
+                    if (!task.IsCancelled && !task.IsFinished)
                     {
                         task.Action.Invoke();
 
@@ -98,7 +112,7 @@ namespace Rocket.Eco.Scheduling
 
                 if (time >= 0)
                 {
-                    Thread.Sleep((int) time);
+                    Thread.Sleep((int) -time);
                 }
                 else if (time != 0)
                 {
@@ -111,8 +125,31 @@ namespace Rocket.Eco.Scheduling
             }
         }
 
-        private void AsyncSingleThreadWork() { }
+        private void AsyncThreadWork()
+        {
+            while (true)
+            {
+                IEnumerable<ITask> newTasks = Tasks.Where(x =>
+                    x.ExecutionTarget == ExecutionTargetContext.NextAsyncFrame || x.ExecutionTarget == ExecutionTargetContext.EveryAsyncFrame);
 
-        private void AsyncContinousThreadWork() { }
+                foreach (ITask task in newTasks)
+                {
+                    if (!task.IsCancelled && !task.IsFinished)
+                    {
+                        task.Action.Invoke();
+
+                        if (task.ExecutionTarget != ExecutionTargetContext.NextAsyncFrame)
+                            continue;
+                    }
+
+                    lock (lockObj)
+                    {
+                        tasks.Remove(task);
+                    }
+                }
+
+                Thread.Sleep(20);
+            }
+        }
     }
 }
