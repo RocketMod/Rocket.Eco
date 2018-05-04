@@ -15,7 +15,7 @@ namespace Rocket.Eco.Player
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
 
-            if (player.User == null || !player.IsOnline) throw new InvalidOperationException("The player must be online to cast to an OnlineEcoPlayer");
+            if (player.User == null || !player.IsOnline) throw new InvalidOperationException("The player must be online to cast to an OnlineEcoPlayer.");
         }
 
         public BaseEcoPlayer Player
@@ -31,19 +31,19 @@ namespace Rocket.Eco.Player
         public double Health
         {
             get => -1;
-            set => Container.Get<ILogger>().LogWarning("Setting player health is not supported in Eco!");
+            set => Container.Resolve<ILogger>().LogWarning("Setting player health is not supported in Eco!");
         }
 
         public double MaxHealth
         {
             get => -1;
-            set => Container.Get<ILogger>().LogWarning("Setting player health is not supported in Eco!");
+            set => Container.Resolve<ILogger>().LogWarning("Setting player health is not supported in Eco!");
         }
 
         public int CompareTo(BaseEcoPlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);
         public bool Equals(BaseEcoPlayer other) => other != null && Id.Equals(other.User.SteamId, StringComparison.InvariantCulture);
 
-        public void SendMessage(string message, ConsoleColor? color = null)
+        public void SendMessage(string message, ConsoleColor? color = null, params object[] bindings)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -57,7 +57,9 @@ namespace Rocket.Eco.Player
         public DateTime? SessionDisconnectTime { get; }
         public TimeSpan SessionOnlineTime { get; }
 
-        public void SendErrorMessage(string message)
+        public string EntityTypeName => "EcoPlayer";
+
+        public void SendErrorMessage(string message, params object[] bindings)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 

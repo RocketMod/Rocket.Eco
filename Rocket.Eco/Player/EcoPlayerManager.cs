@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Eco.Shared.Utils;
+using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
+using Eco.Shared.Utils;
+using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Player;
-using Rocket.Eco.API;
-using Eco.Core.Plugins.Interfaces;
-using Rocket.Core.Player.Events;
 using Rocket.API.Eventing;
-using Rocket.API;
+using Rocket.API.Player;
+using Rocket.Core.Player.Events;
+using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
@@ -39,7 +39,7 @@ namespace Rocket.Eco.Player
                 ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
                 ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.ComparerContains(idOrName));
 
-            if (user == null) throw new PlayerNotFoundException(idOrName);
+            if (user == null) throw new EcoPlayerNotFoundException(idOrName);
 
             return new OnlineEcoPlayer(user.Player, Container);
         }
@@ -72,7 +72,7 @@ namespace Rocket.Eco.Player
 
             User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == id);
 
-            if (user == null) throw new PlayerNotFoundException(id);
+            if (user == null) throw new EcoPlayerNotFoundException(id);
 
             return new OnlineEcoPlayer(user.Player, Container);
         }
@@ -104,7 +104,7 @@ namespace Rocket.Eco.Player
             User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
                 ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).ComparerContains(displayName));
 
-            if (user == null) throw new PlayerNotFoundException(displayName);
+            if (user == null) throw new EcoPlayerNotFoundException(displayName);
 
             return new OnlineEcoPlayer(user.Player, Container);
         }
@@ -132,18 +132,15 @@ namespace Rocket.Eco.Player
 
         public bool Kick(IOnlinePlayer player, ICommandCaller caller = null, string reason = null)
         {
-            if (player is OnlineEcoPlayer ecoPlayer && player.IsOnline)
-            {
-                PlayerKickEvent e = new PlayerKickEvent(player, caller, reason);
-                Container.Get<IEventManager>().Emit(Container.Get<IImplementation>(), e);
+            if (!(player is OnlineEcoPlayer ecoPlayer) || !player.IsOnline) return false;
 
-                if (e.IsCancelled) return false;
+            PlayerKickEvent e = new PlayerKickEvent(player, caller, reason);
+            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
 
-                ecoPlayer.User.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
-                return true;
-            }
+            if (e.IsCancelled) return false;
 
-            return false;
+            ecoPlayer.User.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
+            return true;
         }
 
         public bool Ban(IPlayer player, ICommandCaller caller, string reason, TimeSpan? timeSpan = null)
@@ -155,41 +152,36 @@ namespace Rocket.Eco.Player
             if (reason == null) reason = string.Empty;
 
             PlayerBanEvent e = new PlayerBanEvent(player, caller, reason, null);
-            Container.Get<IEventManager>().Emit(Container.Get<IImplementation>(), e);
+            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
 
             if (e.IsCancelled) return false;
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
             {
-                if (AddBanBlacklist(ecoPlayer.User.SlgId) || AddBanBlacklist(ecoPlayer.User.SteamId))
-                {
-                    UserManager.Obj.SaveConfig();
+                if (!AddBanBlacklist(ecoPlayer.User.SlgId) && !AddBanBlacklist(ecoPlayer.User.SteamId)) return false;
 
-                    if (player.IsOnline)
-                    {
-                        ecoPlayer.User.Client.Disconnect("You have been banned.", reason ?? string.Empty, false);
-                    }
+                UserManager.Obj.SaveConfig();
 
-                    return true;
-                }
+                if (player.IsOnline) ecoPlayer.User.Client.Disconnect("You have been banned.", reason, false);
             }
             else
             {
-                if (AddBanBlacklist(player.Id))
-                {
-                    UserManager.Obj.SaveConfig();
-                    return true;
-                }
+                if (!AddBanBlacklist(player.Id)) return false;
+
+                UserManager.Obj.SaveConfig();
             }
 
-            return false;
+            return true;
         }
 
-        private bool AddBanBlacklist(string user)
-        {
-            if (string.IsNullOrWhiteSpace(user)) return false;
+        public bool Unban(IPlayer player, ICommandCaller caller = null) => !RemoveBanBlacklist(player.Id) || player is EcoPlayer ecoPlayer && ecoPlayer.User?.SlgId != null && RemoveBanBlacklist(ecoPlayer.User.SlgId);
 
-            return UserManager.Config.BlackList.AddUnique(user);
-        }
+        private static bool AddBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.AddUnique(user);
+        private static bool RemoveBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.Remove(user);
+    }
+
+    public sealed class EcoPlayerNotFoundException : PlayerNotFoundException
+    {
+        public EcoPlayerNotFoundException(string nameOrId) : base(nameOrId) { }
     }
 }

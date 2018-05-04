@@ -143,7 +143,6 @@ namespace Rocket.Eco.Launcher
 
             il.Body.Optimize();
             il.Body.OptimizeMacros();
-
         }
 
         private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));

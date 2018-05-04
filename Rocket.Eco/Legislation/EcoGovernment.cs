@@ -13,7 +13,7 @@ namespace Rocket.Eco.Legislation
     {
         private readonly EcoLegislation ecoLegislation;
 
-        public EcoGovernment( IDependencyContainer container) : base(container)
+        public EcoGovernment(IDependencyContainer container) : base(container)
         {
             ecoLegislation = Singleton<EcoLegislation>.Obj;
 

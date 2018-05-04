@@ -33,7 +33,7 @@ namespace Rocket.Eco.Commands
             if (command != null)
                 commandMethod = method;
             else
-                Container.Get<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
+                Container.Resolve<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
         }
 
         public string[] Aliases => new string[0];
@@ -46,7 +46,7 @@ namespace Rocket.Eco.Commands
         //TODO: Make this match the parameter list of `commandMethod`
         public string Syntax => string.Empty;
 
-        public bool SupportsCaller(ICommandCaller caller) => caller is OnlineEcoPlayer;
+        public bool SupportsCaller(Type type) => type == typeof(OnlineEcoPlayer);
 
         public void Execute(ICommandContext context)
         {
@@ -58,7 +58,7 @@ namespace Rocket.Eco.Commands
             }
             catch (Exception e)
             {
-                Container.Get<ILogger>().LogError($"{context.Caller.Name} failed to execute the vanilla command `{Name}`!", e);
+                Container.Resolve<ILogger>().LogError($"{context.Caller.Name} failed to execute the vanilla command `{Name}`!", e);
             }
         }
     }

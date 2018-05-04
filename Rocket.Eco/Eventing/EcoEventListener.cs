@@ -6,7 +6,7 @@ using System.Threading;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
-using Rocket.API.Plugin;
+using Rocket.API.Plugins;
 using Rocket.Core.Plugins.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
@@ -20,7 +20,7 @@ namespace Rocket.Eco.Eventing
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
-            IPatchManager patchManager = Container.Get<IPatchManager>();
+            IPatchManager patchManager = Container.Resolve<IPatchManager>();
 
             List<Assembly> registered = new List<Assembly>();
 
@@ -64,14 +64,14 @@ namespace Rocket.Eco.Eventing
                 }
                 catch (NullReferenceException)
                 {
-                    Container.Get<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
+                    Container.Resolve<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
 
                     WaitAndExit();
                 }
             }
             else
             {
-                Container.Get<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
+                Container.Resolve<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
                 WaitAndExit();
             }

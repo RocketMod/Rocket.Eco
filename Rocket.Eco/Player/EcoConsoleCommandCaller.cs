@@ -14,9 +14,9 @@ namespace Rocket.Eco.Player
         public string Name => "Console";
         public string Id => "console";
 
-        public Type CallerType => typeof(EcoConsoleCommandCaller);
+        public void SendMessage(string message, ConsoleColor? color = null, params object[] bindings) => Container.Resolve<ILogger>().LogInformation(message, color);
 
-        public void SendMessage(string message, ConsoleColor? color) => Container.Get<ILogger>().LogInformation(message, color);
+        public Type CallerType => typeof(EcoConsoleCommandCaller);
 
         public int CompareTo(object obj)
         {
@@ -35,6 +35,8 @@ namespace Rocket.Eco.Player
         public int CompareTo(string other) => other == null ? 1 : string.Compare(Id, other, StringComparison.InvariantCulture);
         public bool Equals(IIdentifiable other) => other != null && Id.Equals(other.Id, StringComparison.InvariantCulture);
         public bool Equals(string other) => other != null && Id.Equals(other, StringComparison.InvariantCulture);
+
+        public void SendMessage(string message, ConsoleColor? color) => Container.Resolve<ILogger>().LogInformation(message, color);
 
         public string ToString(string format, IFormatProvider formatProvider)
         {

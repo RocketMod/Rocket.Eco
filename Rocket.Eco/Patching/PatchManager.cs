@@ -25,7 +25,7 @@ namespace Rocket.Eco.Patching
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            ILogger logger = patchContainer.Get<ILogger>();
+            ILogger logger = patchContainer.Resolve<ILogger>();
 
             if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;
 
@@ -35,7 +35,7 @@ namespace Rocket.Eco.Patching
 
         public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
-            ILogger logger = patchContainer.Get<ILogger>();
+            ILogger logger = patchContainer.Resolve<ILogger>();
 
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
@@ -88,7 +88,7 @@ namespace Rocket.Eco.Patching
                     {
                         if (stream == null)
                         {
-                            Container.Get<ILogger>().LogError("A manifest stream return null!");
+                            Container.Resolve<ILogger>().LogError("A manifest stream return null!");
                             continue;
                         }
 
@@ -100,7 +100,7 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    Container.Get<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
+                    Container.Resolve<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
                 }
             }
 
@@ -109,7 +109,7 @@ namespace Rocket.Eco.Patching
 
         private static void PatchAll(IDictionary<string, byte[]> targets, IDependencyResolver resolver, IAssemblyResolver monoCecilResolver)
         {
-            IEnumerable<IAssemblyPatch> patches = resolver.GetAll<IAssemblyPatch>();
+            IEnumerable<IAssemblyPatch> patches = resolver.ResolveAll<IAssemblyPatch>();
             foreach (KeyValuePair<string, byte[]> target in targets.ToList())
             {
                 string finalName = target.Key;
