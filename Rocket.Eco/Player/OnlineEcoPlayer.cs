@@ -53,9 +53,9 @@ namespace Rocket.Eco.Player
             User.Player.SendTemporaryMessage(FormattableStringFactory.Create(message));
         }
 
-        public DateTime SessionConnectTime { get; }
-        public DateTime? SessionDisconnectTime { get; }
-        public TimeSpan SessionOnlineTime { get; }
+        public DateTime SessionConnectTime { get; private set; }
+        public DateTime? SessionDisconnectTime { get; private set; }
+        public TimeSpan SessionOnlineTime => DateTime.UtcNow - SessionConnectTime;
 
         public string EntityTypeName => "EcoPlayer";
 

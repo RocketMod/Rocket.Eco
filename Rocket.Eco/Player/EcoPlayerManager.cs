@@ -16,32 +16,36 @@ namespace Rocket.Eco.Player
 {
     public sealed class EcoPlayerManager : ContainerAccessor, IPlayerManager
     {
-        public EcoPlayerManager(IDependencyContainer container) : base(container) { }
+        //TODO: Migrate to a thread-safe collection.
+        internal readonly List<EcoPlayer> _Players = new List<EcoPlayer>();
 
-        public IEnumerable<IOnlinePlayer> OnlinePlayers => UserManager.Users.Where(x => x.LoggedIn).Select(user => new OnlineEcoPlayer(user.Player, Container)).ToList();
+        public EcoPlayerManager(IDependencyContainer container) : base(container)
+        {
+            foreach (User user in UserManager.Users) _Players.Add(user.LoggedIn ? new OnlineEcoPlayer(user.Player, Container) : new EcoPlayer(user, Container));
+        }
+
+        public IEnumerable<EcoPlayer> Players => _Players.AsReadOnly();
+
+        public IEnumerable<IOnlinePlayer> OnlinePlayers => Players.Where(x => x.IsOnline).Cast<IOnlinePlayer>();
 
         public IPlayer GetPlayer(string id)
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
 
-            User user = UserManager.Users.FirstOrDefault(x => x.SteamId == id);
-
-            if (user == null) return new EcoPlayer(id, Container);
-
-            return user.LoggedIn ? new OnlineEcoPlayer(user.Player, Container) : new EcoPlayer(user, Container);
+            return Players.FirstOrDefault(x => x.Id.Equals(id)) ?? new EcoPlayer(id, Container);
         }
 
         public IOnlinePlayer GetOnlinePlayer(string idOrName)
         {
             if (idOrName == null) throw new ArgumentNullException(nameof(idOrName));
 
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == idOrName)
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.ComparerContains(idOrName));
+            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == idOrName)
+                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
+                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(idOrName));
 
-            if (user == null) throw new EcoPlayerNotFoundException(idOrName);
+            if (player == null) throw new EcoPlayerNotFoundException(idOrName);
 
-            return new OnlineEcoPlayer(user.Player, Container);
+            return player;
         }
 
         public bool TryGetOnlinePlayer(string idOrName, out IOnlinePlayer output)
@@ -52,17 +56,17 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == idOrName)
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.Name.ComparerContains(idOrName));
+            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == idOrName)
+                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
+                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(idOrName));
 
-            if (user == null)
+            if (player == null)
             {
                 output = null;
                 return false;
             }
 
-            output = new OnlineEcoPlayer(user.Player, Container);
+            output = player;
             return true;
         }
 
@@ -70,11 +74,11 @@ namespace Rocket.Eco.Player
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
 
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == id);
+            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == id);
 
-            if (user == null) throw new EcoPlayerNotFoundException(id);
+            if (player == null) throw new EcoPlayerNotFoundException(id);
 
-            return new OnlineEcoPlayer(user.Player, Container);
+            return player;
         }
 
         public bool TryGetOnlinePlayerById(string id, out IOnlinePlayer output)
@@ -85,15 +89,15 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && x.SteamId == id);
+            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == id);
 
-            if (user == null)
+            if (player == null)
             {
                 output = null;
                 return false;
             }
 
-            output = new OnlineEcoPlayer(user.Player, Container);
+            output = player;
             return true;
         }
 
@@ -101,12 +105,12 @@ namespace Rocket.Eco.Player
         {
             if (displayName == null) throw new ArgumentNullException(nameof(displayName));
 
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).ComparerContains(displayName));
+            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
+                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(displayName));
 
-            if (user == null) throw new EcoPlayerNotFoundException(displayName);
+            if (player == null) throw new EcoPlayerNotFoundException(displayName);
 
-            return new OnlineEcoPlayer(user.Player, Container);
+            return player;
         }
 
         public bool TryGetOnlinePlayerByName(string displayName, out IOnlinePlayer output)
@@ -117,16 +121,16 @@ namespace Rocket.Eco.Player
                 return false;
             }
 
-            User user = UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
-                ?? UserManager.Users.FirstOrDefault(x => x.LoggedIn && (x.Name ?? string.Empty).ComparerContains(displayName));
+            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
+                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(displayName));
 
-            if (user == null)
+            if (player == null)
             {
                 output = null;
                 return false;
             }
 
-            output = new OnlineEcoPlayer(user.Player, Container);
+            output = player;
             return true;
         }
 

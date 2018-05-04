@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
@@ -8,6 +9,7 @@ using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
+using Rocket.API.Player;
 using Rocket.API.Plugins;
 using Rocket.Core.Commands.Events;
 using Rocket.Core.Permissions;
@@ -117,9 +119,23 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser))
                 return;
 
-            OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
+            EcoPlayerManager playerManager = runtime.Container.Resolve<IPlayerManager>("ecoplayermanager") as EcoPlayerManager;
+            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
 
-            PlayerConnectedEvent e = new PlayerConnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
+            ILogger logger = runtime.Container.Resolve<ILogger>();
+
+            if (ecoPlayer == null)
+            {
+                logger.LogWarning("An unknown player has left the game. Please report this to a Rocket.Eco developer!");
+                return;
+            }
+
+            OnlineEcoPlayer onlineEcoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
+
+            playerManager._Players.Remove(ecoPlayer);
+            playerManager._Players.Add(onlineEcoPlayer);
+
+            PlayerConnectedEvent e = new PlayerConnectedEvent(onlineEcoPlayer, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.Resolve<IEventManager>().Emit(this, e);
 
             runtime.Container.Resolve<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
@@ -130,7 +146,19 @@ namespace Rocket.Eco
             if (player == null || !(player is User castedUser))
                 return;
 
-            OnlineEcoPlayer ecoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
+            EcoPlayerManager playerManager = runtime.Container.Resolve<IPlayerManager>("ecoplayermanager") as EcoPlayerManager;
+            OnlineEcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId)) as OnlineEcoPlayer;
+
+            ILogger logger = runtime.Container.Resolve<ILogger>();
+
+            if (ecoPlayer == null)
+            {
+                logger.LogWarning("An unknown player has left the game. Please report this to a Rocket.Eco developer!");
+                return;
+            }
+
+            playerManager._Players.Remove(ecoPlayer);
+            playerManager._Players.Add(new EcoPlayer(castedUser, runtime.Container));
 
             PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.Resolve<IEventManager>().Emit(this, e);
@@ -143,21 +171,28 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser) || !castedUser.LoggedIn)
                 return true;
 
-            OnlineEcoPlayer p = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
+            ILogger logger = runtime.Container.Resolve<ILogger>();
+
+            OnlineEcoPlayer ecoPlayer = (OnlineEcoPlayer) runtime.Container.Resolve<IPlayerManager>("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
+
+            if (ecoPlayer == null)
+            {
+                logger.LogWarning("An unknown player has chatted. Please report this to a Rocket.Eco developer!");
+                return false;
+            }
 
             IEventManager eventManager = runtime.Container.Resolve<IEventManager>();
-            ILogger logger = runtime.Container.Resolve<ILogger>();
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
-                PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(p, text.Remove(0, 1));
+                PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(ecoPlayer, text.Remove(0, 1));
                 eventManager.Emit(this, e1);
 
                 bool wasCancelled = false;
 
                 if (e1.IsCancelled)
                 {
-                    p.SendErrorMessage("Execution of your command has been cancelled!");
+                    ecoPlayer.SendErrorMessage("Execution of your command has been cancelled!");
                     wasCancelled = true;
 
                     goto RETURN;
@@ -167,36 +202,36 @@ namespace Rocket.Eco
 
                 try
                 {
-                    wasHandled = runtime.Container.Resolve<ICommandHandler>().HandleCommand(p, text.Remove(0, 1), string.Empty);
+                    wasHandled = runtime.Container.Resolve<ICommandHandler>().HandleCommand(ecoPlayer, text.Remove(0, 1), string.Empty);
                 }
                 catch (NotEnoughPermissionsException)
                 {
-                    p.SendErrorMessage("You do not have enough permission to execute this command!");
+                    ecoPlayer.SendErrorMessage("You do not have enough permission to execute this command!");
                     wasCancelled = true;
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"{p.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
+                    logger.LogError($"{ecoPlayer.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
                     logger.LogError($"{e.Message}\n{e.StackTrace}");
 
-                    p.SendErrorMessage("A runtime error occurred while executing this command, please contact an administrator!");
+                    ecoPlayer.SendErrorMessage("A runtime error occurred while executing this command, please contact an administrator!");
 
                     return true;
                 }
 
                 if (!wasHandled)
-                    p.SendErrorMessage("That command could not be found!");
+                    ecoPlayer.SendErrorMessage("That command could not be found!");
 
                 RETURN:
 
                 string canceled1 = wasCancelled ? ": CANCELLED" : "";
 
-                logger.LogInformation($"[EVENT{canceled1}] [{p.Id}] {p.Name}: {text}");
+                logger.LogInformation($"[EVENT{canceled1}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
 
                 return true;
             }
 
-            PlayerChatEvent e2 = new PlayerChatEvent(p, text)
+            PlayerChatEvent e2 = new PlayerChatEvent(ecoPlayer, text)
             {
                 IsCancelled = false
             };
@@ -205,7 +240,7 @@ namespace Rocket.Eco
 
             string canceled2 = e2.IsCancelled ? ": CANCELLED" : "";
 
-            logger.LogInformation($"[EVENT{canceled2}] [{p.Id}] {p.Name}: {text}");
+            logger.LogInformation($"[EVENT{canceled2}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
 
             return e2.IsCancelled;
         }
