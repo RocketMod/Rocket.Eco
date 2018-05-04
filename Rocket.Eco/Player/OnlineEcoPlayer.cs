@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.Player;
+using Rocket.Eco.Extensions;
 using BaseEcoPlayer = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco.Player
@@ -31,13 +32,13 @@ namespace Rocket.Eco.Player
         public double Health
         {
             get => -1;
-            set => Container.Resolve<ILogger>().LogWarning("Setting player health is not supported in Eco!");
+            set => Container.ResolveLogger().LogWarning("Setting player health is not supported in Eco!");
         }
 
         public double MaxHealth
         {
             get => -1;
-            set => Container.Resolve<ILogger>().LogWarning("Setting player health is not supported in Eco!");
+            set => Container.ResolveLogger().LogWarning("Setting player health is not supported in Eco!");
         }
 
         public int CompareTo(BaseEcoPlayer other) => other == null ? 1 : string.Compare(Id, other.User.SteamId, StringComparison.InvariantCulture);

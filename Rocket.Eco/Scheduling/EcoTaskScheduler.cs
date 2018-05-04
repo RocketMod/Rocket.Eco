@@ -9,6 +9,7 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.Scheduler;
 using Rocket.Eco.API;
+using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Scheduling
 {
@@ -116,7 +117,7 @@ namespace Rocket.Eco.Scheduling
                 }
                 else if (time != 0)
                 {
-                    ILogger logger = Container.Resolve<ILogger>();
+                    ILogger logger = Container.ResolveLogger();
                     logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
                     logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
                 }

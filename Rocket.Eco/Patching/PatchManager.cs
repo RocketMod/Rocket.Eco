@@ -9,6 +9,7 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
+using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Patching
 {
@@ -25,7 +26,7 @@ namespace Rocket.Eco.Patching
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            ILogger logger = patchContainer.Resolve<ILogger>();
+            ILogger logger = patchContainer.ResolveLogger();
 
             if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;
 
@@ -35,7 +36,7 @@ namespace Rocket.Eco.Patching
 
         public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
-            ILogger logger = patchContainer.Resolve<ILogger>();
+            ILogger logger = patchContainer.ResolveLogger();
 
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
@@ -88,7 +89,7 @@ namespace Rocket.Eco.Patching
                     {
                         if (stream == null)
                         {
-                            Container.Resolve<ILogger>().LogError("A manifest stream return null!");
+                            Container.ResolveLogger().LogError("A manifest stream return null!");
                             continue;
                         }
 
@@ -100,7 +101,7 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    Container.Resolve<ILogger>().LogError("Unable to deflate and write an Assembly to the disk!", e);
+                    Container.ResolveLogger().LogError("Unable to deflate and write an Assembly to the disk!", e);
                 }
             }
 

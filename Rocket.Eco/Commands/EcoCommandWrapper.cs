@@ -6,6 +6,7 @@ using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Eco.API;
+using Rocket.Eco.Extensions;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Commands
@@ -58,7 +59,7 @@ namespace Rocket.Eco.Commands
             }
             catch (Exception e)
             {
-                Container.Resolve<ILogger>().LogError($"{context.Caller.Name} failed to execute the vanilla command `{Name}`!", e);
+                Container.ResolveLogger().LogError($"{context.Caller.Name} failed to execute the vanilla command `{Name}`!", e);
             }
         }
     }

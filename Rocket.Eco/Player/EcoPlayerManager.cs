@@ -11,6 +11,7 @@ using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API;
+using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Player
 {
@@ -139,7 +140,7 @@ namespace Rocket.Eco.Player
             if (!(player is OnlineEcoPlayer ecoPlayer) || !player.IsOnline) return false;
 
             PlayerKickEvent e = new PlayerKickEvent(player, caller, reason);
-            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
+            Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
 
             if (e.IsCancelled) return false;
 
@@ -156,7 +157,7 @@ namespace Rocket.Eco.Player
             if (reason == null) reason = string.Empty;
 
             PlayerBanEvent e = new PlayerBanEvent(player, caller, reason, null);
-            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
+            Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
 
             if (e.IsCancelled) return false;
 

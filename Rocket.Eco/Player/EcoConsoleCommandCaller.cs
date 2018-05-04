@@ -4,6 +4,7 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.Eco.API;
+using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Player
 {
@@ -14,7 +15,7 @@ namespace Rocket.Eco.Player
         public string Name => "Console";
         public string Id => "console";
 
-        public void SendMessage(string message, ConsoleColor? color = null, params object[] bindings) => Container.Resolve<ILogger>().LogInformation(message, color);
+        public void SendMessage(string message, ConsoleColor? color = null, params object[] bindings) => Container.ResolveLogger().LogInformation(message, color);
 
         public Type CallerType => typeof(EcoConsoleCommandCaller);
 
@@ -36,7 +37,7 @@ namespace Rocket.Eco.Player
         public bool Equals(IIdentifiable other) => other != null && Id.Equals(other.Id, StringComparison.InvariantCulture);
         public bool Equals(string other) => other != null && Id.Equals(other, StringComparison.InvariantCulture);
 
-        public void SendMessage(string message, ConsoleColor? color) => Container.Resolve<ILogger>().LogInformation(message, color);
+        public void SendMessage(string message, ConsoleColor? color) => Container.ResolveLogger().LogInformation(message, color);
 
         public string ToString(string format, IFormatProvider formatProvider)
         {
