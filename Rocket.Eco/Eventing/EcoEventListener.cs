@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
-using Rocket.API.Logging;
 using Rocket.API.Plugins;
 using Rocket.Core.Plugins.Events;
 using Rocket.Eco.API;

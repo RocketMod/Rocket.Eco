@@ -14,11 +14,13 @@ using Rocket.API.Plugins;
 using Rocket.Core.Commands.Events;
 using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
+using Rocket.Eco.API.Legislation;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Delegates;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Events;
 using Rocket.Eco.Extensions;
+using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
 
@@ -57,6 +59,9 @@ namespace Rocket.Eco
             eventManager.AddEventListener(this, new EcoEventListener(runtime.Container));
 
             pluginManager.Init();
+
+            runtime.Container.RegisterSingletonType<IPlayerManager, EcoPlayerManager>(null, "ecoplayermanager");
+            runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
 
             PostInit(logger, consoleCommandCaller, commandHandler);
         }

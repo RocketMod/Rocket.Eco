@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Logging;
 using Rocket.API.Player;
 using Rocket.Eco.Extensions;
 using BaseEcoPlayer = Eco.Gameplay.Players.Player;

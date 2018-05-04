@@ -101,7 +101,11 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    Container.ResolveLogger().LogError("Unable to deflate and write an Assembly to the disk!", e);
+                    ILogger logger = Container.ResolveLogger();
+
+                    logger.LogError("Unable to deflate and write an Assembly to the disk!", e);
+                    logger.LogError(e.Message);
+                    logger.LogError(e.StackTrace);
                 }
             }
 
@@ -170,7 +174,6 @@ namespace Rocket.Eco.Patching
                 memStream.Read(finalAssembly, 0, finalAssembly.Length);
             }
 
-            File.WriteAllBytes($@"C:\Users\Graybad1\Desktop\PATCHED\{finalName}.dll", finalAssembly);
             dict[finalName] = finalAssembly;
         }
     }

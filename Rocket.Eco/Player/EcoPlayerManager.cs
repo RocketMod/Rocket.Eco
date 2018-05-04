@@ -4,10 +4,9 @@ using System.Linq;
 using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Eco.Shared.Utils;
-using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Eventing;
+using Rocket.API.Logging;
 using Rocket.API.Player;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API;
@@ -22,7 +21,12 @@ namespace Rocket.Eco.Player
 
         public EcoPlayerManager(IDependencyContainer container) : base(container)
         {
-            foreach (User user in UserManager.Users) _Players.Add(user.LoggedIn ? new OnlineEcoPlayer(user.Player, Container) : new EcoPlayer(user, Container));
+            ILogger logger = Container.ResolveLogger();
+            foreach (User user in UserManager.Users)
+            {
+                _Players.Add(user.LoggedIn ? new OnlineEcoPlayer(user.Player, Container) : new EcoPlayer(user, Container));
+                logger.LogInformation($"Preregistered an EcoPlayer wrapper for {user.Name}.");
+            }
         }
 
         public IEnumerable<EcoPlayer> Players => _Players.AsReadOnly();

@@ -1,7 +1,6 @@
 ﻿using System;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
