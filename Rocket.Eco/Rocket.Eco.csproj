@@ -119,8 +119,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Legislation\IElection.cs" />
+    <Compile Include="API\Legislation\IElectionVote.cs" />
     <Compile Include="API\Legislation\IGovernment.cs" />
     <Compile Include="API\Legislation\ILaw.cs" />
+    <Compile Include="API\Legislation\ILawProposal.cs" />
+    <Compile Include="API\Legislation\ILawVote.cs" />
+    <Compile Include="API\Legislation\IVote.cs" />
     <Compile Include="API\Patching\IPatchManager.cs" />
     <Compile Include="API\ContainerAccessor.cs" />
     <Compile Include="Commands\EcoCommandProvider.cs" />
