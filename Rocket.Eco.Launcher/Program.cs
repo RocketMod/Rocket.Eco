@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -17,7 +18,7 @@ namespace Rocket.Eco.Launcher
         {
             AppDomain.CurrentDomain.AssemblyResolve += GatherRocketDependencies;
 
-            AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
+            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
             {
                 try
                 {
@@ -42,10 +43,16 @@ namespace Rocket.Eco.Launcher
 
             bool isExtraction = args.Length != 0 && args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase);
 
-            foreach (string file in Directory.GetFiles(Path.Combine(currentPath, "Rocket", "Binaries")).Where(x => x.EndsWith(".dll")))
+            string path = Path.Combine(currentPath, "Rocket", "Binaries");
+            string rocketEcoFile = Path.Combine(path, "Rocket.Eco.dll");
+
+            Assembly.LoadFile(rocketEcoFile);
+
+            foreach (string file in Directory.GetFiles(path).Where(x => x.EndsWith(".dll")))
                 try
                 {
-                    Assembly.LoadFile(file);
+                    if (file != rocketEcoFile)
+                        Assembly.LoadFile(file);
                 }
                 catch { }
 

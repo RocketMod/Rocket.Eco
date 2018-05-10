@@ -36,7 +36,7 @@ namespace Rocket.Eco
         private IRuntime runtime;
 
         /// <inheritdoc />
-        public IConsole Console => new EcoConsole(runtime.Container);
+        public IConsole Console => new EcoConsole();
 
         /// <inheritdoc />
         public string InstanceId => throw new NotImplementedException();

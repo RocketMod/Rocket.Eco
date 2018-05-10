@@ -10,9 +10,9 @@ using Rocket.Eco.Extensions;
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IConsole" />
-    public sealed class EcoConsole : ContainerAccessor, IConsole, ILogger
+    public sealed class EcoConsole : IConsole, ILogger
     {
-        internal EcoConsole(IDependencyContainer container) : base(container) { }
+        internal EcoConsole() { }
 
         /// <inheritdoc />
         public string Id => "ecoconsole";
@@ -24,7 +24,7 @@ namespace Rocket.Eco.Player
         public IdentityType Type => IdentityType.Console;
 
         /// <inheritdoc />
-        public IUserManager UserManager => Container.Resolve<IUserManager>();
+        public IUserManager UserManager => null;
 
         /// <inheritdoc />
         public bool IsOnline => true;
@@ -45,52 +45,52 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public void WriteLine(string format, params object[] bindings)
         {
-            Container.ResolveLogger().Log(format, LogLevel.Information, null, bindings);
+            
         }
 
         /// <inheritdoc />
         public void WriteLine(LogLevel level, string format, params object[] bindings)
         {
-            Container.ResolveLogger().Log(format, level, null, bindings);
+            
         }
 
         /// <inheritdoc />
         public void WriteLine(LogLevel level, string format, Color? color = null, params object[] bindings)
         {
-            Container.ResolveLogger().Log(format, LogLevel.Information, null, bindings);
+            
         }
 
         /// <inheritdoc />
         public void WriteLine(string format, Color? color = null, params object[] bindings)
         {
-            throw new NotImplementedException();
+            
         }
 
         /// <inheritdoc />
         public void Write(string format, Color? color = null, params object[] bindings)
         {
-            throw new NotImplementedException();
+            
         }
 
         /// <inheritdoc />
         public void Write(string format, params object[] bindings)
         {
-            throw new NotImplementedException();
+            
         }
 
         /// <inheritdoc />
         public void Log(string message, LogLevel level = LogLevel.Information, Exception exception = null, params object[] arguments)
         {
-            throw new NotImplementedException();
+            
         }
 
         /// <inheritdoc />
-        public bool IsEnabled(LogLevel level) => throw new NotImplementedException();
+        public bool IsEnabled(LogLevel level) => level != LogLevel.Trace && level != LogLevel.Debug;
 
         /// <inheritdoc />
         public void SetEnabled(LogLevel level, bool enabled)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

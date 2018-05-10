@@ -103,19 +103,25 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Rocket.API, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.API.5.0.0.428\lib\net35\Rocket.API.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Rocket.API.dll</HintPath>
     </Reference>
     <Reference Include="Rocket.Compatibility, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Compatibility.5.0.0.428\lib\net35\Rocket.Compatibility.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Rocket.Compatibility.dll</HintPath>
     </Reference>
     <Reference Include="Rocket.Core, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Core.5.0.0.428\lib\net35\Rocket.Core.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Rocket.Core.dll</HintPath>
     </Reference>
     <Reference Include="Rocket.Runtime, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Runtime.5.0.0.428\lib\net35\Rocket.Runtime.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Rocket.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Legislation\IElection.cs" />
