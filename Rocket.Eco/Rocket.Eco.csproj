@@ -102,17 +102,17 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.API, Version=5.0.0.370, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.API.5.0.0.370\lib\net35\Rocket.API.dll</HintPath>
+    <Reference Include="Rocket.API, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.API.5.0.0.428\lib\net35\Rocket.API.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Compatibility, Version=5.0.0.370, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Compatibility.5.0.0.370\lib\net35\Rocket.Compatibility.dll</HintPath>
+    <Reference Include="Rocket.Compatibility, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Compatibility.5.0.0.428\lib\net35\Rocket.Compatibility.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Core, Version=5.0.0.370, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Core.5.0.0.370\lib\net35\Rocket.Core.dll</HintPath>
+    <Reference Include="Rocket.Core, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Core.5.0.0.428\lib\net35\Rocket.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Runtime, Version=5.0.0.370, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Runtime.5.0.0.370\lib\net35\Rocket.Runtime.dll</HintPath>
+    <Reference Include="Rocket.Runtime, Version=5.0.0.428, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Runtime.5.0.0.428\lib\net35\Rocket.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel" />
@@ -132,21 +132,20 @@
     <Compile Include="Delegates\EcoDelegates.cs" />
     <Compile Include="Delegates\ElectionDelegates.cs" />
     <Compile Include="Delegates\UserDelegates.cs" />
-    <Compile Include="Chat\EcoChatManager.cs" />
     <Compile Include="EcoImplementation.cs" />
     <Compile Include="API\Patching\IAssemblyPatch.cs" />
     <Compile Include="Eventing\EcoEventListener.cs" />
-    <Compile Include="Events\EcoReadyEvent.cs" />
     <Compile Include="Extensions\IDependencyContainerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Legislation\EcoGovernment.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />
     <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="Patching\PatchManager.cs" />
-    <Compile Include="Player\EcoConsoleCommandCaller.cs" />
+    <Compile Include="Player\EcoConsole.cs" />
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
-    <Compile Include="Player\OnlineEcoPlayer.cs" />
+    <Compile Include="Player\EcoUser.cs" />
+    <Compile Include="Player\UnknownUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DependencyRegistrator.cs" />
     <Compile Include="Scheduling\ThreadSafeTask.cs" />

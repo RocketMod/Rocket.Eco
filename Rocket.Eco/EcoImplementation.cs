@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Eco.Core.Plugins;
@@ -11,14 +10,16 @@ using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Player;
 using Rocket.API.Plugins;
+using Rocket.API.User;
 using Rocket.Core.Commands.Events;
+using Rocket.Core.Implementation.Events;
+using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API.Legislation;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Delegates;
 using Rocket.Eco.Eventing;
-using Rocket.Eco.Events;
 using Rocket.Eco.Extensions;
 using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
@@ -26,19 +27,33 @@ using Rocket.Eco.Player;
 
 namespace Rocket.Eco
 {
+    /// <inheritdoc />
+    /// <summary>
+    ///     Rocket.Eco's implementation of Rocket's <see cref="IImplementation"/>.
+    /// </summary>
     public sealed class EcoImplementation : IImplementation
     {
         private IRuntime runtime;
-        public IEnumerable<string> Capabilities => new string[0];
 
-        public IConsoleCommandCaller ConsoleCommandCaller => new EcoConsoleCommandCaller(runtime.Container);
+        /// <inheritdoc />
+        public IConsole Console => new EcoConsole(runtime.Container);
 
+        /// <inheritdoc />
         public string InstanceId => throw new NotImplementedException();
+
+        /// <inheritdoc />
         public bool IsAlive { get; } = true;
+
+        /// <inheritdoc />
         public string WorkingDirectory => "./Rocket/";
+
+        /// <inheritdoc />
         public string ConfigurationName => Name;
+
+        /// <inheritdoc />
         public string Name => "Rocket.Eco";
 
+        /// <inheritdoc />
         public void Init(IRuntime runtime)
         {
             if (Assembly.GetCallingAssembly().GetName().Name != "Rocket.Runtime")
@@ -52,8 +67,6 @@ namespace Rocket.Eco
             IPluginManager pluginManager = runtime.Container.ResolvePluginManager();
             ICommandHandler commandHandler = runtime.Container.ResolveCommandHandler();
 
-            ICommandCaller consoleCommandCaller = new EcoConsoleCommandCaller(runtime.Container);
-
             patchManager.RegisterPatch<UserPatch>();
             patchManager.RegisterPatch<ChatManagerPatch>();
             eventManager.AddEventListener(this, new EcoEventListener(runtime.Container));
@@ -63,29 +76,31 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonType<IPlayerManager, EcoPlayerManager>(null, "ecoplayermanager");
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
 
-            PostInit(logger, consoleCommandCaller, commandHandler);
+            PostInit(logger, Console, commandHandler);
         }
 
+        /// <inheritdoc />
         public void Shutdown()
         {
             StorageManager.SaveAndFlush();
 
             foreach (IPlugin plugin in runtime.Container.ResolvePluginManager())
-                plugin.Deactivate();
+                plugin.Unload();
 
             Environment.Exit(0);
         }
 
+        /// <inheritdoc />
         public void Reload()
         {
             IPluginManager pluginManager = runtime.Container.ResolvePluginManager();
 
             foreach (IPlugin plugin in pluginManager)
-                if (plugin.Deactivate())
-                    plugin.Activate();
+                if (plugin.Unload())
+                    plugin.Load(true);
         }
 
-        private void PostInit(ILogger logger, ICommandCaller consoleCommandCaller, ICommandHandler commandHandler)
+        private void PostInit(ILogger logger, IUser consoleCommandCaller, ICommandHandler commandHandler)
         {
             EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
             EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
@@ -98,14 +113,14 @@ namespace Rocket.Eco
             userType.GetField("OnUserLogout").SetValue(null, playerLeave);
             chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
 
-            EcoReadyEvent e = new EcoReadyEvent(this);
+            ImplementationReadyEvent e = new ImplementationReadyEvent(this);
             runtime.Container.ResolveEventManager().Emit(this, e);
 
             logger.LogInformation("[EVENT] Eco has initialized!");
 
             while (true)
             {
-                string input = Console.ReadLine();
+                string input = System.Console.ReadLine();
 
                 if (input == null)
                     continue;
@@ -126,22 +141,9 @@ namespace Rocket.Eco
                 return;
 
             EcoPlayerManager playerManager = runtime.Container.ResolvePlayerManager("ecoplayermanager") as EcoPlayerManager;
-            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
+            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId)) ?? new EcoPlayer(castedUser, runtime.Container);
 
-            ILogger logger = runtime.Container.ResolveLogger();
-
-            if (ecoPlayer == null)
-            {
-                logger.LogWarning("An unknown player has left the game. Please report this to a Rocket.Eco developer!");
-                return;
-            }
-
-            OnlineEcoPlayer onlineEcoPlayer = new OnlineEcoPlayer(castedUser.Player, runtime.Container);
-
-            playerManager._Players.Remove(ecoPlayer);
-            playerManager._Players.Add(onlineEcoPlayer);
-
-            PlayerConnectedEvent e = new PlayerConnectedEvent(onlineEcoPlayer, null, EventExecutionTargetContext.NextFrame);
+            UserConnectedEvent e = new UserConnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.ResolveEventManager().Emit(this, e);
 
             runtime.Container.ResolveLogger().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
@@ -153,7 +155,7 @@ namespace Rocket.Eco
                 return;
 
             EcoPlayerManager playerManager = runtime.Container.ResolvePlayerManager("ecoplayermanager") as EcoPlayerManager;
-            OnlineEcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId)) as OnlineEcoPlayer;
+            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
 
             ILogger logger = runtime.Container.ResolveLogger();
 
@@ -163,10 +165,7 @@ namespace Rocket.Eco
                 return;
             }
 
-            playerManager._Players.Remove(ecoPlayer);
-            playerManager._Players.Add(new EcoPlayer(castedUser, runtime.Container));
-
-            PlayerDisconnectedEvent e = new PlayerDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
+            UserDisconnectedEvent e = new UserDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.ResolveEventManager().Emit(this, e);
 
             runtime.Container.ResolveLogger().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
@@ -179,7 +178,7 @@ namespace Rocket.Eco
 
             ILogger logger = runtime.Container.ResolveLogger();
 
-            OnlineEcoPlayer ecoPlayer = (OnlineEcoPlayer) runtime.Container.ResolvePlayerManager("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
+            EcoPlayer ecoPlayer = (EcoPlayer) runtime.Container.ResolvePlayerManager("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
 
             if (ecoPlayer == null)
             {
@@ -191,12 +190,12 @@ namespace Rocket.Eco
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
-                PreCommandExecutionEvent e1 = new PreCommandExecutionEvent(ecoPlayer, text.Remove(0, 1));
-                eventManager.Emit(this, e1);
+                PreCommandExecutionEvent commandEvent = new PreCommandExecutionEvent(ecoPlayer.User, text.Remove(0, 1));
+                eventManager.Emit(this, commandEvent);
 
                 bool wasCancelled = false;
 
-                if (e1.IsCancelled)
+                if (commandEvent.IsCancelled)
                 {
                     ecoPlayer.SendErrorMessage("Execution of your command has been cancelled!");
                     wasCancelled = true;
@@ -208,7 +207,7 @@ namespace Rocket.Eco
 
                 try
                 {
-                    wasHandled = runtime.Container.ResolveCommandHandler().HandleCommand(ecoPlayer, text.Remove(0, 1), string.Empty);
+                    wasHandled = runtime.Container.ResolveCommandHandler().HandleCommand(ecoPlayer.User, text.Remove(0, 1), string.Empty);
                 }
                 catch (NotEnoughPermissionsException)
                 {
@@ -230,25 +229,25 @@ namespace Rocket.Eco
 
                 RETURN:
 
-                string canceled1 = wasCancelled ? ": CANCELLED" : "";
+                string commandCancelled = wasCancelled ? ": CANCELLED" : "";
 
-                logger.LogInformation($"[EVENT{canceled1}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
+                logger.LogInformation($"[EVENT{commandCancelled}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
 
                 return true;
             }
 
-            PlayerChatEvent e2 = new PlayerChatEvent(ecoPlayer, text)
+            UserChatEvent chatEvent = new UserChatEvent(ecoPlayer.User, text)
             {
                 IsCancelled = false
             };
 
-            eventManager.Emit(this, e2);
+            eventManager.Emit(this, chatEvent);
 
-            string canceled2 = e2.IsCancelled ? ": CANCELLED" : "";
+            string chatCancelled = chatEvent.IsCancelled ? ": CANCELLED" : "";
 
-            logger.LogInformation($"[EVENT{canceled2}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
+            logger.LogInformation($"[EVENT{chatCancelled}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
 
-            return e2.IsCancelled;
+            return chatEvent.IsCancelled;
         }
     }
 }

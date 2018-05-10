@@ -1,71 +1,74 @@
 ﻿using System;
 using Rocket.API.DependencyInjection;
+using Rocket.API.Entities;
 using Rocket.API.Player;
+using Rocket.API.User;
 using Rocket.Core.Player;
-using BaseEcoUser = Eco.Gameplay.Players.User;
+using InternalEcoUser = Eco.Gameplay.Players.User;
+using InternalEcoPlayer = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco.Player
 {
-    public class EcoPlayer : BasePlayer, IComparable<BaseEcoUser>, IEquatable<BaseEcoUser>
+    /// <inheritdoc cref="IPlayer" />
+    public class EcoPlayer : BasePlayer, IUserInfo
     {
-        private readonly string id;
+        private readonly EcoUser ecoUser;
 
-        internal EcoPlayer(BaseEcoUser user, IDependencyContainer container) : base(container)
+        internal EcoPlayer(InternalEcoUser user, IDependencyContainer container) : base(container)
         {
-            User = user;
+            InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
+
+            ecoUser = new EcoUser(this);
         }
 
-        internal EcoPlayer(string id, IDependencyContainer container) : base(container)
-        {
-            this.id = id;
-        }
+        /// <summary>
+        ///     The internal Eco represntation of a player attached to this object.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"> when the player is not online.</exception>
+        /// >
+        public InternalEcoPlayer InternalEcoPlayer => IsOnline ? InternalEcoUser.Player : throw new InvalidOperationException("The player must be online to access this field.");
 
-        public BaseEcoUser User { get; }
+        /// <summary>
+        ///     The internal Eco represntation of a user attached to this object.
+        /// </summary>
+        public InternalEcoUser InternalEcoUser { get; }
 
-        public bool IsAdmin => User?.IsAdmin ?? false;
-        public bool IsDev => User?.IsDev ?? false;
-        public override bool IsOnline => User?.LoggedIn ?? false;
-        public override DateTime? LastSeen => null;
+        /// <inheritdoc />
+        public override IUser User => ecoUser;
 
-        public override string Id => User?.SteamId ?? id ?? string.Empty;
-        public override string Name => User?.Name ?? string.Empty;
+        /// <inheritdoc />
+        public override IEntity Entity => ecoUser;
 
-        public override Type CallerType => typeof(EcoPlayer);
+        /// <inheritdoc />
+        public override bool IsOnline => InternalEcoUser.LoggedIn;
 
-        public int CompareTo(BaseEcoUser other) => other == null ? 1 : string.Compare(Id, other.SteamId, StringComparison.InvariantCulture);
-        public bool Equals(BaseEcoUser other) => other != null && Id.Equals(other.SteamId, StringComparison.InvariantCulture);
+        /// <inheritdoc />
+        public override string Id => InternalEcoUser.SteamId;
 
-        public int CompareTo(object other)
-        {
-            if (other == null) return 1;
+        /// <inheritdoc />
+        public override string Name => InternalEcoUser.Name;
 
-            Type type = other.GetType();
+        /// <inheritdoc />
+        public IUserManager UserManager => Container.Resolve<IUserManager>();
 
-            if (type == typeof(string)) return CompareTo((string) other);
+        /// <summary>
+        ///     Sends a message to the player.
+        /// </summary>
+        /// <param name="message">The <see cref="String" /> to send to the player.</param>
+        /// <param name="arguments">
+        ///     Any arguments passed to the <paramref name="message" /> using
+        ///     <see cref="string.Format(string, object[])" />.
+        /// </param>
+        public void SendMessage(string message, params object[] arguments) => InternalEcoPlayer.SendTemporaryMessageAlreadyLocalized(string.Format(message, arguments));
 
-            if (type == typeof(IPlayer)) return CompareTo((IPlayer) other);
-
-            if (type == typeof(BaseEcoUser)) return CompareTo((BaseEcoUser) other);
-
-            throw new ArgumentException($"Cannot compare the type \"{GetType().Name}\" to \"{type.Name}\".");
-        }
-
-        public override bool Equals(object other)
-        {
-            if (other == null) return false;
-
-            Type type = other.GetType();
-
-            if (type == typeof(string)) return Equals((string) other);
-
-            if (type == typeof(IPlayer)) return Equals((IPlayer) other);
-
-            if (type == typeof(BaseEcoUser)) return Equals((BaseEcoUser) other);
-
-            throw new ArgumentException($"Cannot equate the type \"{GetType().Name}\" to \"{type.Name}\".");
-        }
-
-        public override string ToString() => Id;
-        public override int GetHashCode() => BitConverter.ToInt32(BitConverter.GetBytes(ulong.Parse(Id)), 4);
+        /// <summary>
+        ///     Sends an error message to the player.
+        /// </summary>
+        /// <param name="message">The <see cref="String" /> to send to the player.</param>
+        /// <param name="arguments">
+        ///     Any arguments passed to the <paramref name="message" /> using
+        ///     <see cref="string.Format(string, object[])" />.
+        /// </param>
+        public void SendErrorMessage(string message, params object[] arguments) => InternalEcoPlayer.SendTemporaryErrorAlreadyLocalized(string.Format(message, arguments));
     }
 }

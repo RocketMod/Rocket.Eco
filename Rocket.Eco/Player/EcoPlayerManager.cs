@@ -4,155 +4,78 @@ using System.Linq;
 using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Eco.Shared.Utils;
-using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Logging;
 using Rocket.API.Player;
+using Rocket.API.User;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
+using Color = System.Drawing.Color;
 
 namespace Rocket.Eco.Player
 {
+    /// <inheritdoc cref="IPlayerManager" />
     public sealed class EcoPlayerManager : ContainerAccessor, IPlayerManager
     {
         //TODO: Migrate to a thread-safe collection.
         internal readonly List<EcoPlayer> _Players = new List<EcoPlayer>();
 
+        /// <inheritdoc />
         public EcoPlayerManager(IDependencyContainer container) : base(container)
         {
-            ILogger logger = Container.ResolveLogger();
             foreach (User user in UserManager.Users)
-            {
-                _Players.Add(user.LoggedIn ? new OnlineEcoPlayer(user.Player, Container) : new EcoPlayer(user, Container));
-                logger.LogInformation($"Preregistered an EcoPlayer wrapper for {user.Name}.");
-            }
+                _Players.Add(new EcoPlayer(user, Container));
         }
 
-        public IEnumerable<EcoPlayer> Players => _Players.AsReadOnly();
+        /// <inheritdoc />
+        public IEnumerable<IPlayer> OnlinePlayers => _Players.Where(x => x.IsOnline);
 
-        public IEnumerable<IOnlinePlayer> OnlinePlayers => Players.Where(x => x.IsOnline).Cast<IOnlinePlayer>();
+        /// <inheritdoc />
+        public IEnumerable<IUser> Users => _Players.Select(x => x.User);
 
-        public IPlayer GetPlayer(string id)
+        /// <inheritdoc />
+        public IPlayer GetOnlinePlayer(string nameOrId) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public IPlayer GetOnlinePlayerByName(string name) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public IPlayer GetOnlinePlayerById(string id) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public bool TryGetOnlinePlayer(string nameOrId, out IPlayer output) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public bool TryGetOnlinePlayerById(string id, out IPlayer output) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public bool TryGetOnlinePlayerByName(string name, out IPlayer output) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public IPlayer GetPlayer(string id) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public bool Kick(IUser user, IUser kickedBy = null, string reason = null)
         {
-            if (id == null) throw new ArgumentNullException(nameof(id));
+            if (!(user is EcoUser ecoUser))
+                throw new ArgumentException("Must be of type `EcoUser`", nameof(user));
 
-            return Players.FirstOrDefault(x => x.Id.Equals(id)) ?? new EcoPlayer(id, Container);
-        }
+            if (!ecoUser.IsOnline)
+                throw new InvalidOperationException("You cannot kick an offline player.");
 
-        public IOnlinePlayer GetOnlinePlayer(string idOrName)
-        {
-            if (idOrName == null) throw new ArgumentNullException(nameof(idOrName));
-
-            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == idOrName)
-                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
-                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(idOrName));
-
-            if (player == null) throw new EcoPlayerNotFoundException(idOrName);
-
-            return player;
-        }
-
-        public bool TryGetOnlinePlayer(string idOrName, out IOnlinePlayer output)
-        {
-            if (idOrName == null)
-            {
-                output = null;
-                return false;
-            }
-
-            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == idOrName)
-                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
-                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(idOrName));
-
-            if (player == null)
-            {
-                output = null;
-                return false;
-            }
-
-            output = player;
-            return true;
-        }
-
-        public IOnlinePlayer GetOnlinePlayerById(string id)
-        {
-            if (id == null) throw new ArgumentNullException(nameof(id));
-
-            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == id);
-
-            if (player == null) throw new EcoPlayerNotFoundException(id);
-
-            return player;
-        }
-
-        public bool TryGetOnlinePlayerById(string id, out IOnlinePlayer output)
-        {
-            if (id == null)
-            {
-                output = null;
-                return false;
-            }
-
-            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Id == id);
-
-            if (player == null)
-            {
-                output = null;
-                return false;
-            }
-
-            output = player;
-            return true;
-        }
-
-        public IOnlinePlayer GetOnlinePlayerByName(string displayName)
-        {
-            if (displayName == null) throw new ArgumentNullException(nameof(displayName));
-
-            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
-                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(displayName));
-
-            if (player == null) throw new EcoPlayerNotFoundException(displayName);
-
-            return player;
-        }
-
-        public bool TryGetOnlinePlayerByName(string displayName, out IOnlinePlayer output)
-        {
-            if (displayName == null)
-            {
-                output = null;
-                return false;
-            }
-
-            OnlineEcoPlayer player = (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.Equals(displayName, StringComparison.InvariantCultureIgnoreCase))
-                ?? (OnlineEcoPlayer) _Players.FirstOrDefault(x => x.IsOnline && x.Name.ComparerContains(displayName));
-
-            if (player == null)
-            {
-                output = null;
-                return false;
-            }
-
-            output = player;
-            return true;
-        }
-
-        public bool Kick(IOnlinePlayer player, ICommandCaller caller = null, string reason = null)
-        {
-            if (!(player is OnlineEcoPlayer ecoPlayer) || !player.IsOnline) return false;
-
-            PlayerKickEvent e = new PlayerKickEvent(player, caller, reason);
+            UserKickEvent e = new UserKickEvent(ecoUser, ecoUser, reason);
             Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
 
-            if (e.IsCancelled) return false;
+            if (e.IsCancelled)
+                return false;
 
-            ecoPlayer.User.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
+            ecoUser.Player.InternalEcoUser.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
+
             return true;
         }
 
-        public bool Ban(IPlayer player, ICommandCaller caller, string reason, TimeSpan? timeSpan = null)
+        /// <inheritdoc />
+        public bool Ban(IUserInfo player, IUser caller, string reason, TimeSpan? timeSpan = null)
         {
             if (player == null) throw new ArgumentNullException(nameof(player));
 
@@ -160,18 +83,19 @@ namespace Rocket.Eco.Player
 
             if (reason == null) reason = string.Empty;
 
-            PlayerBanEvent e = new PlayerBanEvent(player, caller, reason, null);
+            UserBanEvent e = new UserBanEvent(player, caller, reason, null);
             Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
 
             if (e.IsCancelled) return false;
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
             {
-                if (!AddBanBlacklist(ecoPlayer.User.SlgId) && !AddBanBlacklist(ecoPlayer.User.SteamId)) return false;
+                //TODO: Currently only bans by SteamIDs
+                if (!AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId)) return false;
 
                 UserManager.Obj.SaveConfig();
 
-                if (player.IsOnline) ecoPlayer.User.Client.Disconnect("You have been banned.", reason, false);
+                if (ecoPlayer.IsOnline) ecoPlayer.InternalEcoUser.Client.Disconnect("You have been banned.", reason, false);
             }
             else
             {
@@ -183,14 +107,40 @@ namespace Rocket.Eco.Player
             return true;
         }
 
-        public bool Unban(IPlayer player, ICommandCaller caller = null) => !RemoveBanBlacklist(player.Id) || player is EcoPlayer ecoPlayer && ecoPlayer.User?.SlgId != null && RemoveBanBlacklist(ecoPlayer.User.SlgId);
+        /// <inheritdoc />
+        public bool Unban(IUserInfo user, IUser unbannedBy = null)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            return RemoveBanBlacklist(user.Id);
+        }
+
+        /// <inheritdoc />
+        public void SendMessage(IUser sender, IUser receiver, string message, Color? color = null, params object[] arguments)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void Broadcast(IUser sender, IEnumerable<IUser> receivers, string message, Color? color = null, params object[] arguments)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void Broadcast(IUser sender, string message, Color? color = null, params object[] arguments)
+        {
+            throw new NotImplementedException();
+        }
 
         private static bool AddBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.AddUnique(user);
         private static bool RemoveBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.Remove(user);
     }
 
+    /// <inheritdoc />
     public sealed class EcoPlayerNotFoundException : PlayerNotFoundException
     {
+        /// <inheritdoc />
         public EcoPlayerNotFoundException(string nameOrId) : base(nameOrId) { }
     }
 }

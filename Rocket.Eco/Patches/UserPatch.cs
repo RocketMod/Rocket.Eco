@@ -6,12 +6,20 @@ using Rocket.Eco.Delegates;
 
 namespace Rocket.Eco.Patches
 {
+    /// <inheritdoc />
+    /// <summary>
+    ///     A patch to inject delegate calls into Eco's User class.
+    /// </summary>
+    /// >
     public sealed class UserPatch : IAssemblyPatch
     {
+        /// <inheritdoc />
         public string TargetAssembly => "Eco.Gameplay";
 
+        /// <inheritdoc />
         public string TargetType => "Eco.Gameplay.Players.User";
 
+        /// <inheritdoc />
         public void Patch(TypeDefinition definition)
         {
             FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));

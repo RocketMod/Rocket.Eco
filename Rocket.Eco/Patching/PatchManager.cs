@@ -7,21 +7,25 @@ using System.Reflection;
 using Mono.Cecil;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
+using Rocket.Core.Logging;
 using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Patching
 {
+    /// <inheritdoc cref="IPatchManager" />
     public sealed class PatchManager : ContainerAccessor, IPatchManager
     {
         private readonly IDependencyContainer patchContainer;
 
+        /// <inheritdoc />
         public PatchManager(IDependencyContainer container) : base(container)
         {
             patchContainer = Container.CreateChildContainer();
         }
 
+        /// <inheritdoc />
         public void RegisterPatch(Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
@@ -34,6 +38,7 @@ namespace Rocket.Eco.Patching
             logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
         }
 
+        /// <inheritdoc />
         public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
             ILogger logger = patchContainer.ResolveLogger();
@@ -44,6 +49,7 @@ namespace Rocket.Eco.Patching
             logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
         }
 
+        /// <inheritdoc />
         public void RunPatching()
         {
             if (Assembly.GetCallingAssembly().GetName().Name == "Rocket.Eco")

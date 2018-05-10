@@ -6,6 +6,8 @@ using System.Threading;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Plugins;
+using Rocket.Core.Logging;
+using Rocket.Core.Plugins;
 using Rocket.Core.Plugins.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
@@ -13,10 +15,17 @@ using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Eventing
 {
+    /// <inheritdoc cref="IEventListener{TEvent}" />
+    /// >
+    /// <summary>
+    ///     An internal class used by Rocket.Eco to handle a <see cref="PluginManagerInitEvent" /> emitted by Rocket's
+    ///     <see cref="PluginManager" />.
+    /// </summary>
     public sealed class EcoEventListener : ContainerAccessor, IEventListener<PluginManagerInitEvent>
     {
         internal EcoEventListener(IDependencyContainer container) : base(container) { }
 
+        /// <inheritdoc />
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;

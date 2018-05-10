@@ -67,6 +67,7 @@ namespace Rocket.Eco.Launcher
 
                 AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly(Path.Combine(currentPath, "EcoServer.exe"), reader);
 
+                //TODO: Make this WAY better! https://i.redd.it/atf1ietqwaxy.jpg
                 try
                 {
                     TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
@@ -84,7 +85,6 @@ namespace Rocket.Eco.Launcher
 
                     Assembly.LoadFile(outputDir);
                 }
-                //TODO: Make this WAY better!
                 catch (Exception e)
                 {
                     Console.WriteLine(e.GetType().ToString());

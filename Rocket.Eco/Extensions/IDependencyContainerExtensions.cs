@@ -1,5 +1,4 @@
 ﻿using Rocket.API;
-using Rocket.API.Chat;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
@@ -15,8 +14,6 @@ namespace Rocket.Eco.Extensions
     public static class IDependencyContainerExtensions
     {
         public static ILogger ResolveLogger(this IDependencyContainer container, string mapping = null) => container.Resolve<ILogger>(mapping);
-
-        public static IChatManager ResolveChatManager(this IDependencyContainer container, string mapping = null) => container.Resolve<IChatManager>(mapping);
 
         public static IEventManager ResolveEventManager(this IDependencyContainer container, string mapping = null) => container.Resolve<IEventManager>(mapping);
 

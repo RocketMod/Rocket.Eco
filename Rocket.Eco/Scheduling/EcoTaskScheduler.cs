@@ -8,15 +8,17 @@ using Rocket.API;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.Scheduler;
+using Rocket.Core.Logging;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Scheduling
 {
+    /// <inheritdoc cref="ITaskScheduler" />
     public sealed class EcoTaskScheduler : ContainerAccessor, ITaskScheduler
     {
         //TODO: Make this configurable
-        private const long mainTargetTickrate = 60;
+        private const long MainTargetTickrate = 60;
         private readonly Thread asyncThread;
 
         private readonly object lockObj = new object();
@@ -34,6 +36,7 @@ namespace Rocket.Eco.Scheduling
         }
 
         //Creating a clone to ensure the collection will always be the same as the moment it was accessed.
+        /// <inheritdoc />
         public ReadOnlyCollection<ITask> Tasks
         {
             get
@@ -45,6 +48,8 @@ namespace Rocket.Eco.Scheduling
             }
         }
 
+        /// <inheritdoc />
+        /// s
         public ITask Schedule(ILifecycleObject @object, Action action, ExecutionTargetContext target)
         {
             ThreadSafeTask task = new ThreadSafeTask(this, @object, action, target);
@@ -57,18 +62,25 @@ namespace Rocket.Eco.Scheduling
             return task;
         }
 
+        /// <inheritdoc />
         public ITask ScheduleNextFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextFrame);
 
+        /// <inheritdoc />
         public ITask ScheduleEveryFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryFrame);
 
+        /// <inheritdoc />
         public ITask ScheduleNextPhysicUpdate(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextPhysicsUpdate);
 
+        /// <inheritdoc />
         public ITask ScheduleEveryPhysicUpdate(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryPhysicsUpdate);
 
+        /// <inheritdoc />
         public ITask ScheduleNextAsyncFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextAsyncFrame);
 
+        /// <inheritdoc />
         public ITask ScheduleEveryAsyncFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryAsyncFrame);
 
+        /// <inheritdoc />
         public bool CancelTask(ITask task)
         {
             if (!(task is ThreadSafeTask threadSafeTask)) return false;
@@ -109,7 +121,7 @@ namespace Rocket.Eco.Scheduling
 
                 watch.Stop();
 
-                long time = watch.ElapsedMilliseconds - 1000 / mainTargetTickrate;
+                long time = watch.ElapsedMilliseconds - 1000 / MainTargetTickrate;
 
                 if (time < 0)
                 {

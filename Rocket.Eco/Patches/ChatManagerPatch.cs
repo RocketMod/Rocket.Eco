@@ -6,12 +6,19 @@ using Rocket.Eco.Delegates;
 
 namespace Rocket.Eco.Patches
 {
+    /// <inheritdoc />
+    /// <summary>
+    ///     A patch to inject delegate calls into Eco's ChatManager class.
+    /// </summary>
     public sealed class ChatManagerPatch : IAssemblyPatch
     {
+        /// <inheritdoc />
         public string TargetAssembly => "Eco.Gameplay";
 
+        /// <inheritdoc />
         public string TargetType => "Eco.Gameplay.Systems.Chat.ChatManager";
 
+        /// <inheritdoc />
         public void Patch(TypeDefinition definition)
         {
             FieldDefinition chatDelegate = new FieldDefinition("OnUserChat", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserChatDelegate)));
