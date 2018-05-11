@@ -33,6 +33,11 @@ namespace Rocket.Eco.Player
         /// </summary>
         public InternalEcoUser InternalEcoUser { get; }
 
+        /// <summary>
+        ///     Checks if the player is an admin according to vanilla Eco's admin list.
+        /// </summary>
+        public bool IsAdmin => InternalEcoUser.IsAdmin;
+
         /// <inheritdoc />
         public override IUser User => ecoUser;
 

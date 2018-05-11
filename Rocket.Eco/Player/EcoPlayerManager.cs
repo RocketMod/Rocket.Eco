@@ -5,11 +5,10 @@ using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
 using Eco.Shared.Utils;
+using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Logging;
 using Rocket.API.Player;
 using Rocket.API.User;
-using Rocket.Core.Logging;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
@@ -40,10 +39,10 @@ namespace Rocket.Eco.Player
         public IPlayer GetOnlinePlayer(string nameOrId)
         {
             IEnumerable<EcoPlayer> players = OnlinePlayers.Cast<EcoPlayer>();
-            
-            return players.FirstOrDefault(x => x.Id.Equals(nameOrId)) 
-                ?? players.FirstOrDefault(x => x.Name.Equals(nameOrId, StringComparison.InvariantCultureIgnoreCase)) 
-                ?? players.FirstOrDefault(x => x.Name.ComparerContains(nameOrId)) 
+
+            return players.FirstOrDefault(x => x.Id.Equals(nameOrId))
+                ?? players.FirstOrDefault(x => x.Name.Equals(nameOrId, StringComparison.InvariantCultureIgnoreCase))
+                ?? players.FirstOrDefault(x => x.Name.ComparerContains(nameOrId))
                 ?? throw new EcoPlayerNotFoundException(nameOrId);
         }
 
@@ -72,8 +71,8 @@ namespace Rocket.Eco.Player
             IEnumerable<EcoPlayer> players = OnlinePlayers.Cast<EcoPlayer>();
 
             EcoPlayer player = players.FirstOrDefault(x => x.Id.Equals(nameOrId))
-                            ?? players.FirstOrDefault(x => x.Name.Equals(nameOrId, StringComparison.InvariantCultureIgnoreCase))
-                            ?? players.FirstOrDefault(x => x.Name.ComparerContains(nameOrId));
+                ?? players.FirstOrDefault(x => x.Name.Equals(nameOrId, StringComparison.InvariantCultureIgnoreCase))
+                ?? players.FirstOrDefault(x => x.Name.ComparerContains(nameOrId));
 
             output = player;
 
@@ -98,7 +97,7 @@ namespace Rocket.Eco.Player
             IEnumerable<EcoPlayer> players = OnlinePlayers.Cast<EcoPlayer>();
 
             EcoPlayer player = players.FirstOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                            ?? players.FirstOrDefault(x => x.Name.ComparerContains(name));
+                ?? players.FirstOrDefault(x => x.Name.ComparerContains(name));
 
             output = player;
 
@@ -131,29 +130,36 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public bool Ban(IUserInfo player, IUser caller, string reason, TimeSpan? timeSpan = null)
         {
-            if (player == null) throw new ArgumentNullException(nameof(player));
+            if (player == null)
+                throw new ArgumentNullException(nameof(player));
 
-            if (string.IsNullOrWhiteSpace(player.Id)) throw new ArgumentException("The argument has invalid members.", nameof(player));
+            if (string.IsNullOrWhiteSpace(player.Id))
+                throw new ArgumentException("The argument has invalid members.", nameof(player));
 
-            if (reason == null) reason = string.Empty;
+            if (reason == null)
+                reason = string.Empty;
 
             UserBanEvent e = new UserBanEvent(player, caller, reason, null);
             Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
 
-            if (e.IsCancelled) return false;
+            if (e.IsCancelled)
+                return false;
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
             {
                 //TODO: Currently only bans by SteamIDs
-                if (!AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId)) return false;
+                if (!AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId))
+                    return false;
 
                 UserManager.Obj.SaveConfig();
 
-                if (ecoPlayer.IsOnline) ecoPlayer.InternalEcoUser.Client.Disconnect("You have been banned.", reason, false);
+                if (ecoPlayer.IsOnline)
+                    ecoPlayer.InternalEcoUser.Client.Disconnect("You have been banned.", reason, false);
             }
             else
             {
-                if (!AddBanBlacklist(player.Id)) return false;
+                if (!AddBanBlacklist(player.Id))
+                    return false;
 
                 UserManager.Obj.SaveConfig();
             }
@@ -164,7 +170,8 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public bool Unban(IUserInfo user, IUser unbannedBy = null)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
 
             return RemoveBanBlacklist(user.Id);
         }
@@ -173,9 +180,16 @@ namespace Rocket.Eco.Player
         public void SendMessage(IUser sender, IUser receiver, string message, Color? color = null, params object[] arguments)
         {
             if (!(receiver is EcoUser ecoUser))
-                throw new ArgumentException("Must be of type `EcoUser`.", nameof(receiver));
-            
-            if (!ecoUser.IsOnline) throw new ArgumentException("Must be online.", nameof(receiver));
+            {
+                if (!(receiver is IConsole console))
+                    throw new ArgumentException("Must be of type `EcoUser`.", nameof(receiver));
+
+                console.WriteLine(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
+                return;
+            }
+
+            if (!ecoUser.IsOnline)
+                throw new ArgumentException("Must be online.", nameof(receiver));
 
             string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
 
@@ -189,19 +203,18 @@ namespace Rocket.Eco.Player
 
             foreach (IUser user in receivers)
             {
-                if (!(user is EcoUser ecoUser)) throw new ArgumentException("Every enumeration must be of type `EcoUser`.", nameof(receivers));
+                if (!(user is EcoUser ecoUser))
+                    throw new ArgumentException("Every enumeration must be of type `EcoUser`.", nameof(receivers));
 
-                if (!ecoUser.IsOnline) throw new ArgumentException("Every enumeration must be online.", nameof(receivers));
+                if (!ecoUser.IsOnline)
+                    throw new ArgumentException("Every enumeration must be online.", nameof(receivers));
 
                 users.Add(ecoUser);
             }
 
             string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
 
-            foreach (EcoUser ecoUser in users)
-            {
-                ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
-            }
+            foreach (EcoUser ecoUser in users) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
         }
 
         /// <inheritdoc />
@@ -209,10 +222,7 @@ namespace Rocket.Eco.Player
         {
             string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
 
-            foreach (EcoPlayer ecoPlayer in OnlinePlayers.Cast<EcoPlayer>())
-            {
-                ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoPlayer.InternalEcoUser);
-            }
+            foreach (EcoPlayer ecoPlayer in OnlinePlayers.Cast<EcoPlayer>()) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoPlayer.InternalEcoUser);
         }
 
         private static bool AddBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.AddUnique(user);

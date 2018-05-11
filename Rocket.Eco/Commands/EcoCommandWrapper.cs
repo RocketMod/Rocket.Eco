@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API.Commands;
@@ -24,7 +23,7 @@ namespace Rocket.Eco.Commands
         private readonly ChatCommandAttribute command;
         private readonly MethodInfo commandMethod;
 
-        internal EcoCommandWrapper(MethodInfo method, IDependencyContainer container) : base(container)
+        internal EcoCommandWrapper(MethodInfo method, ChatCommandAttribute attribute, IDependencyContainer container) : base(container)
         {
             if (ecoChatManager == null)
                 ecoChatManager = (ChatManager) typeof(ChatServer).GetField("netChatManager", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatServer.Obj)
@@ -34,7 +33,7 @@ namespace Rocket.Eco.Commands
                 execute = typeof(ChatManager).GetMethod("InvokeCommand", BindingFlags.Instance | BindingFlags.NonPublic)
                     ?? throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
-            command = (ChatCommandAttribute) method.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
+            command = attribute;
 
             ILogger logger = Container.Resolve<ILogger>();
 

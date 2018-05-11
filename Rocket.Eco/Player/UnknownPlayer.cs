@@ -1,10 +1,8 @@
 ﻿using System;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Entities;
-using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Core.Player;
-using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
@@ -22,16 +20,19 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public override string Id { get; }
-
-        /// <inheritdoc />
-        public override string Name { get; }
-
-        /// <inheritdoc />
         public override IUser User => this;
 
         /// <inheritdoc />
         public override IEntity Entity => this;
+
+        /// <inheritdoc />
+        public string EntityTypeName => UserType;
+
+        /// <inheritdoc />
+        public override string Id { get; }
+
+        /// <inheritdoc />
+        public override string Name { get; }
 
         /// <inheritdoc />
         public override bool IsOnline => false;
@@ -50,8 +51,5 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public IUserManager UserManager => Container.Resolve<IUserManager>("ecousermanager");
-
-        /// <inheritdoc />
-        public string EntityTypeName => UserType;
     }
 }

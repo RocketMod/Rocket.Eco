@@ -1,44 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.Eco.API;
-using Eco.Gameplay.Systems.Chat;
-using Rocket.API.Logging;
-using Rocket.Core.Logging;
+using Rocket.Eco.Commands.EcoCommands;
 
 namespace Rocket.Eco.Commands
 {
     /// <inheritdoc cref="ICommandProvider" />
     /// <summary>
-    ///     Translates all of the commands provided by Eco and its modkit into a Rocket-useable <see cref="ICommand" />.
+    ///     Provides all the commands added by the Eco implementation.
     /// </summary>
     public sealed class EcoCommandProvider : ContainerAccessor, ICommandProvider
     {
-        private readonly List<EcoCommandWrapper> commands = new List<EcoCommandWrapper>();
-
-        /// <inheritdoc />
-        public EcoCommandProvider(IDependencyContainer container) : base(container)
+        internal EcoCommandProvider(IDependencyContainer container) : base(container)
         {
-            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>)typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
-
-            if (cmds == null)
-                throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
-
-            ILogger logger = Container.Resolve<ILogger>();
-
-            foreach (KeyValuePair<string, MethodInfo> pair in cmds)
+            Commands = new ICommand[]
             {
-                commands.Add(new EcoCommandWrapper(pair.Value, Container));
-            }
+                new CommandBan(),
+                new CommandKick()
+            };
         }
 
         /// <inheritdoc />
         public ILifecycleObject GetOwner(ICommand command) => Container.Resolve<IImplementation>();
 
         /// <inheritdoc />
-        public IEnumerable<ICommand> Commands => commands;
+        public IEnumerable<ICommand> Commands { get; }
     }
 }

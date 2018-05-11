@@ -30,16 +30,15 @@ namespace Rocket.Eco
 {
     /// <inheritdoc />
     /// <summary>
-    ///     Rocket.Eco's implementation of Rocket's <see cref="IImplementation"/>.
+    ///     Rocket.Eco's implementation of Rocket's <see cref="IImplementation" />.
     /// </summary>
     public sealed class EcoImplementation : IImplementation
     {
+        private EcoConsole console;
         private IRuntime runtime;
 
         /// <inheritdoc />
-        public IConsole Console => console ?? (console = new EcoConsole()); 
-        
-        private EcoConsole console;
+        public IConsole Console => console ?? (console = new EcoConsole());
 
         /// <inheritdoc />
         public string InstanceId => throw new NotImplementedException();
@@ -82,7 +81,7 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
             runtime.Container.RegisterSingletonInstance<IUserManager>(ecoPlayerManager, "ecousermanager");
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
-            runtime.Container.RegisterSingletonType<ICommandProvider, EcoCommandProvider>("ecocommandprovider");
+            runtime.Container.RegisterSingletonType<ICommandProvider, EcoVanillaCommandProvider>("ecovanillacommandprovider");
 
             PostInit(logger, Console, commandHandler);
         }
@@ -246,11 +245,6 @@ namespace Rocket.Eco
                     ecoPlayer.SendErrorMessage("That command could not be found!");
 
                 RETURN:
-
-                string commandCancelled = wasCancelled ? ": CANCELLED" : "";
-
-                logger.LogInformation($"[EVENT{commandCancelled}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
-
                 return true;
             }
 
@@ -261,9 +255,8 @@ namespace Rocket.Eco
 
             eventManager.Emit(this, chatEvent);
 
-            string chatCancelled = chatEvent.IsCancelled ? ": CANCELLED" : "";
-
-            logger.LogInformation($"[EVENT{chatCancelled}] [{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
+            string commandCancelled = chatEvent.IsCancelled ? "[CANCELLED] " : "";
+            logger.LogInformation($"{commandCancelled}[{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
 
             return chatEvent.IsCancelled;
         }

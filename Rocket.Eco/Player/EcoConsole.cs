@@ -4,19 +4,15 @@ using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.User;
-using Rocket.Eco.API;
 
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IConsole" />
     public sealed class EcoConsole : IConsole
     {
-        internal EcoConsole () { }
-
         private readonly object lockObj = new object();
         private IDependencyContainer container;
-
-        internal void Init(IDependencyContainer container) => this.container = container;
+        internal EcoConsole() { }
 
         /// <inheritdoc />
         public string Id => "ecoconsole";
@@ -65,5 +61,7 @@ namespace Rocket.Eco.Player
         //TODO: Use the Color
         /// <inheritdoc />
         public void Write(string format, Color? color = null, params object[] bindings) => Console.Write(format, bindings);
+
+        internal void Init(IDependencyContainer container) => this.container = container;
     }
 }

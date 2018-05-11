@@ -15,6 +15,7 @@ namespace Rocket.Eco.Properties
         {
             container.RegisterSingletonType<IPatchManager, PatchManager>(null, "ecopatchmanager");
             container.RegisterSingletonType<IImplementation, EcoImplementation>(null, "eco");
+            container.RegisterSingletonType<ICommandProvider, EcoCommandProvider>("ecocommandprovider");
 
             //No more IChatManager :O
             //container.RegisterSingletonType<IChatManager, EcoChatManager>(null, "ecochatmanager");

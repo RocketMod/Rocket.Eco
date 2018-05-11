@@ -17,7 +17,7 @@ namespace Rocket.Eco.Launcher
         {
             AppDomain.CurrentDomain.AssemblyResolve += GatherRocketDependencies;
 
-            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
+            AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
             {
                 try
                 {
