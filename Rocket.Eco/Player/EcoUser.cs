@@ -36,13 +36,13 @@ namespace Rocket.Eco.Player
         public bool IsOnline => Player.IsOnline;
 
         /// <inheritdoc />
-        public DateTime SessionConnectTime { get; }
+        public DateTime SessionConnectTime => DateTime.MinValue;
 
         /// <inheritdoc />
-        public DateTime? SessionDisconnectTime { get; }
+        public DateTime? SessionDisconnectTime => null;
 
         /// <inheritdoc />
-        public DateTime? LastSeen { get; }
+        public DateTime? LastSeen => null;
 
         /// <inheritdoc />
         public string UserType => GetType().Name;

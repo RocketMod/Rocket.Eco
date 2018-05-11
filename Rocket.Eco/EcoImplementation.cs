@@ -18,6 +18,7 @@ using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
 using Rocket.Eco.API.Legislation;
 using Rocket.Eco.API.Patching;
+using Rocket.Eco.Commands;
 using Rocket.Eco.Delegates;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Extensions;
@@ -36,7 +37,9 @@ namespace Rocket.Eco
         private IRuntime runtime;
 
         /// <inheritdoc />
-        public IConsole Console => new EcoConsole();
+        public IConsole Console => console ?? (console = new EcoConsole()); 
+        
+        private EcoConsole console;
 
         /// <inheritdoc />
         public string InstanceId => throw new NotImplementedException();
@@ -60,6 +63,7 @@ namespace Rocket.Eco
                 throw new MethodAccessException();
 
             this.runtime = runtime;
+            console.Init(runtime.Container);
 
             IPatchManager patchManager = runtime.Container.ResolvePatchManager();
             ILogger logger = runtime.Container.ResolveLogger();
@@ -73,8 +77,12 @@ namespace Rocket.Eco
 
             pluginManager.Init();
 
-            runtime.Container.RegisterSingletonType<IPlayerManager, EcoPlayerManager>(null, "ecoplayermanager");
+            EcoPlayerManager ecoPlayerManager = new EcoPlayerManager(runtime.Container);
+
+            runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
+            runtime.Container.RegisterSingletonInstance<IUserManager>(ecoPlayerManager, "ecousermanager");
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
+            runtime.Container.RegisterSingletonType<ICommandProvider, EcoCommandProvider>("ecocommandprovider");
 
             PostInit(logger, Console, commandHandler);
         }
@@ -141,12 +149,22 @@ namespace Rocket.Eco
                 return;
 
             EcoPlayerManager playerManager = runtime.Container.ResolvePlayerManager("ecoplayermanager") as EcoPlayerManager;
-            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId)) ?? new EcoPlayer(castedUser, runtime.Container);
+            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
+
+            string firstTime = string.Empty;
+
+            if (ecoPlayer == null)
+            {
+                ecoPlayer = new EcoPlayer(castedUser, runtime.Container);
+                playerManager?._Players.Add(ecoPlayer);
+
+                firstTime = " for the first time!";
+            }
 
             UserConnectedEvent e = new UserConnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame);
             runtime.Container.ResolveEventManager().Emit(this, e);
 
-            runtime.Container.ResolveLogger().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined!");
+            runtime.Container.ResolveLogger().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}!");
         }
 
         internal void _EmitPlayerLeave(object player)

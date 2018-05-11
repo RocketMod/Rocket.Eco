@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -129,7 +128,7 @@ namespace Rocket.Eco.Launcher
             for (int i = il.Body.Instructions.Count - 1; i != 0; i--)
                 if (il.Body.Instructions[i].OpCode == OpCodes.Newobj)
                 {
-                    index = i + 2;
+                    index = i + 1;
                     break;
                 }
 
@@ -141,6 +140,7 @@ namespace Rocket.Eco.Launcher
             foreach (Instruction i in removedInstructions)
                 il.Remove(i);
 
+            il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Pop));
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
 
             il.Body.ExceptionHandlers.Clear();

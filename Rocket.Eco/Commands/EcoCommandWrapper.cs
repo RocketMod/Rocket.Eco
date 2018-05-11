@@ -36,10 +36,17 @@ namespace Rocket.Eco.Commands
 
             command = (ChatCommandAttribute) method.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
 
+            ILogger logger = Container.Resolve<ILogger>();
+
             if (command != null)
+            {
                 commandMethod = method;
+                logger.LogInformation($"The vanilla command \"{Name}\" has been registered.");
+            }
             else
-                Container.Resolve<ILogger>().LogError("An attempt was made to register a vanilla command with inproper attributes!");
+            {
+                logger.LogError($"An attempt was made to register a vanilla command (method: {method.DeclaringType?.FullName ?? "UnknownType"}.{method.Name}) with inproper attributes!");
+            }
         }
 
         /// <inheritdoc />
@@ -52,7 +59,7 @@ namespace Rocket.Eco.Commands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public string Name => command.CommandName;
+        public string Name => command.UseMethodName ? commandMethod.Name : command.CommandName;
 
         /// <inheritdoc />
         public string Permission => $"Eco.Base.{Name}";

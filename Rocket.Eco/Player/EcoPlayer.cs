@@ -49,7 +49,7 @@ namespace Rocket.Eco.Player
         public override string Name => InternalEcoUser.Name;
 
         /// <inheritdoc />
-        public IUserManager UserManager => Container.Resolve<IUserManager>();
+        public IUserManager UserManager => Container.Resolve<IUserManager>("ecousermanager");
 
         /// <summary>
         ///     Sends a message to the player.
