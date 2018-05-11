@@ -96,18 +96,7 @@ namespace Rocket.Eco.Launcher
                     Console.WriteLine(e.GetType().ToString());
                     Console.WriteLine(e.Message);
                     Console.WriteLine(e.StackTrace);
-                    Console.WriteLine("Launching failed, you may not have extracted. Running the extraction now...");
-
-                    Thread.Sleep(2000);
-
-                    ProcessStartInfo info = new ProcessStartInfo
-                    {
-                        FileName = typeof(Program).Assembly.Location,
-                        Arguments = "-extract"
-                    };
-
-                    Process.Start(info);
-
+                    Console.WriteLine("Launching failed! (Maybe you didn't extract)");
                     return;
                 }
                 finally
