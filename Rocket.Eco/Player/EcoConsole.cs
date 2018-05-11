@@ -4,6 +4,7 @@ using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.User;
+using Rocket.Core.Logging;
 
 namespace Rocket.Eco.Player
 {
@@ -53,14 +54,28 @@ namespace Rocket.Eco.Player
 
         //TODO: Use the Color and LogLevel
         /// <inheritdoc />
-        public void WriteLine(LogLevel level, string format, Color? color = null, params object[] bindings) => Console.WriteLine(format, bindings);
+        public void WriteLine(LogLevel level, string format, Color? color = null, params object[] bindings)
+        {
+            ConsoleColor currentColor = Console.ForegroundColor;
+            
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(format, bindings);
+            Console.ForegroundColor = currentColor;
+        }
 
         /// <inheritdoc />
         public void Write(string format, params object[] bindings) => Write(format, null, bindings);
 
         //TODO: Use the Color
         /// <inheritdoc />
-        public void Write(string format, Color? color = null, params object[] bindings) => Console.Write(format, bindings);
+        public void Write(string format, Color? color = null, params object[] bindings)
+        {
+            ConsoleColor currentColor = Console.ForegroundColor;
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write(format, bindings);
+            Console.ForegroundColor = currentColor;
+        }
 
         internal void Init(IDependencyContainer container) => this.container = container;
     }

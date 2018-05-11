@@ -13,12 +13,17 @@ namespace Rocket.Eco.Commands
     /// </summary>
     public sealed class EcoCommandProvider : ContainerAccessor, ICommandProvider
     {
-        internal EcoCommandProvider(IDependencyContainer container) : base(container)
+        /// <inheritdoc />
+        public EcoCommandProvider(IDependencyContainer container) : base(container)
         {
             Commands = new ICommand[]
             {
                 new CommandBan(),
-                new CommandKick()
+                new CommandKick(),
+                new CommandAdmin(),
+                new CommandRemoveAdmin(),
+                new CommandSave(),
+                new CommandShutdown()
             };
         }
 

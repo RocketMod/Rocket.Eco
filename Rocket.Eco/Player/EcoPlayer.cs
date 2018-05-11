@@ -4,13 +4,14 @@ using Rocket.API.Entities;
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Core.Player;
+using Rocket.Eco.API;
 using InternalEcoUser = Eco.Gameplay.Players.User;
 using InternalEcoPlayer = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IPlayer" />
-    public class EcoPlayer : BasePlayer, IUserInfo
+    public sealed class EcoPlayer : BasePlayer, IUserInfo
     {
         private readonly EcoUser ecoUser;
 
@@ -25,7 +26,6 @@ namespace Rocket.Eco.Player
         ///     The internal Eco represntation of a player attached to this object.
         /// </summary>
         /// <exception cref="InvalidOperationException"> when the player is not online.</exception>
-        /// >
         public InternalEcoPlayer InternalEcoPlayer => IsOnline ? InternalEcoUser.Player : throw new InvalidOperationException("The player must be online to access this field.");
 
         /// <summary>
@@ -38,6 +38,22 @@ namespace Rocket.Eco.Player
         /// </summary>
         public bool IsAdmin => InternalEcoUser.IsAdmin;
 
+        /// <summary>
+        ///     Returns a <see cref="EUserIdType"/> based on what type of account the user is using.
+        /// </summary>
+        public EUserIdType UserIdType
+        {
+            get
+            {
+                bool hasSlg = string.IsNullOrWhiteSpace(InternalEcoUser.SlgId);
+                bool hasSteam = string.IsNullOrWhiteSpace(InternalEcoUser.SteamId);
+
+                if (hasSlg && hasSteam) return EUserIdType.Both;
+
+                return hasSteam ? EUserIdType.Steam : EUserIdType.Slg;
+            }
+        }
+
         /// <inheritdoc />
         public override IUser User => ecoUser;
 
@@ -48,7 +64,10 @@ namespace Rocket.Eco.Player
         public override bool IsOnline => InternalEcoUser.LoggedIn;
 
         /// <inheritdoc />
-        public override string Id => InternalEcoUser.SteamId;
+        /// <returns>
+        ///     Will return the players Slg ID, if that is not available, their Steam ID will be returned.
+        /// </returns>
+        public override string Id => (string.IsNullOrWhiteSpace(InternalEcoUser.SlgId)) ? InternalEcoUser.SteamId : InternalEcoUser.SlgId;
 
         /// <inheritdoc />
         public override string Name => InternalEcoUser.Name;

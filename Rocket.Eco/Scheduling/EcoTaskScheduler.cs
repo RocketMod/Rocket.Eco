@@ -26,7 +26,7 @@ namespace Rocket.Eco.Scheduling
         private readonly Thread mainThread;
         private readonly List<ITask> tasks = new List<ITask>();
 
-        internal EcoTaskScheduler(IDependencyContainer container) : base(container)
+        public EcoTaskScheduler(IDependencyContainer container) : base(container)
         {
             mainThread = new Thread(MainThreadWork);
             asyncThread = new Thread(AsyncThreadWork);

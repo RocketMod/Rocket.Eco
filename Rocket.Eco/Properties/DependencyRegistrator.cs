@@ -1,9 +1,11 @@
 ﻿using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
+using Rocket.API.Scheduler;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;
 using Rocket.Eco.Patching;
+using Rocket.Eco.Scheduling;
 
 namespace Rocket.Eco.Properties
 {

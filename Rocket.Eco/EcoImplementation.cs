@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
+using Rocket.API.Configuration;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
+using Rocket.API.Permissions;
 using Rocket.API.Player;
 using Rocket.API.Plugins;
+using Rocket.API.Scheduler;
 using Rocket.API.User;
 using Rocket.Core.Commands.Events;
 using Rocket.Core.Implementation.Events;
@@ -25,6 +29,7 @@ using Rocket.Eco.Extensions;
 using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
+using Rocket.Eco.Scheduling;
 
 namespace Rocket.Eco
 {
@@ -69,6 +74,20 @@ namespace Rocket.Eco
             IEventManager eventManager = runtime.Container.ResolveEventManager();
             IPluginManager pluginManager = runtime.Container.ResolvePluginManager();
             ICommandHandler commandHandler = runtime.Container.ResolveCommandHandler();
+            ConfigurationPermissionProvider permissionProvider = (ConfigurationPermissionProvider)runtime.Container.Resolve<IPermissionProvider>("default_permissions");
+
+            //TODO: Add a IConfiguration.TryGetSection method.
+            try
+            {
+                permissionProvider.PlayersConfig.GetSection("EcoUser");
+            }
+            catch
+            {
+                logger.LogInformation("Detected first-time initialization for Permissions config, regenerating it now.");
+
+                permissionProvider.PlayersConfig.CreateSection("EcoUser", SectionType.Array);
+                permissionProvider.PlayersConfig.Save();
+            }
 
             patchManager.RegisterPatch<UserPatch>();
             patchManager.RegisterPatch<ChatManagerPatch>();
@@ -81,7 +100,10 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
             runtime.Container.RegisterSingletonInstance<IUserManager>(ecoPlayerManager, "ecousermanager");
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
-            runtime.Container.RegisterSingletonType<ICommandProvider, EcoVanillaCommandProvider>("ecovanillacommandprovider");
+            runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "ecotaskscheduler");
+
+            //This throws a StackOverflowException if not done this way do to how Unity's Dependency Container works.
+            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoVanillaCommandProvider(runtime.Container.Resolve<ICommandProvider>().Commands, runtime.Container), "ecovanillacommandprovider");
 
             PostInit(logger, Console, commandHandler);
         }
@@ -89,12 +111,28 @@ namespace Rocket.Eco
         /// <inheritdoc />
         public void Shutdown()
         {
-            StorageManager.SaveAndFlush();
+            runtime.Container.Resolve<ITaskScheduler>()
+                   .ScheduleNextFrame(this, () =>
+                   {
+                       runtime.Container.Resolve<ILogger>().LogInformation("The shutdown sequence has been initiated.");
 
-            foreach (IPlugin plugin in runtime.Container.ResolvePluginManager())
-                plugin.Unload();
+                       StorageManager.SaveAndFlush();
 
-            Environment.Exit(0);
+                       foreach (IPlugin plugin in runtime.Container.ResolvePluginManager())
+                           plugin.Unload();
+
+                       EcoPlayerManager playerManager = (EcoPlayerManager)runtime.Container.Resolve<IPlayerManager>("ecoplayermanager");
+
+                       foreach (EcoPlayer player in playerManager.OnlinePlayers.Cast<EcoPlayer>())
+                           playerManager.Kick(player.User, null, "The server is shutting down.");
+
+                       //TODO: This appears to cause a StackOverflowException.
+                       //runtime.Shutdown();
+
+                       Thread.Sleep(2000);
+
+                       Environment.Exit(0);
+                   });
         }
 
         /// <inheritdoc />
@@ -132,13 +170,17 @@ namespace Rocket.Eco
                 if (input == null)
                     continue;
 
-                if (input.StartsWith("/", StringComparison.InvariantCulture))
-                    input = input.Remove(0, 1);
+                runtime.Container.Resolve<ITaskScheduler>("ecotaskscheduler")
+                       .ScheduleNextFrame(this, () =>
+                       {
+                           if (input.StartsWith("/", StringComparison.InvariantCulture))
+                               input = input.Remove(0, 1);
 
-                bool wasHandled = commandHandler.HandleCommand(consoleCommandCaller, input, string.Empty);
+                           bool wasHandled = commandHandler.HandleCommand(consoleCommandCaller, input, string.Empty);
 
-                if (!wasHandled)
-                    logger.LogError("That command could not be found!");
+                           if (!wasHandled)
+                               logger.LogError("That command could not be found!");
+                       });
             }
         }
 
@@ -195,7 +237,7 @@ namespace Rocket.Eco
 
             ILogger logger = runtime.Container.ResolveLogger();
 
-            EcoPlayer ecoPlayer = (EcoPlayer) runtime.Container.ResolvePlayerManager("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
+            EcoPlayer ecoPlayer = (EcoPlayer)runtime.Container.ResolvePlayerManager("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
 
             if (ecoPlayer == null)
             {
@@ -210,39 +252,38 @@ namespace Rocket.Eco
                 PreCommandExecutionEvent commandEvent = new PreCommandExecutionEvent(ecoPlayer.User, text.Remove(0, 1));
                 eventManager.Emit(this, commandEvent);
 
-                bool wasCancelled = false;
-
                 if (commandEvent.IsCancelled)
                 {
                     ecoPlayer.SendErrorMessage("Execution of your command has been cancelled!");
-                    wasCancelled = true;
 
                     goto RETURN;
                 }
 
-                bool wasHandled = true;
-
-                try
+                runtime.Container.Resolve<ITaskScheduler>("ecotaskscheduler").ScheduleNextFrame(this, () =>
                 {
-                    wasHandled = runtime.Container.ResolveCommandHandler().HandleCommand(ecoPlayer.User, text.Remove(0, 1), string.Empty);
-                }
-                catch (NotEnoughPermissionsException)
-                {
-                    ecoPlayer.SendErrorMessage("You do not have enough permission to execute this command!");
-                    wasCancelled = true;
-                }
-                catch (Exception e)
-                {
-                    logger.LogError($"{ecoPlayer.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
-                    logger.LogError($"{e.Message}\n{e.StackTrace}");
+                    bool wasHandled = true;
 
-                    ecoPlayer.SendErrorMessage("A runtime error occurred while executing this command, please contact an administrator!");
+                    try
+                    {
+                        wasHandled = runtime.Container.ResolveCommandHandler().HandleCommand(ecoPlayer.User, text.Remove(0, 1), string.Empty);
+                    }
+                    catch (NotEnoughPermissionsException)
+                    {
+                        ecoPlayer.SendErrorMessage("You do not have enough permission to execute this command!");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError($"{ecoPlayer.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
+                        logger.LogError($"{e.Message}\n{e.StackTrace}");
 
-                    return true;
-                }
+                        ecoPlayer.SendErrorMessage("A runtime error occurred while executing this command, please contact an administrator!");
 
-                if (!wasHandled)
-                    ecoPlayer.SendErrorMessage("That command could not be found!");
+                        return;
+                    }
+
+                    if (!wasHandled)
+                        ecoPlayer.SendErrorMessage("That command could not be found!");
+                });
 
                 RETURN:
                 return true;

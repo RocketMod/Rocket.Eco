@@ -122,7 +122,7 @@ namespace Rocket.Eco.Player
             if (e.IsCancelled)
                 return false;
 
-            ecoUser.Player.InternalEcoUser.Client.Disconnect("You have been kicked.", reason ?? string.Empty, false);
+            ecoUser.Player.InternalEcoUser.Client.Disconnect("You have been kicked.", reason ?? string.Empty);
 
             return true;
         }
@@ -147,14 +147,18 @@ namespace Rocket.Eco.Player
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
             {
-                //TODO: Currently only bans by SteamIDs
-                if (!AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId))
+                bool bothSucceed = false;
+
+                if (ecoPlayer.UserIdType == EUserIdType.Both)
+                    bothSucceed = AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId);
+
+                if (!AddBanBlacklist(ecoPlayer.Id) && !bothSucceed)
                     return false;
 
                 UserManager.Obj.SaveConfig();
 
                 if (ecoPlayer.IsOnline)
-                    ecoPlayer.InternalEcoUser.Client.Disconnect("You have been banned.", reason, false);
+                    ecoPlayer.InternalEcoUser.Client.Disconnect("You have been banned.", reason);
             }
             else
             {
@@ -170,8 +174,13 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public bool Unban(IUserInfo user, IUser unbannedBy = null)
         {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
+            switch (user) {
+                case null:
+                    throw new ArgumentNullException(nameof(user));
+                case EcoPlayer ecoPlayer when ecoPlayer.UserIdType == EUserIdType.Both:
+                    RemoveBanBlacklist(ecoPlayer.InternalEcoUser.SteamId);
+                    break;
+            }
 
             return RemoveBanBlacklist(user.Id);
         }
