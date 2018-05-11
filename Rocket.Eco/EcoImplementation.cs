@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -30,6 +31,7 @@ using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
 using Rocket.Eco.Scheduling;
+using Players_Player = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco
 {
@@ -200,6 +202,30 @@ namespace Rocket.Eco
                 playerManager?._Players.Add(ecoPlayer);
 
                 firstTime = " for the first time!";
+            }
+
+            ConfigurationPermissionProvider permissionProvider = (ConfigurationPermissionProvider)runtime.Container.Resolve<IPermissionProvider>("default_permissions");
+
+            IConfigurationSection configurationSection = permissionProvider.PlayersConfig["EcoUser"];
+
+            List<PlayerPermissionSection> playerPermissions = configurationSection.Get<PlayerPermissionSection[]>().ToList();
+
+            if (playerPermissions.FirstOrDefault(x => x.Id.Equals(ecoPlayer.Id)) == null)
+            {
+                IEnumerable<GroupPermissionSection> autoGroups = permissionProvider.GroupsConfig["Groups"].Get<GroupPermissionSection[]>().Where(x => x.AutoAssign);
+
+                PlayerPermissionSection section = new PlayerPermissionSection
+                {
+                    Id = ecoPlayer.Id,
+                    Permissions = new string[0],
+                    Groups = autoGroups.Select(x => x.Id).ToArray()
+                };
+
+                playerPermissions.Add(section);
+
+                configurationSection.Set(playerPermissions);
+                
+                permissionProvider.PlayersConfig.Save();
             }
 
             UserConnectedEvent e = new UserConnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame);
