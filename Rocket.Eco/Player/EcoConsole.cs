@@ -4,7 +4,6 @@ using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.User;
-using Rocket.Core.Logging;
 
 namespace Rocket.Eco.Player
 {
@@ -57,7 +56,7 @@ namespace Rocket.Eco.Player
         public void WriteLine(LogLevel level, string format, Color? color = null, params object[] bindings)
         {
             ConsoleColor currentColor = Console.ForegroundColor;
-            
+
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(format, bindings);
             Console.ForegroundColor = currentColor;

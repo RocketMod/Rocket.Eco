@@ -17,7 +17,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Name => "Shutdown";
 
         /// <inheritdoc />
-        public string[] Aliases => new[] { "Stop", "Quit" };
+        public string[] Aliases => new[] {"Stop", "Quit"};
 
         /// <inheritdoc />
         public string Summary => "Saves and shuts down the server.";

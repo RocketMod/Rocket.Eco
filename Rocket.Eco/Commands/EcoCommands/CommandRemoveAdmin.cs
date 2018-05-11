@@ -12,7 +12,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 {
     /// <inheritdoc />
     /// <summary>
-    ///     A command add a player to the admin list.
+    ///     A command to remove a player from the admin list.
     /// </summary>
     public sealed class CommandRemoveAdmin : ICommand
     {
@@ -23,7 +23,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Name => "RemoveAdmin";
 
         /// <inheritdoc />
-        public string[] Aliases => new[] { "DelAdmin", "UnAdmin", "DeAdmin" };
+        public string[] Aliases => new[] {"DelAdmin", "UnAdmin", "DeAdmin"};
 
         /// <inheritdoc />
         public string Summary => "Removes a player's administrator permissions.";
@@ -49,13 +49,9 @@ namespace Rocket.Eco.Commands.EcoCommands
             IPlayerManager playerManager = context.Container.Resolve<IPlayerManager>("ecoplayermanager");
 
             if (playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
-            {
-                ((EcoPlayer)player).User.SendMessage("You have been stripped of your administator permissions.");
-            }
+                ((EcoPlayer) player).User.SendMessage("You have been stripped of your administator permissions.");
             else
-            {
                 player = playerManager.GetPlayer(context.Parameters[0]);
-            }
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.UserIdType == EUserIdType.Both)
                 UserManager.Config.Admins.Remove(ecoPlayer.InternalEcoUser.SteamId);

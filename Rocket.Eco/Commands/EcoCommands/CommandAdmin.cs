@@ -14,7 +14,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 {
     /// <inheritdoc />
     /// <summary>
-    ///     A command add a player to the admin list.
+    ///     A command to add a player to the admin list.
     /// </summary>
     public sealed class CommandAdmin : ICommand
     {
@@ -67,7 +67,7 @@ namespace Rocket.Eco.Commands.EcoCommands
             context.Container.Resolve<ILogger>().LogInformation($"{context.User.Name} has granted {player.Name} administrator permissions.");
 
             context.User.SendMessage("The requested user has been made an administrator.");
-            ((EcoPlayer)player).User.SendMessage("You have been granted administrator permissions.");
+            ((EcoPlayer) player).User.SendMessage("You have been granted administrator permissions.");
         }
     }
 }

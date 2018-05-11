@@ -1,6 +1,5 @@
 ﻿using System;
 using Eco.Core.Plugins;
-using Rocket.API;
 using Rocket.API.Commands;
 
 namespace Rocket.Eco.Commands.EcoCommands

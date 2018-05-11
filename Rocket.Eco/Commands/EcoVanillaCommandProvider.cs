@@ -27,11 +27,11 @@ namespace Rocket.Eco.Commands
 
             if (cmds == null)
                 throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
-            
+
             ILogger logger = Container.Resolve<ILogger>();
-            
+
             List<EcoCommandWrapper> tempCommands = new List<EcoCommandWrapper>();
-            
+
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
             {
                 ChatCommandAttribute attribute = (ChatCommandAttribute) pair.Value.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
@@ -39,13 +39,13 @@ namespace Rocket.Eco.Commands
                 if (attribute == null) continue;
 
                 string name = attribute.UseMethodName ? pair.Value.Name : attribute.CommandName;
-                
+
                 if (currentCommands.FirstOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) != null)
                     logger.LogWarning($"The vanilla command \"{name}\" was not registered as an override exists.");
-                
+
                 tempCommands.Add(new EcoCommandWrapper(pair.Value, attribute, Container));
             }
-            
+
             commands = tempCommands;
         }
 

@@ -174,7 +174,8 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public bool Unban(IUserInfo user, IUser unbannedBy = null)
         {
-            switch (user) {
+            switch (user)
+            {
                 case null:
                     throw new ArgumentNullException(nameof(user));
                 case EcoPlayer ecoPlayer when ecoPlayer.UserIdType == EUserIdType.Both:

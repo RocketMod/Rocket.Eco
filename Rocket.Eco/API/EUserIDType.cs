@@ -9,7 +9,7 @@ namespace Rocket.Eco.API
     {
         /// <summary>
         ///     The user is using an account with both IDs present.
-        ///     Their Slg ID will be used when accessing <see cref="EcoPlayer.Id"/>.
+        ///     Their Slg ID will be used when accessing <see cref="EcoPlayer.Id" />.
         /// </summary>
         Both,
 

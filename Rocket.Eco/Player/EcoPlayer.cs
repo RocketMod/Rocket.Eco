@@ -39,7 +39,7 @@ namespace Rocket.Eco.Player
         public bool IsAdmin => InternalEcoUser.IsAdmin;
 
         /// <summary>
-        ///     Returns a <see cref="EUserIdType"/> based on what type of account the user is using.
+        ///     Returns a <see cref="EUserIdType" /> based on what type of account the user is using.
         /// </summary>
         public EUserIdType UserIdType
         {
@@ -67,7 +67,7 @@ namespace Rocket.Eco.Player
         /// <returns>
         ///     Will return the players Slg ID, if that is not available, their Steam ID will be returned.
         /// </returns>
-        public override string Id => (string.IsNullOrWhiteSpace(InternalEcoUser.SlgId)) ? InternalEcoUser.SteamId : InternalEcoUser.SlgId;
+        public override string Id => string.IsNullOrWhiteSpace(InternalEcoUser.SlgId) ? InternalEcoUser.SteamId : InternalEcoUser.SlgId;
 
         /// <inheritdoc />
         public override string Name => InternalEcoUser.Name;
