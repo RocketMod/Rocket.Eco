@@ -98,8 +98,8 @@ namespace Rocket.Eco
 
             EcoPlayerManager ecoPlayerManager = new EcoPlayerManager(runtime.Container);
 
-            runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
             runtime.Container.RegisterSingletonInstance<IUserManager>(ecoPlayerManager, "ecousermanager");
+            runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
             runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "ecotaskscheduler");
 
@@ -197,7 +197,7 @@ namespace Rocket.Eco
 
             if (ecoPlayer == null)
             {
-                ecoPlayer = new EcoPlayer(castedUser, runtime.Container);
+                ecoPlayer = new EcoPlayer(castedUser, runtime.Container.Resolve<IUserManager>("ecousermanager"), runtime.Container);
                 playerManager?._Players.Add(ecoPlayer);
 
                 firstTime = " for the first time!";

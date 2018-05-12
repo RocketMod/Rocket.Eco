@@ -26,7 +26,7 @@ namespace Rocket.Eco.Player
         public EcoPlayerManager(IDependencyContainer container) : base(container)
         {
             foreach (User user in UserManager.Users)
-                _Players.Add(new EcoPlayer(user, Container));
+                _Players.Add(new EcoPlayer(user, this, Container));
         }
 
         /// <inheritdoc />
@@ -105,7 +105,15 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public IPlayer GetPlayer(string id) => TryGetOnlinePlayerById(id, out IPlayer p) ? p : new EcoPlayer(id, Container);
+        public IPlayer GetPlayer(string id)
+        {
+            if (TryGetOnlinePlayerById(id, out IPlayer p)) return p;
+
+            p = new EcoPlayer(id, this, Container);
+            _Players.Add((EcoPlayer)p);
+
+            return p;
+        }
 
         /// <inheritdoc />
         public bool Kick(IUser user, IUser kickedBy = null, string reason = null)

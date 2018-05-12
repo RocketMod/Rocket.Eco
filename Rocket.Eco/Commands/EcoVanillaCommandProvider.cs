@@ -23,7 +23,7 @@ namespace Rocket.Eco.Commands
         /// <inheritdoc />
         public EcoVanillaCommandProvider(IEnumerable<ICommand> currentCommands, IDependencyContainer container) : base(container)
         {
-            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
+            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>)typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
                 throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
@@ -34,23 +34,26 @@ namespace Rocket.Eco.Commands
 
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
             {
-                ChatCommandAttribute attribute = (ChatCommandAttribute) pair.Value.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
+                ChatCommandAttribute attribute = (ChatCommandAttribute)pair.Value.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
 
-                if (attribute == null) continue;
+                if (attribute == null)
+                    continue;
 
                 string name = attribute.UseMethodName ? pair.Value.Name : attribute.CommandName;
 
                 foreach (ICommand command in currentCommands)
                 {
-                    if (!command.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !command.Aliases.Contains(name, StringComparer.InvariantCultureIgnoreCase)) continue;
-
+                    if (!command.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) || (command.Aliases != null && !command.Aliases.Contains(name, StringComparer.InvariantCultureIgnoreCase)))
+                        continue;
+                    
                     logger.LogWarning($"The vanilla command \"{name}\" was not registered as an override exists.");
                     goto FAILURE;
                 }
 
                 tempCommands.Add(new EcoCommandWrapper(pair.Value, attribute, Container));
 
-                FAILURE: ;
+                FAILURE:
+                ;
             }
 
             commands = tempCommands;
