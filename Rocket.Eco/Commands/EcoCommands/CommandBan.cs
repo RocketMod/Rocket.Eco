@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Rocket.API.Commands;
 using Rocket.API.Player;
 using Rocket.API.User;
@@ -69,7 +70,7 @@ namespace Rocket.Eco.Commands.EcoCommands
             string reason = null;
 
             if (context.Parameters.Length > 1)
-                reason = string.Join(" ", context.Parameters);
+                reason = string.Join(" ", context.Parameters.Skip(1));
 
             playerManager.Ban(userInfo, context.User, reason);
 
