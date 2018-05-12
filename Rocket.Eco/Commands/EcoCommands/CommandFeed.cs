@@ -11,16 +11,16 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// <summary>
     ///     Makes you or another player eat.
     /// </summary>
-    public sealed class CommandEat : ICommand
+    public sealed class CommandFeed : ICommand
     {
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
-        public string Name => "Eat";
+        public string Name => "Feed";
 
         /// <inheritdoc />
-        public string[] Aliases => new string[0];
+        public string[] Aliases => new [] { "Eat" };
 
         /// <inheritdoc />
         public string Summary => "Satifies your or another player's hunger.";
@@ -29,7 +29,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Description => null;
 
         /// <inheritdoc />
-        public string Permission => "Rocket.Eat";
+        public string Permission => "Rocket.Feed";
 
         /// <inheritdoc />
         public string Syntax => "<[n]ame / id>";

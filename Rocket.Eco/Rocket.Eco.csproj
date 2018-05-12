@@ -129,7 +129,7 @@
     <Compile Include="API\Legislation\ILawVote.cs" />
     <Compile Include="API\Legislation\IVote.cs" />
     <Compile Include="API\Patching\IPatchManager.cs" />
-    <Compile Include="Commands\EcoCommands\CommandEat.cs" />
+    <Compile Include="Commands\EcoCommands\CommandFeed.cs" />
     <Compile Include="Commands\EcoCommandProvider.cs" />
     <Compile Include="Commands\EcoCommands\CommandAdmin.cs" />
     <Compile Include="Commands\EcoCommands\CommandUnAdmin.cs" />
