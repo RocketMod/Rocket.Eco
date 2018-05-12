@@ -30,7 +30,7 @@ namespace Rocket.Eco.Patching
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            ILogger logger = patchContainer.ResolveLogger();
+            ILogger logger = patchContainer.Resolve<ILogger>();
 
             if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;
 
@@ -41,7 +41,7 @@ namespace Rocket.Eco.Patching
         /// <inheritdoc />
         public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
-            ILogger logger = patchContainer.ResolveLogger();
+            ILogger logger = patchContainer.Resolve<ILogger>();
 
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
@@ -95,7 +95,7 @@ namespace Rocket.Eco.Patching
                     {
                         if (stream == null)
                         {
-                            Container.ResolveLogger().LogError("A manifest stream return null!");
+                            Container.Resolve<ILogger>().LogError("A manifest stream return null!");
                             continue;
                         }
 
@@ -107,7 +107,7 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    ILogger logger = Container.ResolveLogger();
+                    ILogger logger = Container.Resolve<ILogger>();
 
                     logger.LogError("Unable to deflate and write an Assembly to the disk!", e);
                     logger.LogError(e.Message);

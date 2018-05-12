@@ -9,6 +9,7 @@ using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Configuration;
+using Rocket.API.Economy;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
@@ -25,6 +26,7 @@ using Rocket.Eco.API.Legislation;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;
 using Rocket.Eco.Delegates;
+using Rocket.Eco.Economy;
 using Rocket.Eco.Eventing;
 using Rocket.Eco.Extensions;
 using Rocket.Eco.Legislation;
@@ -70,11 +72,11 @@ namespace Rocket.Eco
             this.runtime = runtime;
             console.Init(runtime.Container);
 
-            IPatchManager patchManager = runtime.Container.ResolvePatchManager();
-            ILogger logger = runtime.Container.ResolveLogger();
-            IEventManager eventManager = runtime.Container.ResolveEventManager();
-            IPluginManager pluginManager = runtime.Container.ResolvePluginManager();
-            ICommandHandler commandHandler = runtime.Container.ResolveCommandHandler();
+            IPatchManager patchManager = runtime.Container.Resolve<IPatchManager>();
+            ILogger logger = runtime.Container.Resolve<ILogger>();
+            IEventManager eventManager = runtime.Container.Resolve<IEventManager>();
+            IPluginManager pluginManager = runtime.Container.Resolve<IPluginManager>();
+            ICommandHandler commandHandler = runtime.Container.Resolve<ICommandHandler>();
             ConfigurationPermissionProvider permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
 
             //TODO: Add a IConfiguration.TryGetSection method.
@@ -102,11 +104,12 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
             runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "ecotaskscheduler");
+            runtime.Container.RegisterSingletonType<IEconomyProvider, EcoEconomyProvider>(null, "ecoeconomyprovider");
 
             //This throws a StackOverflowException if not done this way do to how Unity's Dependency Container works.
             runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoVanillaCommandProvider(runtime.Container.Resolve<ICommandProvider>().Commands, runtime.Container), "ecovanillacommandprovider");
 
-            PostInit(logger, Console, commandHandler);
+            PostInit(logger, Console, commandHandler, ecoPlayerManager);
         }
 
         /// <inheritdoc />
@@ -119,7 +122,7 @@ namespace Rocket.Eco
 
                        StorageManager.SaveAndFlush();
 
-                       foreach (IPlugin plugin in runtime.Container.ResolvePluginManager())
+                       foreach (IPlugin plugin in runtime.Container.Resolve<IPluginManager>().Plugins)
                            plugin.Unload();
 
                        EcoPlayerManager playerManager = (EcoPlayerManager) runtime.Container.Resolve<IPlayerManager>("ecoplayermanager");
@@ -139,14 +142,12 @@ namespace Rocket.Eco
         /// <inheritdoc />
         public void Reload()
         {
-            IPluginManager pluginManager = runtime.Container.ResolvePluginManager();
-
-            foreach (IPlugin plugin in pluginManager)
+            foreach (IPlugin plugin in runtime.Container.Resolve<IPluginManager>())
                 if (plugin.Unload())
                     plugin.Load(true);
         }
 
-        private void PostInit(ILogger logger, IUser consoleCommandCaller, ICommandHandler commandHandler)
+        private void PostInit(ILogger logger, IUser consoleCommandCaller, ICommandHandler commandHandler, EcoPlayerManager playerManager)
         {
             EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
             EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
@@ -160,7 +161,7 @@ namespace Rocket.Eco
             chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
 
             ImplementationReadyEvent e = new ImplementationReadyEvent(this);
-            runtime.Container.ResolveEventManager().Emit(this, e);
+            runtime.Container.Resolve<IEventManager>().Emit(this, e);
 
             logger.LogInformation("[EVENT] Eco has initialized!");
 
@@ -190,7 +191,7 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser))
                 return;
 
-            EcoPlayerManager playerManager = runtime.Container.ResolvePlayerManager("ecoplayermanager") as EcoPlayerManager;
+            EcoPlayerManager playerManager = runtime.Container.Resolve<IPlayerManager>("ecoplayermanager") as EcoPlayerManager;
             EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SlgId) || x.Id.Equals(castedUser.SteamId));
 
             string firstTime = string.Empty;
@@ -235,9 +236,9 @@ namespace Rocket.Eco
             }
 
             UserConnectedEvent e = new UserConnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame);
-            runtime.Container.ResolveEventManager().Emit(this, e);
+            runtime.Container.Resolve<IEventManager>().Emit(this, e);
 
-            runtime.Container.ResolveLogger().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}!");
+            runtime.Container.Resolve<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}!");
         }
 
         internal void _EmitPlayerLeave(object player)
@@ -245,10 +246,10 @@ namespace Rocket.Eco
             if (player == null || !(player is User castedUser))
                 return;
 
-            EcoPlayerManager playerManager = runtime.Container.ResolvePlayerManager("ecoplayermanager") as EcoPlayerManager;
+            EcoPlayerManager playerManager = runtime.Container.Resolve<IPlayerManager>("ecoplayermanager") as EcoPlayerManager;
             EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
 
-            ILogger logger = runtime.Container.ResolveLogger();
+            ILogger logger = runtime.Container.Resolve<ILogger>();
 
             if (ecoPlayer == null)
             {
@@ -257,9 +258,9 @@ namespace Rocket.Eco
             }
 
             UserDisconnectedEvent e = new UserDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame);
-            runtime.Container.ResolveEventManager().Emit(this, e);
+            runtime.Container.Resolve<IEventManager>().Emit(this, e);
 
-            runtime.Container.ResolveLogger().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
+            runtime.Container.Resolve<ILogger>().LogInformation($"[EVENT] [{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
 
         internal bool _EmitPlayerChat(object user, string text)
@@ -267,9 +268,9 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser) || !castedUser.LoggedIn)
                 return true;
 
-            ILogger logger = runtime.Container.ResolveLogger();
+            ILogger logger = runtime.Container.Resolve<ILogger>();
 
-            EcoPlayer ecoPlayer = (EcoPlayer) runtime.Container.ResolvePlayerManager("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
+            EcoPlayer ecoPlayer = (EcoPlayer) runtime.Container.Resolve<IPlayerManager>("ecoplayermanager").GetOnlinePlayerById(castedUser.SteamId);
 
             if (ecoPlayer == null)
             {
@@ -277,7 +278,7 @@ namespace Rocket.Eco
                 return false;
             }
 
-            IEventManager eventManager = runtime.Container.ResolveEventManager();
+            IEventManager eventManager = runtime.Container.Resolve<IEventManager>();
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
@@ -298,7 +299,7 @@ namespace Rocket.Eco
 
                            try
                            {
-                               wasHandled = runtime.Container.ResolveCommandHandler().HandleCommand(ecoPlayer.User, text.Remove(0, 1), string.Empty);
+                               wasHandled = runtime.Container.Resolve<ICommandHandler>().HandleCommand(ecoPlayer.User, text.Remove(0, 1), string.Empty);
                            }
                            catch (NotEnoughPermissionsException)
                            {

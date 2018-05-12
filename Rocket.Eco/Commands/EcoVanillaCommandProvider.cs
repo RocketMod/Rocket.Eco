@@ -41,19 +41,15 @@ namespace Rocket.Eco.Commands
 
                 string name = attribute.UseMethodName ? pair.Value.Name : attribute.CommandName;
 
-                foreach (ICommand command in currentCommands)
-                {
-                    if (!command.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) || (command.Aliases != null && !command.Aliases.Contains(name, StringComparer.InvariantCultureIgnoreCase)))
-                        continue;
-                    
+                bool overriden = false;
+
+                if (currentCommands.Any(command => command.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) || (command.Aliases != null && command.Aliases.Contains(name, StringComparer.InvariantCultureIgnoreCase)))) {
                     logger.LogWarning($"The vanilla command \"{name}\" was not registered as an override exists.");
-                    goto FAILURE;
+                    overriden = true;
                 }
 
-                tempCommands.Add(new EcoCommandWrapper(pair.Value, attribute, Container));
-
-                FAILURE:
-                ;
+                if (!overriden)
+                    tempCommands.Add(new EcoCommandWrapper(pair.Value, attribute, Container));
             }
 
             commands = tempCommands;

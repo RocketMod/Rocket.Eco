@@ -84,7 +84,7 @@ namespace Rocket.Eco.Commands
             }
             catch (Exception e)
             {
-                Container.ResolveLogger().LogError($"{context.User.Name} failed to execute the vanilla command `{Name}`!", e);
+                Container.Resolve<ILogger>().LogError($"{context.User.Name} failed to execute the vanilla command `{Name}`!", e);
             }
         }
     }

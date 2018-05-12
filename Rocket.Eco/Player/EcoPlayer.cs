@@ -1,4 +1,5 @@
 ﻿using System;
+using Eco.Gameplay.Economy;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Entities;
 using Rocket.API.Player;
@@ -48,6 +49,11 @@ namespace Rocket.Eco.Player
         /// </summary>
         public bool IsAdmin => InternalEcoUser?.IsAdmin ?? false;
 
+        /// <summary>
+        ///     Returns a <see cref="float"/> representing the player's in-game reputation.
+        /// </summary>
+        public float Reputation => ReputationManager.Obj.Rep(Name).CachedTotalReputation;
+        
         /// <summary>
         ///     Returns a <see cref="EUserIdType" /> based on what type of account the user is using.
         /// </summary>

@@ -129,7 +129,7 @@ namespace Rocket.Eco.Scheduling
                 }
                 else if (time != 0)
                 {
-                    ILogger logger = Container.ResolveLogger();
+                    ILogger logger = Container.Resolve<ILogger>();
                     logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
                     logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
                 }

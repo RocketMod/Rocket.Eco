@@ -5,8 +5,10 @@ using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
 using Eco.Shared.Utils;
+using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
+using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Core.Player.Events;
@@ -125,7 +127,7 @@ namespace Rocket.Eco.Player
                 throw new InvalidOperationException("You cannot kick an offline player.");
 
             UserKickEvent e = new UserKickEvent(ecoUser, ecoUser, reason);
-            Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
+            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
 
             if (e.IsCancelled)
                 return false;
@@ -148,7 +150,7 @@ namespace Rocket.Eco.Player
                 reason = string.Empty;
 
             UserBanEvent e = new UserBanEvent(player, caller, reason, null);
-            Container.ResolveEventManager().Emit(Container.ResolveImplementation(), e);
+            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
 
             if (e.IsCancelled)
                 return false;
