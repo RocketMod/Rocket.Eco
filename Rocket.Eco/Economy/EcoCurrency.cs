@@ -10,6 +10,7 @@ namespace Rocket.Eco.Economy
     public sealed class EcoCurrency : IEconomyCurrency
     {
         internal readonly List<EcoEconomyAccount> _Accounts = new List<EcoEconomyAccount>();
+
         private readonly IDependencyContainer container;
         private readonly Currency internalCurrency;
         private readonly IPlayerManager playerManager;

@@ -6,10 +6,10 @@ using System.Threading;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
+using Eco.Plugins.Networking;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Configuration;
-using Rocket.API.Economy;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
@@ -22,16 +22,20 @@ using Rocket.Core.Implementation.Events;
 using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
-using Rocket.Eco.API.Legislation;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;
 using Rocket.Eco.Delegates;
-using Rocket.Eco.Economy;
 using Rocket.Eco.Eventing;
-using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
 using Rocket.Eco.Scheduling;
+
+#if DEBUG
+using Rocket.Eco.API.Legislation;
+using Rocket.Eco.Economy;
+using Rocket.Eco.Legislation;
+using Rocket.API.Economy;
+#endif
 
 namespace Rocket.Eco
 {
@@ -48,7 +52,7 @@ namespace Rocket.Eco
         public IConsole Console => console ?? (console = new EcoConsole());
 
         /// <inheritdoc />
-        public string InstanceId => throw new NotImplementedException();
+        public string InstanceId => NetworkManager.Config?.Description ?? "Unknown";
 
         /// <inheritdoc />
         public bool IsAlive { get; } = true;
@@ -166,7 +170,7 @@ namespace Rocket.Eco
             ImplementationReadyEvent e = new ImplementationReadyEvent(this);
             runtime.Container.Resolve<IEventManager>().Emit(this, e);
 
-            logger.LogInformation("[EVENT] Eco has initialized!");
+            logger.LogInformation($"Rocket has initialized under the server {InstanceId}!");
 
             while (true)
             {

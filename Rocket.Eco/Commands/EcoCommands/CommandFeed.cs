@@ -20,7 +20,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Name => "Feed";
 
         /// <inheritdoc />
-        public string[] Aliases => new [] { "Eat" };
+        public string[] Aliases => new[] {"Eat"};
 
         /// <inheritdoc />
         public string Summary => "Satifies your or another player's hunger.";
