@@ -21,10 +21,9 @@ namespace Rocket.Eco.Player
     /// <inheritdoc cref="IPlayerManager" />
     public sealed class EcoPlayerManager : IPlayerManager
     {
-        private readonly IDependencyContainer container;
-
         //TODO: Migrate to a thread-safe collection.
         internal readonly List<EcoPlayer> _Players = new List<EcoPlayer>();
+        private readonly IDependencyContainer container;
 
         /// <inheritdoc />
         public EcoPlayerManager(IDependencyContainer container)
@@ -119,7 +118,7 @@ namespace Rocket.Eco.Player
             if (TryGetOnlinePlayerById(id, out IPlayer p)) return p;
 
             p = new EcoPlayer(id, this, container);
-            _Players.Add((EcoPlayer)p);
+            _Players.Add((EcoPlayer) p);
 
             return p;
         }

@@ -9,8 +9,6 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.API.Scheduler;
 using Rocket.Core.Logging;
-using Rocket.Eco.API;
-using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Scheduling
 {
@@ -21,12 +19,12 @@ namespace Rocket.Eco.Scheduling
         private const long MainTargetTickrate = 60;
         private readonly Thread asyncThread;
 
+        private readonly IDependencyContainer container;
+
         private readonly object lockObj = new object();
 
         private readonly Thread mainThread;
         private readonly List<ITask> tasks = new List<ITask>();
-
-        private readonly IDependencyContainer container;
 
         public EcoTaskScheduler(IDependencyContainer container)
         {

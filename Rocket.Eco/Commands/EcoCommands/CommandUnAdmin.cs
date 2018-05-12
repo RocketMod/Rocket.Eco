@@ -35,7 +35,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Permission => "Rocket.RemoveAdmin";
 
         /// <inheritdoc />
-        public string Syntax => "[command] <[n]ame / id>";
+        public string Syntax => "<[n]ame / id>";
 
         /// <inheritdoc />
         public IChildCommand[] ChildCommands => new IChildCommand[0];

@@ -37,7 +37,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Permission => "Rocket.Admin";
 
         /// <inheritdoc />
-        public string Syntax => "[command] <[n]ame>";
+        public string Syntax => "<[n]ame>";
 
         /// <inheritdoc />
         public IChildCommand[] ChildCommands => new IChildCommand[0];

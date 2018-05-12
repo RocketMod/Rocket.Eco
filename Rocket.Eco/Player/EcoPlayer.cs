@@ -50,7 +50,7 @@ namespace Rocket.Eco.Player
         public bool IsAdmin => InternalEcoUser?.IsAdmin ?? false;
 
         /// <summary>
-        ///     Returns a <see cref="float"/> representing the player's in-game reputation.
+        ///     Returns a <see cref="float" /> representing the player's in-game reputation.
         /// </summary>
         public float Reputation => ReputationManager.Obj.Rep(Name).CachedTotalReputation;
 

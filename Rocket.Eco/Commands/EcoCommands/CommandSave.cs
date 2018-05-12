@@ -29,7 +29,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Permission => "Rocket.Save";
 
         /// <inheritdoc />
-        public string Syntax => "[command]";
+        public string Syntax => "";
 
         /// <inheritdoc />
         public IChildCommand[] ChildCommands => new IChildCommand[0];

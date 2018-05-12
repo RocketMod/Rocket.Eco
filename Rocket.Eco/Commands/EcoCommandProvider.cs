@@ -2,7 +2,6 @@
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.Eco.API;
 using Rocket.Eco.Commands.EcoCommands;
 
 namespace Rocket.Eco.Commands
@@ -14,6 +13,7 @@ namespace Rocket.Eco.Commands
     public sealed class EcoCommandProvider : ICommandProvider
     {
         private readonly IDependencyContainer container;
+
         /// <inheritdoc />
         public EcoCommandProvider(IDependencyContainer container)
         {

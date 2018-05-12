@@ -5,8 +5,6 @@ using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Core.Logging;
-using Rocket.Eco.API;
-using Rocket.Eco.Extensions;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Commands

@@ -8,7 +8,6 @@ using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Core.Logging;
-using Rocket.Eco.API;
 
 namespace Rocket.Eco.Commands
 {
@@ -26,7 +25,7 @@ namespace Rocket.Eco.Commands
         {
             this.container = container;
 
-            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>)typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
+            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
                 throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
@@ -37,7 +36,7 @@ namespace Rocket.Eco.Commands
 
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
             {
-                ChatCommandAttribute attribute = (ChatCommandAttribute)pair.Value.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
+                ChatCommandAttribute attribute = (ChatCommandAttribute) pair.Value.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
 
                 if (attribute == null)
                     continue;
@@ -46,7 +45,8 @@ namespace Rocket.Eco.Commands
 
                 bool overriden = false;
 
-                if (currentCommands.Any(command => command.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) || (command.Aliases != null && command.Aliases.Contains(name, StringComparer.InvariantCultureIgnoreCase)))) {
+                if (currentCommands.Any(command => command.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) || command.Aliases != null && command.Aliases.Contains(name, StringComparer.InvariantCultureIgnoreCase)))
+                {
                     logger.LogWarning($"The vanilla command \"{name}\" was not registered as an override exists.");
                     overriden = true;
                 }

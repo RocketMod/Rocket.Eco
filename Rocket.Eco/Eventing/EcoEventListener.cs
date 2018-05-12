@@ -10,9 +10,7 @@ using Rocket.API.Plugins;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Core.Plugins.Events;
-using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
-using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Eventing
 {

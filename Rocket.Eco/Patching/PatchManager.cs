@@ -8,17 +8,15 @@ using Mono.Cecil;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Core.Logging;
-using Rocket.Eco.API;
 using Rocket.Eco.API.Patching;
-using Rocket.Eco.Extensions;
 
 namespace Rocket.Eco.Patching
 {
     /// <inheritdoc cref="IPatchManager" />
     public sealed class PatchManager : IPatchManager
     {
-        private readonly IDependencyContainer patchContainer;
         private readonly IDependencyContainer container;
+        private readonly IDependencyContainer patchContainer;
 
         /// <inheritdoc />
         public PatchManager(IDependencyContainer container)
