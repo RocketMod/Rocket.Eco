@@ -9,13 +9,14 @@ using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Economy
 {
-    public sealed class EcoEconomyProvider : ContainerAccessor, IEconomyProvider
+    public sealed class EcoEconomyProvider : IEconomyProvider
     {
+        private readonly IDependencyContainer container;
         internal readonly List<EcoCurrency> _Currencies = new List<EcoCurrency>();
 
-        public EcoEconomyProvider(IDependencyContainer container) : base (container)
+        public EcoEconomyProvider(IDependencyContainer container)
         {
-
+            this.container = container;
         }
 
         public IEnumerable<IEconomyCurrency> Currencies => _Currencies;

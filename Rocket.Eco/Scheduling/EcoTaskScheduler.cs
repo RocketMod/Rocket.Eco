@@ -15,7 +15,7 @@ using Rocket.Eco.Extensions;
 namespace Rocket.Eco.Scheduling
 {
     /// <inheritdoc cref="ITaskScheduler" />
-    public sealed class EcoTaskScheduler : ContainerAccessor, ITaskScheduler
+    public sealed class EcoTaskScheduler : ITaskScheduler
     {
         //TODO: Make this configurable
         private const long MainTargetTickrate = 60;
@@ -26,8 +26,12 @@ namespace Rocket.Eco.Scheduling
         private readonly Thread mainThread;
         private readonly List<ITask> tasks = new List<ITask>();
 
-        public EcoTaskScheduler(IDependencyContainer container) : base(container)
+        private readonly IDependencyContainer container;
+
+        public EcoTaskScheduler(IDependencyContainer container)
         {
+            this.container = container;
+
             mainThread = new Thread(MainThreadWork);
             asyncThread = new Thread(AsyncThreadWork);
 
@@ -129,7 +133,7 @@ namespace Rocket.Eco.Scheduling
                 }
                 else if (time != 0)
                 {
-                    ILogger logger = Container.Resolve<ILogger>();
+                    ILogger logger = container.Resolve<ILogger>();
                     logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
                     logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
                 }

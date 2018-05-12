@@ -15,6 +15,9 @@ namespace Rocket.Eco.Permissions
     public sealed class EcoPermissionProvider : IPermissionProvider
     {
         /// <inheritdoc />
+        public string ServiceName => GetType().Name;
+
+        /// <inheritdoc />
         public bool SupportsTarget(IIdentity target) => target is EcoPlayer || target is EcoUser;
 
         /// <inheritdoc />

@@ -15,14 +15,16 @@ using Rocket.Eco.Extensions;
 namespace Rocket.Eco.Patching
 {
     /// <inheritdoc cref="IPatchManager" />
-    public sealed class PatchManager : ContainerAccessor, IPatchManager
+    public sealed class PatchManager : IPatchManager
     {
         private readonly IDependencyContainer patchContainer;
+        private readonly IDependencyContainer container;
 
         /// <inheritdoc />
-        public PatchManager(IDependencyContainer container) : base(container)
+        public PatchManager(IDependencyContainer container)
         {
-            patchContainer = Container.CreateChildContainer();
+            this.container = container;
+            patchContainer = container.CreateChildContainer();
         }
 
         /// <inheritdoc />
@@ -95,7 +97,7 @@ namespace Rocket.Eco.Patching
                     {
                         if (stream == null)
                         {
-                            Container.Resolve<ILogger>().LogError("A manifest stream return null!");
+                            container.Resolve<ILogger>().LogError("A manifest stream return null!");
                             continue;
                         }
 
@@ -107,7 +109,7 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    ILogger logger = Container.Resolve<ILogger>();
+                    ILogger logger = container.Resolve<ILogger>();
 
                     logger.LogError("Unable to deflate and write an Assembly to the disk!", e);
                     logger.LogError(e.Message);

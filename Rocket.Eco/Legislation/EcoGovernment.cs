@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Eco.Shared.Utils;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
@@ -11,8 +12,9 @@ using EcoLegislation = Eco.Gameplay.Legislation;
 
 namespace Rocket.Eco.Legislation
 {
-    public sealed class EcoGovernment : ContainerAccessor, IGovernment
+    public sealed class EcoGovernment : IGovernment
     {
+        private readonly IDependencyContainer container;
         private readonly EcoLegislation ecoLegislation;
 
         private readonly List<IElection> elections = new List<IElection>();
@@ -21,8 +23,9 @@ namespace Rocket.Eco.Legislation
         private readonly List<ILaw> laws = new List<ILaw>();
         private readonly object lawsLock = new object();
 
-        public EcoGovernment(IDependencyContainer container) : base(container)
+        public EcoGovernment(IDependencyContainer container)
         {
+            this.container = container;
             ecoLegislation = Singleton<EcoLegislation>.Obj;
 
             //TODO: Pull all info from EcoLegislation.

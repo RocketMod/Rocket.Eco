@@ -58,7 +58,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             EcoPlayer ecoPlayer = (EcoPlayer) player;
 
-            if (ecoPlayer.UserIdType == EUserIdType.Both)
+            if (ecoPlayer.UserIdType == UserIdType.Both)
                 UserManager.Config.Admins.Add(ecoPlayer.InternalEcoUser.SteamId);
 
             UserManager.Config.Admins.Add(player.Id);

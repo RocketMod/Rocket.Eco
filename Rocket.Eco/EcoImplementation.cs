@@ -14,7 +14,6 @@ using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
-
 using Rocket.API.Plugins;
 using Rocket.API.Scheduler;
 using Rocket.API.User;
@@ -29,7 +28,6 @@ using Rocket.Eco.Commands;
 using Rocket.Eco.Delegates;
 using Rocket.Eco.Economy;
 using Rocket.Eco.Eventing;
-using Rocket.Eco.Extensions;
 using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
@@ -101,12 +99,13 @@ namespace Rocket.Eco
 
             EcoPlayerManager ecoPlayerManager = new EcoPlayerManager(runtime.Container);
 
+            //TODO: This can go into DependencyRegistrator.cs after patching is migrated 
             runtime.Container.RegisterSingletonInstance<IUserManager>(ecoPlayerManager, "ecousermanager");
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(ecoPlayerManager, null, "ecoplayermanager");
-            runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
             runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "ecotaskscheduler");
 
 #if DEBUG
+            runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
             runtime.Container.RegisterSingletonType<IEconomyProvider, EcoEconomyProvider>(null, "ecoeconomyprovider");
 #endif
 

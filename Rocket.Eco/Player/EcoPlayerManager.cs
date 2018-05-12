@@ -19,17 +19,24 @@ using Color = System.Drawing.Color;
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IPlayerManager" />
-    public sealed class EcoPlayerManager : ContainerAccessor, IPlayerManager
+    public sealed class EcoPlayerManager : IPlayerManager
     {
+        private readonly IDependencyContainer container;
+
         //TODO: Migrate to a thread-safe collection.
         internal readonly List<EcoPlayer> _Players = new List<EcoPlayer>();
 
         /// <inheritdoc />
-        public EcoPlayerManager(IDependencyContainer container) : base(container)
+        public EcoPlayerManager(IDependencyContainer container)
         {
+            this.container = container;
+
             foreach (User user in UserManager.Users)
-                _Players.Add(new EcoPlayer(user, this, Container));
+                _Players.Add(new EcoPlayer(user, this, container));
         }
+
+        /// <inheritdoc />
+        public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
         public IEnumerable<IPlayer> OnlinePlayers => _Players.Where(x => x.IsOnline);
@@ -111,7 +118,7 @@ namespace Rocket.Eco.Player
         {
             if (TryGetOnlinePlayerById(id, out IPlayer p)) return p;
 
-            p = new EcoPlayer(id, this, Container);
+            p = new EcoPlayer(id, this, container);
             _Players.Add((EcoPlayer)p);
 
             return p;
@@ -127,7 +134,7 @@ namespace Rocket.Eco.Player
                 throw new InvalidOperationException("You cannot kick an offline player.");
 
             UserKickEvent e = new UserKickEvent(ecoUser, ecoUser, reason);
-            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
+            container.Resolve<IEventManager>().Emit(container.Resolve<IImplementation>(), e);
 
             if (e.IsCancelled)
                 return false;
@@ -150,7 +157,7 @@ namespace Rocket.Eco.Player
                 reason = string.Empty;
 
             UserBanEvent e = new UserBanEvent(player, caller, reason, null);
-            Container.Resolve<IEventManager>().Emit(Container.Resolve<IImplementation>(), e);
+            container.Resolve<IEventManager>().Emit(container.Resolve<IImplementation>(), e);
 
             if (e.IsCancelled)
                 return false;
@@ -159,7 +166,7 @@ namespace Rocket.Eco.Player
             {
                 bool bothSucceed = false;
 
-                if (ecoPlayer.UserIdType == EUserIdType.Both)
+                if (ecoPlayer.UserIdType == UserIdType.Both)
                     bothSucceed = AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId);
 
                 if (!AddBanBlacklist(ecoPlayer.Id) && !bothSucceed)
@@ -188,7 +195,7 @@ namespace Rocket.Eco.Player
             {
                 case null:
                     throw new ArgumentNullException(nameof(user));
-                case EcoPlayer ecoPlayer when ecoPlayer.UserIdType == EUserIdType.Both:
+                case EcoPlayer ecoPlayer when ecoPlayer.UserIdType == UserIdType.Both:
                     RemoveBanBlacklist(ecoPlayer.InternalEcoUser.SteamId);
                     break;
             }

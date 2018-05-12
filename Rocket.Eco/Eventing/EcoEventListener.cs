@@ -22,16 +22,21 @@ namespace Rocket.Eco.Eventing
     ///     An internal class used by Rocket.Eco to handle a <see cref="PluginManagerInitEvent" /> emitted by Rocket's
     ///     <see cref="PluginManager" />.
     /// </summary>
-    public sealed class EcoEventListener : ContainerAccessor, IEventListener<PluginManagerInitEvent>
+    public sealed class EcoEventListener : IEventListener<PluginManagerInitEvent>
     {
-        internal EcoEventListener(IDependencyContainer container) : base(container) { }
+        private readonly IDependencyContainer container;
+
+        internal EcoEventListener(IDependencyContainer container)
+        {
+            this.container = container;
+        }
 
         /// <inheritdoc />
         [Core.Eventing.EventHandler(IgnoreCancelled = true)]
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
-            IPatchManager patchManager = Container.Resolve<IPatchManager>();
+            IPatchManager patchManager = container.Resolve<IPatchManager>();
 
             List<Assembly> registered = new List<Assembly>();
 
@@ -75,14 +80,14 @@ namespace Rocket.Eco.Eventing
                 }
                 catch (NullReferenceException)
                 {
-                    Container.Resolve<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
+                    container.Resolve<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
 
                     WaitAndExit();
                 }
             }
             else
             {
-                Container.Resolve<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
+                container.Resolve<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
                 WaitAndExit();
             }

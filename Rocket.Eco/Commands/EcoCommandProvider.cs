@@ -11,11 +11,14 @@ namespace Rocket.Eco.Commands
     /// <summary>
     ///     Provides all the commands added by the Eco implementation.
     /// </summary>
-    public sealed class EcoCommandProvider : ContainerAccessor, ICommandProvider
+    public sealed class EcoCommandProvider : ICommandProvider
     {
+        private readonly IDependencyContainer container;
         /// <inheritdoc />
-        public EcoCommandProvider(IDependencyContainer container) : base(container)
+        public EcoCommandProvider(IDependencyContainer container)
         {
+            this.container = container;
+
             Commands = new ICommand[]
             {
                 new CommandBan(),
@@ -28,7 +31,10 @@ namespace Rocket.Eco.Commands
         }
 
         /// <inheritdoc />
-        public ILifecycleObject GetOwner(ICommand command) => Container.Resolve<IImplementation>();
+        public string ServiceName => GetType().Name;
+
+        /// <inheritdoc />
+        public ILifecycleObject GetOwner(ICommand command) => container.Resolve<IImplementation>();
 
         /// <inheritdoc />
         public IEnumerable<ICommand> Commands { get; }

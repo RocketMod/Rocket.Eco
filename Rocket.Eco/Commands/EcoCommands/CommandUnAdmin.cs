@@ -53,7 +53,7 @@ namespace Rocket.Eco.Commands.EcoCommands
             else
                 player = playerManager.GetPlayer(context.Parameters[0]);
 
-            if (player is EcoPlayer ecoPlayer && ecoPlayer.UserIdType == EUserIdType.Both)
+            if (player is EcoPlayer ecoPlayer && ecoPlayer.UserIdType == UserIdType.Both)
                 UserManager.Config.Admins.Remove(ecoPlayer.InternalEcoUser.SteamId);
 
             UserManager.Config.Admins.Remove(player.Id);

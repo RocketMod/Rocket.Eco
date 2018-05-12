@@ -11,17 +11,19 @@ using Rocket.Eco.API;
 
 namespace Rocket.Eco.Economy
 {
-    public sealed class EcoCurrency : ContainerAccessor, IEconomyCurrency
+    public sealed class EcoCurrency : IEconomyCurrency
     {
         private readonly Currency internalCurrency;
         private readonly IPlayerManager playerManager;
+        private readonly IDependencyContainer container;
         internal readonly List<EcoEconomyAccount> _Accounts = new List<EcoEconomyAccount>();
 
-        public EcoCurrency(Currency internalCurrency, IDependencyContainer container) : base(container)
+        public EcoCurrency(Currency internalCurrency, IDependencyContainer container)
         {
+            this.container = container;
             this.internalCurrency = internalCurrency;
 
-            playerManager = Container.Resolve<IPlayerManager>("ecoplayermanager");
+            playerManager = container.Resolve<IPlayerManager>("ecoplayermanager");
 
             Owner = playerManager.GetPlayer(internalCurrency.Owner);
         }

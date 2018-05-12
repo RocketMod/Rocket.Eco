@@ -53,24 +53,24 @@ namespace Rocket.Eco.Player
         ///     Returns a <see cref="float"/> representing the player's in-game reputation.
         /// </summary>
         public float Reputation => ReputationManager.Obj.Rep(Name).CachedTotalReputation;
-        
+
         /// <summary>
-        ///     Returns a <see cref="EUserIdType" /> based on what type of account the user is using.
+        ///     Returns a <see cref="API.UserIdType" /> based on what type of account the user is using.
         /// </summary>
-        public EUserIdType UserIdType
+        public UserIdType UserIdType
         {
             get
             {
                 if (InternalEcoUser == null)
-                    return EUserIdType.Unknown;
+                    return UserIdType.Unknown;
 
                 bool hasSlg = string.IsNullOrWhiteSpace(InternalEcoUser.SlgId);
                 bool hasSteam = string.IsNullOrWhiteSpace(InternalEcoUser.SteamId);
 
                 if (hasSlg && hasSteam)
-                    return EUserIdType.Both;
+                    return UserIdType.Both;
 
-                return hasSteam ? EUserIdType.Steam : EUserIdType.Slg;
+                return hasSteam ? UserIdType.Steam : UserIdType.Slg;
             }
         }
 

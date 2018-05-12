@@ -16,21 +16,24 @@ namespace Rocket.Eco.Commands
     /// <summary>
     ///     Translates all of the commands provided by Eco and its modkit into a Rocket-useable <see cref="ICommand" />.
     /// </summary>
-    public sealed class EcoVanillaCommandProvider : ContainerAccessor, ICommandProvider
+    public sealed class EcoVanillaCommandProvider : ICommandProvider
     {
-        private readonly List<EcoCommandWrapper> commands;
+        private readonly List<EcoNativeCommand> commands;
+        private readonly IDependencyContainer container;
 
         /// <inheritdoc />
-        public EcoVanillaCommandProvider(IEnumerable<ICommand> currentCommands, IDependencyContainer container) : base(container)
+        public EcoVanillaCommandProvider(IEnumerable<ICommand> currentCommands, IDependencyContainer container)
         {
+            this.container = container;
+
             Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>)typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
                 throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
-            ILogger logger = Container.Resolve<ILogger>();
+            ILogger logger = container.Resolve<ILogger>();
 
-            List<EcoCommandWrapper> tempCommands = new List<EcoCommandWrapper>();
+            List<EcoNativeCommand> tempCommands = new List<EcoNativeCommand>();
 
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
             {
@@ -49,14 +52,17 @@ namespace Rocket.Eco.Commands
                 }
 
                 if (!overriden)
-                    tempCommands.Add(new EcoCommandWrapper(pair.Value, attribute, Container));
+                    tempCommands.Add(new EcoNativeCommand(pair.Value, attribute, container));
             }
 
             commands = tempCommands;
         }
 
         /// <inheritdoc />
-        public ILifecycleObject GetOwner(ICommand command) => Container.Resolve<IImplementation>();
+        public string ServiceName => GetType().Name;
+
+        /// <inheritdoc />
+        public ILifecycleObject GetOwner(ICommand command) => container.Resolve<IImplementation>();
 
         /// <inheritdoc />
         public IEnumerable<ICommand> Commands => commands;
