@@ -132,7 +132,7 @@
     <Compile Include="API\ContainerAccessor.cs" />
     <Compile Include="Commands\EcoCommandProvider.cs" />
     <Compile Include="Commands\EcoCommands\CommandAdmin.cs" />
-    <Compile Include="Commands\EcoCommands\CommandRemoveAdmin.cs" />
+    <Compile Include="Commands\EcoCommands\CommandUnAdmin.cs" />
     <Compile Include="Commands\EcoCommands\CommandSave.cs" />
     <Compile Include="Commands\EcoCommands\CommandShutdown.cs" />
     <Compile Include="Commands\EcoVanillaCommandProvider.cs" />
@@ -156,7 +156,6 @@
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
     <Compile Include="Player\EcoUser.cs" />
-    <Compile Include="Player\UnknownPlayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DependencyRegistrator.cs" />
     <Compile Include="Scheduling\ThreadSafeTask.cs" />

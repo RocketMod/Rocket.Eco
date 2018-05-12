@@ -23,7 +23,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Summary => "Saves and shuts down the server.";
 
         /// <inheritdoc />
-        public string Description => Summary;
+        public string Description => null;
 
         /// <inheritdoc />
         public string Permission => "Rocket.Shutdown";

@@ -31,7 +31,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Summary => "Makes a player an administrator. (THIS IS DANGEROUS TO GRANT!)";
 
         /// <inheritdoc />
-        public string Description => Summary;
+        public string Description => null;
 
         /// <inheritdoc />
         public string Permission => "Rocket.Admin";

@@ -14,22 +14,22 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// <summary>
     ///     A command to remove a player from the admin list.
     /// </summary>
-    public sealed class CommandRemoveAdmin : ICommand
+    public sealed class CommandUnAdmin : ICommand
     {
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
-        public string Name => "RemoveAdmin";
+        public string Name => "UnAdmin";
 
         /// <inheritdoc />
-        public string[] Aliases => new[] {"DelAdmin", "UnAdmin", "DeAdmin"};
+        public string[] Aliases => new[] {"DelAdmin", "RemoveAdmin", "DeAdmin"};
 
         /// <inheritdoc />
         public string Summary => "Removes a player's administrator permissions.";
 
         /// <inheritdoc />
-        public string Description => Summary;
+        public string Description => null;
 
         /// <inheritdoc />
         public string Permission => "Rocket.RemoveAdmin";

@@ -27,7 +27,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Summary => "Bans a player.";
 
         /// <inheritdoc />
-        public string Description => Summary;
+        public string Description => null;
 
         /// <inheritdoc />
         public string Permission => "Rocket.Ban";

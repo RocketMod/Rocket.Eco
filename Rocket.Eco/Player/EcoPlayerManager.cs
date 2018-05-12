@@ -105,7 +105,7 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public IPlayer GetPlayer(string id) => TryGetOnlinePlayerById(id, out IPlayer p) ? p : new UnknownPlayer(id, Container);
+        public IPlayer GetPlayer(string id) => TryGetOnlinePlayerById(id, out IPlayer p) ? p : new EcoPlayer(id, Container);
 
         /// <inheritdoc />
         public bool Kick(IUser user, IUser kickedBy = null, string reason = null)

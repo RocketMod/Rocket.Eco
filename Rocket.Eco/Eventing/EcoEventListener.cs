@@ -26,6 +26,7 @@ namespace Rocket.Eco.Eventing
         internal EcoEventListener(IDependencyContainer container) : base(container) { }
 
         /// <inheritdoc />
+        [Core.Eventing.EventHandler(IgnoreCancelled = true)]
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;

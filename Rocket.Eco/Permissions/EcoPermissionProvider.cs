@@ -2,6 +2,7 @@
 using Rocket.API.Configuration;
 using Rocket.API.Permissions;
 using Rocket.API.User;
+using Rocket.Core.ServiceProxies;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Permissions
@@ -10,6 +11,7 @@ namespace Rocket.Eco.Permissions
     /// <summary>
     ///     This class ensure that any admins registered by vanilla Eco have all the commands available.
     /// </summary>
+    [ServicePriority(Priority = ServicePriority.Lowest)]
     public sealed class EcoPermissionProvider : IPermissionProvider
     {
         /// <inheritdoc />

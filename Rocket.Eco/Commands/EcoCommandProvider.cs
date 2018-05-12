@@ -21,7 +21,7 @@ namespace Rocket.Eco.Commands
                 new CommandBan(),
                 new CommandKick(),
                 new CommandAdmin(),
-                new CommandRemoveAdmin(),
+                new CommandUnAdmin(),
                 new CommandSave(),
                 new CommandShutdown()
             };

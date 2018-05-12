@@ -21,6 +21,11 @@ namespace Rocket.Eco.API
         /// <summary>
         ///     The user is using an account with only a Steam ID present.
         /// </summary>
-        Steam
+        Steam,
+
+        /// <summary>
+        ///     The user has never logged in and their account type is unknown.
+        /// </summary>
+        Unknown
     }
 }

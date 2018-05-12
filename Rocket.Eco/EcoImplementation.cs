@@ -31,7 +31,6 @@ using Rocket.Eco.Legislation;
 using Rocket.Eco.Patches;
 using Rocket.Eco.Player;
 using Rocket.Eco.Scheduling;
-using Players_Player = Eco.Gameplay.Players.Player;
 
 namespace Rocket.Eco
 {
@@ -192,7 +191,7 @@ namespace Rocket.Eco
                 return;
 
             EcoPlayerManager playerManager = runtime.Container.ResolvePlayerManager("ecoplayermanager") as EcoPlayerManager;
-            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
+            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SlgId) || x.Id.Equals(castedUser.SteamId));
 
             string firstTime = string.Empty;
 
@@ -204,7 +203,14 @@ namespace Rocket.Eco
                 firstTime = " for the first time!";
             }
 
-            ConfigurationPermissionProvider permissionProvider = (ConfigurationPermissionProvider)runtime.Container.Resolve<IPermissionProvider>("default_permissions");
+            if (ecoPlayer.InternalEcoUser == null)
+            {
+                ecoPlayer.BuildReference(castedUser);
+
+                firstTime = " for the first time!";
+            }
+
+            ConfigurationPermissionProvider permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
 
             IConfigurationSection configurationSection = permissionProvider.PlayersConfig["EcoUser"];
 
@@ -224,7 +230,7 @@ namespace Rocket.Eco
                 playerPermissions.Add(section);
 
                 configurationSection.Set(playerPermissions);
-                
+
                 permissionProvider.PlayersConfig.Save();
             }
 
