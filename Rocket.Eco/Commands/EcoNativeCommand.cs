@@ -81,7 +81,7 @@ namespace Rocket.Eco.Commands
 
             try
             {
-                execute.Invoke(ecoChatManager, new object[] {Name, commandMethod, args, (context.User as EcoUser).Player.InternalEcoUser});
+                execute.Invoke(ecoChatManager, new object[] {Name, commandMethod, args, ((EcoUser) context.User).Player.InternalEcoUser});
             }
             catch (Exception e)
             {

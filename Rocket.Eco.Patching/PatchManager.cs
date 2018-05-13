@@ -12,8 +12,8 @@ namespace Rocket.Eco.Patching
     /// <inheritdoc cref="IPatchManager" />
     public sealed class PatcherPass : IPatcherPass
     {
-        private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();
         private readonly List<(AssemblyDefinition, IAssemblyResolver)> assemblies = new List<(AssemblyDefinition, IAssemblyResolver)>();
+        private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();
 
         /// <inheritdoc />
         public bool RegisterPatch<T>() where T : IAssemblyPatch, new()
@@ -26,23 +26,17 @@ namespace Rocket.Eco.Patching
         }
 
         /// <inheritdoc />
-        public bool RegisterAssembly(AssemblyDefinition assemblyDefinition)
-        {
-            throw new NotImplementedException();
-        }
+        public bool RegisterAssembly(AssemblyDefinition assemblyDefinition, IAssemblyResolver resolver) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public IEnumerable<AssemblyDefinition> FinalizePass()
-        {
-            throw new NotImplementedException();
-        }
+        public IEnumerable<AssemblyDefinition> FinalizePass() => throw new NotImplementedException();
 
         /// <inheritdoc />
         public void RegisterDependencyResolver(IAssemblyResolver resolver)
         {
             throw new NotImplementedException();
         }
-        
+
         /// <inheritdoc />
         public void RunPatching()
         {
@@ -87,11 +81,7 @@ namespace Rocket.Eco.Patching
                 {
                     using (Stream stream = eco.GetManifestResourceStream(resource))
                     {
-                        if (stream == null)
-                        {
-                            //container.Resolve<ILogger>().LogError("A manifest stream return null!");
-                            continue;
-                        }
+                        if (stream == null) continue;
 
                         using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
                         {
@@ -114,7 +104,7 @@ namespace Rocket.Eco.Patching
 
         private static void PatchAll(IDictionary<string, byte[]> targets, IAssemblyResolver monoCecilResolver)
         {
-            IEnumerable<IAssemblyPatch> patches = null;//resolver.ResolveAll<IAssemblyPatch>();
+            IEnumerable<IAssemblyPatch> patches = null; //resolver.ResolveAll<IAssemblyPatch>();
             foreach (KeyValuePair<string, byte[]> target in targets.ToList())
             {
                 string finalName = target.Key;

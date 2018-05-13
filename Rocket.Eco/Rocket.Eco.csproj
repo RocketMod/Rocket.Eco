@@ -132,6 +132,7 @@
     <Compile Include="Commands\EcoCommands\CommandFeed.cs" />
     <Compile Include="Commands\EcoCommandProvider.cs" />
     <Compile Include="Commands\EcoCommands\CommandAdmin.cs" />
+    <Compile Include="Commands\EcoCommands\CommandSkills.cs" />
     <Compile Include="Commands\EcoCommands\CommandUnAdmin.cs" />
     <Compile Include="Commands\EcoCommands\CommandSave.cs" />
     <Compile Include="Commands\EcoCommands\CommandShutdown.cs" />
