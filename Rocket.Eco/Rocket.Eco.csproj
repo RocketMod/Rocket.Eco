@@ -139,7 +139,6 @@
     <Compile Include="Commands\EcoCommands\CommandBan.cs" />
     <Compile Include="Commands\EcoCommands\CommandKick.cs" />
     <Compile Include="Commands\EcoNativeCommand.cs" />
-    <Compile Include="Delegates\EcoDelegates.cs" />
     <Compile Include="Delegates\ElectionDelegates.cs" />
     <Compile Include="Delegates\UserDelegates.cs" />
     <Compile Include="EcoImplementation.cs" />

@@ -1,7 +1,7 @@
 ﻿using System;
 using Mono.Cecil;
 
-namespace Rocket.Eco.Launcher.API.Patching
+namespace Rocket.Eco.Patching.API
 {
     /// <summary>
     ///     An object to represent a patch for a specified <see cref="Type" />.

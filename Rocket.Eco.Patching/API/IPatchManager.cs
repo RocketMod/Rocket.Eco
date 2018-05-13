@@ -1,6 +1,7 @@
 ﻿using System;
+using Mono.Cecil;
 
-namespace Rocket.Eco.Launcher.API.Patching
+namespace Rocket.Eco.Patching.API
 {
     /// <summary>
     ///     The service responsible for finding, patching, and loading any requested Assemblies.
@@ -23,5 +24,12 @@ namespace Rocket.Eco.Launcher.API.Patching
         ///     Runs every <see cref="IAssemblyPatch" /> that has been registered.
         /// </summary>
         void RunPatching();
+
+        //TODO: Make this API more expandable.
+        /// <summary>
+        ///     Registers an assembly given the <see cref="AssemblyDefinition"/>.
+        /// </summary>
+        /// <param name="assemblyDefinition">The assembly to register.</param>
+        void RegisterAssembly(AssemblyDefinition assemblyDefinition);
     }
 }
