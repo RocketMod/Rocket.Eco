@@ -33,7 +33,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Permission => "Rocket.Skills";
 
         /// <inheritdoc />
-        public string Syntax => "<[n]ame / id> <points> | <points>";
+        public string Syntax => "[[n]ame / id] [points] | [points]";
 
         /// <inheritdoc />
         public IChildCommand[] ChildCommands => new IChildCommand[0];

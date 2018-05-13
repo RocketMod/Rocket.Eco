@@ -16,6 +16,7 @@ namespace Rocket.Eco.Patching
     public sealed class PatchManager : IPatchManager
     {
         private readonly IDependencyContainer container;
+        private readonly ILogger logger;
         private readonly IDependencyContainer patchContainer;
 
         /// <inheritdoc />
@@ -23,14 +24,13 @@ namespace Rocket.Eco.Patching
         {
             this.container = container;
             patchContainer = container.CreateChildContainer();
+            logger = container.Resolve<ILogger>();
         }
 
         /// <inheritdoc />
         public void RegisterPatch(Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
-
-            ILogger logger = patchContainer.Resolve<ILogger>();
 
             if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;
 
@@ -41,8 +41,6 @@ namespace Rocket.Eco.Patching
         /// <inheritdoc />
         public void RegisterPatch<T>() where T : IAssemblyPatch, new()
         {
-            ILogger logger = patchContainer.Resolve<ILogger>();
-
             T patch = new T();
             patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
 
@@ -107,8 +105,6 @@ namespace Rocket.Eco.Patching
                 }
                 catch (Exception e)
                 {
-                    ILogger logger = container.Resolve<ILogger>();
-
                     logger.LogError("Unable to deflate and write an Assembly to the disk!", e);
                     logger.LogError(e.Message);
                     logger.LogError(e.StackTrace);

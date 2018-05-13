@@ -12,6 +12,7 @@ namespace Rocket.Eco.Player
     {
         private readonly object lockObj = new object();
         private IDependencyContainer container;
+
         internal EcoConsole() { }
 
         /// <inheritdoc />
@@ -24,7 +25,7 @@ namespace Rocket.Eco.Player
         public IdentityType Type => IdentityType.Console;
 
         /// <inheritdoc />
-        public IUserManager UserManager => container?.Resolve<IUserManager>("ecousermanager");
+        public IUserManager UserManager { get; private set; }
 
         /// <inheritdoc />
         public bool IsOnline => true;
@@ -76,6 +77,11 @@ namespace Rocket.Eco.Player
             Console.ForegroundColor = currentColor;
         }
 
-        internal void Init(IDependencyContainer container) => this.container = container;
+        internal void Init(IDependencyContainer container)
+        {
+            this.container = container;
+
+            UserManager = container.Resolve<IUserManager>("ecousermanager");
+        }
     }
 }

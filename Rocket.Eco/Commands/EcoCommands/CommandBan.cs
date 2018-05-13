@@ -34,7 +34,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Permission => "Rocket.Ban";
 
         /// <inheritdoc />
-        public string Syntax => "<[n]ame / id> <reason>";
+        public string Syntax => "[[n]ame / id] <reason>";
 
         /// <inheritdoc />
         public IChildCommand[] ChildCommands => new IChildCommand[0];

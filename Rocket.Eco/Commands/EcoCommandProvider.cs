@@ -2,6 +2,7 @@
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
+using Rocket.Core.ServiceProxies;
 using Rocket.Eco.Commands.EcoCommands;
 
 namespace Rocket.Eco.Commands
@@ -10,6 +11,7 @@ namespace Rocket.Eco.Commands
     /// <summary>
     ///     Provides all the commands added by the Eco implementation.
     /// </summary>
+    [ServicePriority(Priority = ServicePriority.Low)]
     public sealed class EcoCommandProvider : ICommandProvider
     {
         private readonly IDependencyContainer container;

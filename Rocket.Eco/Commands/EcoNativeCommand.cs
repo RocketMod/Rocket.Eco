@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API.Commands;
@@ -22,7 +23,7 @@ namespace Rocket.Eco.Commands
         private readonly MethodInfo commandMethod;
         private readonly IDependencyContainer container;
 
-        internal EcoNativeCommand(MethodInfo method, ChatCommandAttribute attribute, IDependencyContainer container)
+        internal EcoNativeCommand(MethodInfo method, IDependencyContainer container)
         {
             this.container = container;
 
@@ -34,7 +35,7 @@ namespace Rocket.Eco.Commands
                 execute = typeof(ChatManager).GetMethod("InvokeCommand", BindingFlags.Instance | BindingFlags.NonPublic)
                     ?? throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
-            command = attribute;
+            command = (ChatCommandAttribute) method.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
 
             ILogger logger = container.Resolve<ILogger>();
 

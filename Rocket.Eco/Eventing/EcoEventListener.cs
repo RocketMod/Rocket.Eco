@@ -1,16 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
-using Rocket.API.Plugins;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Core.Plugins.Events;
 using Rocket.Eco.API.Patching;
+
+#if DEBUG
+using System.Collections.Generic;
+using Rocket.API.Plugins;
+#endif
 
 namespace Rocket.Eco.Eventing
 {
@@ -23,18 +26,24 @@ namespace Rocket.Eco.Eventing
     public sealed class EcoEventListener : IEventListener<PluginManagerInitEvent>
     {
         private readonly IDependencyContainer container;
+        private readonly ILogger logger;
+        private readonly IPatchManager patchManager;
 
         internal EcoEventListener(IDependencyContainer container)
         {
             this.container = container;
+
+            patchManager = container.Resolve<IPatchManager>();
+            logger = container.Resolve<ILogger>();
         }
 
         /// <inheritdoc />
         [Core.Eventing.EventHandler(IgnoreCancelled = true)]
         public void HandleEvent(IEventEmitter emitter, PluginManagerInitEvent @event)
         {
+            //TODO: Plugins shouldn't be able to load patches.
+#if DEBUG
             IEnumerable<IPlugin> plugins = @event.PluginManager.Plugins;
-            IPatchManager patchManager = container.Resolve<IPatchManager>();
 
             List<Assembly> registered = new List<Assembly>();
 
@@ -58,6 +67,7 @@ namespace Rocket.Eco.Eventing
 
                     foreach (Type type in patches) patchManager.RegisterPatch(type);
                 }
+#endif
 
             patchManager.RunPatching();
 
@@ -78,14 +88,14 @@ namespace Rocket.Eco.Eventing
                 }
                 catch (NullReferenceException)
                 {
-                    container.Resolve<ILogger>().LogFatal("The entrypoint for the EcoServer couldn't be found!");
+                    logger.LogFatal("The entrypoint for the EcoServer couldn't be found!");
 
                     WaitAndExit();
                 }
             }
             else
             {
-                container.Resolve<ILogger>().LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
+                logger.LogInformation("Extraction has finished; please restart the program without the `-extract` argument to run.");
 
                 WaitAndExit();
             }

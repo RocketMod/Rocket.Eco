@@ -25,7 +25,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Name => "Admin";
 
         /// <inheritdoc />
-        public string[] Aliases => new string[0];
+        public string[] Aliases => new[] {"AddAdmin", "SetAdmin"};
 
         /// <inheritdoc />
         public string Summary => "Makes a player an administrator. (THIS IS DANGEROUS TO GRANT!)";
@@ -37,7 +37,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public string Permission => "Rocket.Admin";
 
         /// <inheritdoc />
-        public string Syntax => "<[n]ame>";
+        public string Syntax => "[[n]ame / id]";
 
         /// <inheritdoc />
         public IChildCommand[] ChildCommands => new IChildCommand[0];
