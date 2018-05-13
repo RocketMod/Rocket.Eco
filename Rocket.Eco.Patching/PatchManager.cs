@@ -10,33 +10,39 @@ using Rocket.Eco.Patching.API;
 namespace Rocket.Eco.Patching
 {
     /// <inheritdoc cref="IPatchManager" />
-    public sealed class PatchManager : IPatchManager
+    public sealed class PatcherPass : IPatcherPass
     {
-        /// <inheritdoc />
-        public void RegisterPatch(Type type)
-        {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            
-            if (!(Activator.CreateInstance(type) is IAssemblyPatch patch)) return;
+        private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();
+        private readonly List<(AssemblyDefinition, IAssemblyResolver)> assemblies = new List<(AssemblyDefinition, IAssemblyResolver)>();
 
-            //patchContainer.RegisterInstance(patch, $"{type.Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
-            //logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
+        /// <inheritdoc />
+        public bool RegisterPatch<T>() where T : IAssemblyPatch, new()
+        {
+            if (patches.FirstOrDefault(x => x.GetType() == typeof(T)) != null)
+                return false;
+
+            patches.Add(new T());
+            return true;
         }
 
         /// <inheritdoc />
-        public void RegisterPatch<T>() where T : IAssemblyPatch, new()
+        public bool RegisterAssembly(AssemblyDefinition assemblyDefinition)
         {
-            //ILogger logger = patchContainer.Resolve<ILogger>();
-
-            T patch = new T();
-            //patchContainer.RegisterInstance<IAssemblyPatch>(patch, $"{typeof(T).Assembly.FullName}_{patch.TargetAssembly}_{patch.TargetType}");
-
-            //logger.LogInformation($"A patch for {patch.TargetType} has been registered.");
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public void RegisterAssembly(AssemblyDefinition assemblyDefinition) => throw new NotImplementedException();
+        public IEnumerable<AssemblyDefinition> FinalizePass()
+        {
+            throw new NotImplementedException();
+        }
 
+        /// <inheritdoc />
+        public void RegisterDependencyResolver(IAssemblyResolver resolver)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <inheritdoc />
         public void RunPatching()
         {
