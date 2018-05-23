@@ -3,7 +3,7 @@ using Mono.Cecil;
 
 namespace Rocket.Eco.Patching.API
 {
-    public interface IPatcherPass
+    public interface IPatchingService
     {
         /// <summary>
         ///     Registers a new <see cref="IAssemblyPatch" />.
@@ -31,7 +31,7 @@ namespace Rocket.Eco.Patching.API
         bool RegisterAssembly(AssemblyDefinition assemblyDefinition, IAssemblyResolver resolver = null);
 
         /// <summary>
-        ///     Patches every given Assembly up-to this point.
+        ///     Patches every given Assembly up-to this point and wipes the list of assemblies/patches.
         /// </summary>
         /// <returns>An enumaration of the patched <see cref="AssemblyDefinition" />.</returns>
         IEnumerable<AssemblyDefinition> FinalizePass();

@@ -33,6 +33,11 @@ namespace Rocket.Eco.Economy
 
         public decimal Exchange(double amount, IEconomyCurrency targetCurrency) => throw new NotSupportedException("Vanilla currencies may not exchange with each-other.");
 
+        public decimal ExchangeTo(decimal amount, IEconomyCurrency targetCurrency)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool CanExchange(IEconomyCurrency currency) => false;
 
         public string Name => internalCurrency.CurrencyName;

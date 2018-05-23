@@ -22,6 +22,7 @@ using Rocket.Core.Implementation.Events;
 using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
+using Rocket.Core.User.Events;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;
 using Rocket.Eco.Delegates;
@@ -63,7 +64,7 @@ namespace Rocket.Eco
         public string InstanceId => NetworkManager.Config?.Description ?? "Unknown";
 
         /// <inheritdoc />
-        public bool IsAlive { get; } = true;
+        public bool IsAlive => true;
 
         /// <inheritdoc />
         public string WorkingDirectory => "./Rocket/";
@@ -218,8 +219,7 @@ namespace Rocket.Eco
 
                 firstTime = " for the first time!";
             }
-
-            if (ecoPlayer.InternalEcoUser == null)
+            else if (ecoPlayer.InternalEcoUser == null)
             {
                 ecoPlayer.BuildReference(castedUser);
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using Eco.Gameplay.Economy;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Entities;
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Core.Player;
@@ -12,7 +11,7 @@ using InternalEcoPlayer = Eco.Gameplay.Players.Player;
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IPlayer" />
-    public sealed class EcoPlayer : BasePlayer, IUserInfo
+    public sealed class EcoPlayer : BasePlayer<EcoUser, EcoUser, EcoPlayer>, IUserInfo
     {
         private readonly string unbuiltId;
         private EcoUser ecoUser;
@@ -75,10 +74,10 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public override IUser User => IsOnline ? ecoUser : null;
+        public override EcoUser User => IsOnline ? ecoUser : null;
 
         /// <inheritdoc />
-        public override IEntity Entity => IsOnline ? ecoUser : null;
+        public override EcoUser Entity => IsOnline ? ecoUser : null;
 
         /// <inheritdoc />
         public override bool IsOnline => InternalEcoUser?.LoggedIn ?? false;

@@ -10,7 +10,7 @@ using Rocket.Eco.Patching.API;
 namespace Rocket.Eco.Patching
 {
     /// <inheritdoc cref="IPatchManager" />
-    public sealed class PatcherPass : IPatcherPass
+    public sealed class PatcherPass : IPatchingService
     {
         private readonly List<(AssemblyDefinition, IAssemblyResolver)> assemblies = new List<(AssemblyDefinition, IAssemblyResolver)>();
         private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();

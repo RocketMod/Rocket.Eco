@@ -1,24 +1,36 @@
 ﻿using System;
+using System.Numerics;
 using Rocket.API.Entities;
+using Rocket.API.Player;
 using Rocket.API.User;
+using Rocket.Eco.Extensions;
+using EcoVector3 = Eco.Shared.Math.Vector3;
 
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IUser" />
-    public sealed class EcoUser : IUser, IEntity
+    public sealed class EcoUser : IPlayerUser<EcoPlayer>, IPlayerEntity<EcoPlayer>
     {
         internal EcoUser(EcoPlayer player)
         {
             Player = player;
         }
 
-        /// <summary>
-        ///     A reference to the companion <see cref="EcoPlayer" /> this instance is related to.
-        /// </summary>
+        /// <inheritdoc cref="IPlayerUser"/>
         public EcoPlayer Player { get; }
 
         /// <inheritdoc />
         public string EntityTypeName => UserType;
+
+        /// <inheritdoc />
+        public Vector3 Position => Player.InternalEcoUser.Position.ToSystemVector3();
+
+        /// <inheritdoc />
+        public bool Teleport(Vector3 position)
+        {
+            Player.InternalEcoPlayer.SetPosition(position.ToEcoVector3());
+            return true;
+        }
 
         /// <inheritdoc />
         public string Id => Player.Id;
@@ -27,7 +39,7 @@ namespace Rocket.Eco.Player
         public string Name => Player.Name;
 
         /// <inheritdoc />
-        public IdentityType Type => Player.Type;
+        public string IdentityType => "User";
 
         /// <inheritdoc />
         public IUserManager UserManager => Player.UserManager;

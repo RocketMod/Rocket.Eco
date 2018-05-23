@@ -22,7 +22,7 @@ namespace Rocket.Eco.Player
         public string Name => "Eco Console";
 
         /// <inheritdoc />
-        public IdentityType Type => IdentityType.Console;
+        public string IdentityType => "Console";
 
         /// <inheritdoc />
         public IUserManager UserManager { get; private set; }

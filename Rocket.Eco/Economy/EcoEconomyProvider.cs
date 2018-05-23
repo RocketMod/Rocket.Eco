@@ -18,8 +18,14 @@ namespace Rocket.Eco.Economy
             this.container = container;
         }
 
+        public decimal GetBalance(IIdentity identity)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<IEconomyCurrency> Currencies => _Currencies;
         public IEconomyCurrency DefaultCurrency => _Currencies.FirstOrDefault(x => x.IsBacked);
+        public bool SupportsMultipleAccounts { get; }
 
         public void AddBalance(IIdentity owner, decimal amount, string reason = null)
         {

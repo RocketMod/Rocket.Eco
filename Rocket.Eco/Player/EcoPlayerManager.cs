@@ -12,6 +12,7 @@ using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Core.Player.Events;
+using Rocket.Core.User.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
 using Color = System.Drawing.Color;

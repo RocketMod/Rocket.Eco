@@ -5,6 +5,7 @@ using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Economy
 {
+    /// <inheritdoc />
     public sealed class EcoEconomyAccount : IEconomyAccount
     {
         internal EcoEconomyAccount(IIdentity player, IEconomyCurrency currency)
@@ -16,10 +17,16 @@ namespace Rocket.Eco.Economy
             Currency = currency;
         }
 
+        /// <inheritdoc />
         public IIdentity Owner { get; }
+
+        /// <inheritdoc />
         public IEconomyCurrency Currency { get; }
 
+        /// <inheritdoc />
         public string Name => $"{Owner.Name}'s {Currency.Name} Account";
+
+        /// <inheritdoc />
         public decimal Balance { get; }
     }
 }

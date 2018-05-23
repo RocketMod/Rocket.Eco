@@ -16,7 +16,7 @@ namespace Rocket.Eco.Delegates
     /// <param name="text">The message the user sent.</param>
     /// <returns>
     ///     <value>false</value>
-    ///     > when the message should be cancelled.
+    ///     when the message should be cancelled.
     /// </returns>
     public delegate bool EcoUserChatDelegate(object user, string text);
 }
