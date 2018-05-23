@@ -18,10 +18,7 @@ namespace Rocket.Eco.Economy
             this.container = container;
         }
 
-        public decimal GetBalance(IIdentity identity)
-        {
-            throw new NotImplementedException();
-        }
+        public decimal GetBalance(IIdentity identity) => throw new NotImplementedException();
 
         public IEnumerable<IEconomyCurrency> Currencies => _Currencies;
         public IEconomyCurrency DefaultCurrency => _Currencies.FirstOrDefault(x => x.IsBacked);
@@ -67,6 +64,6 @@ namespace Rocket.Eco.Economy
 
         public IEnumerable<IEconomyAccount> GetAccounts(IIdentity owner) => throw new NotImplementedException();
 
-        public bool SupportsIdentity(IIdentity identity) => identity is EcoPlayer || identity is EcoUser;
+        public bool SupportsIdentity(IIdentity identity) => identity is EcoPlayer || identity is EcoPlayerEntity;
     }
 }

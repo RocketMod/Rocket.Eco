@@ -11,16 +11,18 @@ using InternalEcoPlayer = Eco.Gameplay.Players.Player;
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IPlayer" />
-    public sealed class EcoPlayer : BasePlayer<EcoUser, EcoUser, EcoPlayer>, IUserInfo
+    public sealed class EcoPlayer : BasePlayer<EcoPlayerEntity, EcoPlayerUser, EcoPlayer>, IUserInfo
     {
         private readonly string unbuiltId;
-        private EcoUser ecoUser;
+        private EcoPlayerEntity ecoEntity;
+        private EcoPlayerUser ecoUser;
 
         internal EcoPlayer(InternalEcoUser user, IUserManager userManager, IDependencyContainer container) : base(container)
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
 
-            ecoUser = new EcoUser(this);
+            ecoUser = new EcoPlayerUser(this);
+            ecoEntity = new EcoPlayerEntity(this);
 
             UserManager = userManager;
         }
@@ -74,10 +76,10 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public override EcoUser User => IsOnline ? ecoUser : null;
+        public override EcoPlayerUser User => IsOnline ? ecoUser : null;
 
         /// <inheritdoc />
-        public override EcoUser Entity => IsOnline ? ecoUser : null;
+        public override EcoPlayerEntity Entity => IsOnline ? ecoEntity : null;
 
         /// <inheritdoc />
         public override bool IsOnline => InternalEcoUser?.LoggedIn ?? false;
@@ -107,7 +109,8 @@ namespace Rocket.Eco.Player
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
 
-            ecoUser = new EcoUser(this);
+            ecoUser = new EcoPlayerUser(this);
+            ecoEntity = new EcoPlayerEntity(this);
         }
 
         /// <summary>

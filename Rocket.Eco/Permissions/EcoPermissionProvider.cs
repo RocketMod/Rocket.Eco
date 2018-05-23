@@ -18,7 +18,7 @@ namespace Rocket.Eco.Permissions
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public bool SupportsTarget(IIdentity target) => target is EcoPlayer || target is EcoUser;
+        public bool SupportsTarget(IIdentity target) => target is EcoPlayer || target is EcoPlayerEntity;
 
         /// <inheritdoc />
         public PermissionResult CheckPermission(IIdentity target, string permission)
@@ -29,7 +29,7 @@ namespace Rocket.Eco.Permissions
                     if (ecoPlayer.InternalEcoUser.IsAdmin)
                         return PermissionResult.Grant;
                     break;
-                case EcoUser ecoUser:
+                case EcoPlayerUser ecoUser:
                     if (ecoUser.Player.InternalEcoUser.IsAdmin)
                         return PermissionResult.Grant;
                     break;
@@ -47,7 +47,7 @@ namespace Rocket.Eco.Permissions
                     if (ecoPlayer.IsAdmin)
                         return PermissionResult.Grant;
                     break;
-                case EcoUser ecoUser:
+                case EcoPlayerUser ecoUser:
                     if (ecoUser.Player.IsAdmin)
                         return PermissionResult.Grant;
                     break;
@@ -65,7 +65,7 @@ namespace Rocket.Eco.Permissions
                     if (ecoPlayer.IsAdmin)
                         return PermissionResult.Grant;
                     break;
-                case EcoUser ecoUser:
+                case EcoPlayerUser ecoUser:
                     if (ecoUser.Player.IsAdmin)
                         return PermissionResult.Grant;
                     break;

@@ -21,7 +21,6 @@ using Rocket.Core.Commands.Events;
 using Rocket.Core.Implementation.Events;
 using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
-using Rocket.Core.Player.Events;
 using Rocket.Core.User.Events;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;

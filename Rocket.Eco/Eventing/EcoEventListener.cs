@@ -6,7 +6,6 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.Core.Logging;
-using Rocket.Core.Plugins;
 using Rocket.Core.Plugins.Events;
 using Rocket.Eco.API.Patching;
 

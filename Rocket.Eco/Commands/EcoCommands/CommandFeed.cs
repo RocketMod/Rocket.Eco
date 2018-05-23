@@ -42,7 +42,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         {
             if (context.Parameters.Length == 0)
             {
-                if (!(context.User is EcoUser ecoUser))
+                if (!(context.User is EcoPlayerUser ecoUser))
                     throw new CommandWrongUsageException("If this is called from the console, you need to specify a user.");
 
                 ecoUser.Player.InternalEcoUser.Stomach.Calories = ecoUser.Player.InternalEcoUser.Stomach.MaxCalories;

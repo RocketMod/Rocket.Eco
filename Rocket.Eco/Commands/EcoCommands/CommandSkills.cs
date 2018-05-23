@@ -49,7 +49,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (context.Parameters.Length == 1)
             {
-                if (!(context.User is EcoUser ecoUser))
+                if (!(context.User is EcoPlayerUser ecoUser))
                     throw new CommandWrongUsageException("Only in-game players may give skill points to themselves.");
 
                 if (!float.TryParse(context.Parameters[0], out skills))

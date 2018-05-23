@@ -11,7 +11,6 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.API.User;
-using Rocket.Core.Player.Events;
 using Rocket.Core.User.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
@@ -127,7 +126,7 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public bool Kick(IUser user, IUser kickedBy = null, string reason = null)
         {
-            if (!(user is EcoUser ecoUser))
+            if (!(user is EcoPlayerUser ecoUser))
                 throw new ArgumentException("Must be of type `EcoUser`", nameof(user));
 
             if (!ecoUser.IsOnline)
@@ -206,7 +205,7 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public void SendMessage(IUser sender, IUser receiver, string message, Color? color = null, params object[] arguments)
         {
-            if (!(receiver is EcoUser ecoUser))
+            if (!(receiver is EcoPlayerUser ecoUser))
             {
                 if (!(receiver is IConsole console))
                     throw new ArgumentException("Must be of type `EcoUser`.", nameof(receiver));
@@ -226,11 +225,11 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public void Broadcast(IUser sender, IEnumerable<IUser> receivers, string message, Color? color = null, params object[] arguments)
         {
-            List<EcoUser> users = new List<EcoUser>();
+            List<EcoPlayerUser> users = new List<EcoPlayerUser>();
 
             foreach (IUser user in receivers)
             {
-                if (!(user is EcoUser ecoUser))
+                if (!(user is EcoPlayerUser ecoUser))
                     throw new ArgumentException("Every enumeration must be of type `EcoUser`.", nameof(receivers));
 
                 if (!ecoUser.IsOnline)
@@ -241,7 +240,7 @@ namespace Rocket.Eco.Player
 
             string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
 
-            foreach (EcoUser ecoUser in users) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
+            foreach (EcoPlayerUser ecoUser in users) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
         }
 
         /// <inheritdoc />

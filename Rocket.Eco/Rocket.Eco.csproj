@@ -158,7 +158,8 @@
     <Compile Include="Player\EcoConsole.cs" />
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
-    <Compile Include="Player\EcoUser.cs" />
+    <Compile Include="Player\EcoPlayerEntity.cs" />
+    <Compile Include="Player\EcoPlayerUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DependencyRegistrator.cs" />
     <Compile Include="Scheduling\ThreadSafeTask.cs" />
