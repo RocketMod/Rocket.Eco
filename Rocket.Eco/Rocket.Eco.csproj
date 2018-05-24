@@ -136,7 +136,7 @@
     <Compile Include="Commands\EcoCommands\CommandUnAdmin.cs" />
     <Compile Include="Commands\EcoCommands\CommandSave.cs" />
     <Compile Include="Commands\EcoCommands\CommandShutdown.cs" />
-    <Compile Include="Commands\EcoVanillaCommandProvider.cs" />
+    <Compile Include="Commands\EcoNativeCommandProvider.cs" />
     <Compile Include="Commands\EcoCommands\CommandBan.cs" />
     <Compile Include="Commands\EcoCommands\CommandKick.cs" />
     <Compile Include="Commands\EcoNativeCommand.cs" />

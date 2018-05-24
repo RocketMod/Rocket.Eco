@@ -14,13 +14,13 @@ namespace Rocket.Eco.Commands
     ///     Translates all of the commands provided by Eco and its modkit into a Rocket-useable <see cref="ICommand" />.
     /// </summary>
     [ServicePriority(Priority = ServicePriority.Lowest)]
-    public sealed class EcoVanillaCommandProvider : ICommandProvider
+    public sealed class EcoNativeCommandProvider : ICommandProvider
     {
         private readonly List<EcoNativeCommand> commands = new List<EcoNativeCommand>();
         private readonly IImplementation implementation;
 
         /// <inheritdoc />
-        public EcoVanillaCommandProvider(IImplementation implementation, IDependencyContainer container)
+        public EcoNativeCommandProvider(IImplementation implementation, IDependencyContainer container)
         {
             this.implementation = implementation;
             Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
