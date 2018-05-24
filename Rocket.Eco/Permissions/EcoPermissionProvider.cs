@@ -26,11 +26,11 @@ namespace Rocket.Eco.Permissions
             switch (target)
             {
                 case EcoPlayer ecoPlayer:
-                    if (ecoPlayer.InternalEcoUser.IsAdmin)
+                    if (ecoPlayer.IsAdmin)
                         return PermissionResult.Grant;
                     break;
                 case EcoPlayerUser ecoUser:
-                    if (ecoUser.Player.InternalEcoUser.IsAdmin)
+                    if (ecoUser.Player.IsAdmin)
                         return PermissionResult.Grant;
                     break;
             }

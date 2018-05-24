@@ -22,7 +22,7 @@ namespace Rocket.Eco.Player
     public sealed class EcoPlayerManager : IPlayerManager
     {
         //TODO: Migrate to a thread-safe collection.
-        internal readonly List<EcoPlayer> _Players = new List<EcoPlayer>();
+        internal readonly List<EcoPlayer> InternalPlayersList = new List<EcoPlayer>();
         private readonly IDependencyContainer container;
 
         /// <inheritdoc />
@@ -31,17 +31,17 @@ namespace Rocket.Eco.Player
             this.container = container;
 
             foreach (User user in UserManager.Users)
-                _Players.Add(new EcoPlayer(user, this, container));
+                InternalPlayersList.Add(new EcoPlayer(user, this, container));
         }
 
         /// <inheritdoc />
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public IEnumerable<IPlayer> OnlinePlayers => _Players.Where(x => x.IsOnline);
+        public IEnumerable<IPlayer> OnlinePlayers => InternalPlayersList.Where(x => x.IsOnline);
 
         /// <inheritdoc />
-        public IEnumerable<IUser> Users => _Players.Select(x => x.User);
+        public IEnumerable<IUser> Users => InternalPlayersList.Select(x => x.User);
 
         /// <inheritdoc />
         public IPlayer GetOnlinePlayer(string nameOrId)
@@ -118,7 +118,7 @@ namespace Rocket.Eco.Player
             if (TryGetOnlinePlayerById(id, out IPlayer p)) return p;
 
             p = new EcoPlayer(id, this, container);
-            _Players.Add((EcoPlayer) p);
+            InternalPlayersList.Add((EcoPlayer) p);
 
             return p;
         }
@@ -161,20 +161,20 @@ namespace Rocket.Eco.Player
             if (e.IsCancelled)
                 return false;
 
-            if (player is EcoPlayer ecoPlayer && ecoPlayer.User != null)
+            if (player is EcoPlayerUser ecoUser)
             {
                 bool bothSucceed = false;
 
-                if (ecoPlayer.UserIdType == UserIdType.Both)
-                    bothSucceed = AddBanBlacklist(ecoPlayer.InternalEcoUser.SteamId);
+                if (ecoUser.Player.UserIdType == UserIdType.Both)
+                    bothSucceed = AddBanBlacklist(ecoUser.Player.InternalEcoUser.SteamId);
 
-                if (!AddBanBlacklist(ecoPlayer.Id) && !bothSucceed)
+                if (!AddBanBlacklist(ecoUser.Id) && !bothSucceed)
                     return false;
 
                 UserManager.Obj.SaveConfig();
 
-                if (ecoPlayer.IsOnline)
-                    ecoPlayer.InternalEcoUser.Client.Disconnect("You have been banned.", reason);
+                if (ecoUser.IsOnline)
+                    ecoUser.Player.InternalEcoUser.Client.Disconnect("You have been banned.", reason);
             }
             else
             {
@@ -194,8 +194,8 @@ namespace Rocket.Eco.Player
             {
                 case null:
                     throw new ArgumentNullException(nameof(user));
-                case EcoPlayer ecoPlayer when ecoPlayer.UserIdType == UserIdType.Both:
-                    RemoveBanBlacklist(ecoPlayer.InternalEcoUser.SteamId);
+                case EcoPlayerUser ecoUser when ecoUser.Player.UserIdType == UserIdType.Both:
+                    RemoveBanBlacklist(ecoUser.Player.InternalEcoUser.SteamId);
                     break;
             }
 

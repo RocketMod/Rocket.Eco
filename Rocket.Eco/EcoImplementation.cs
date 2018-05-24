@@ -105,7 +105,7 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "ecousermanager");
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "ecoplayermanager");
             runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "ecotaskscheduler");
-            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoVanillaCommandProvider(this, runtime.Container), "ecovanillacommandprovider");
+            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, runtime.Container), "econativecommandprovider");
 
 #if DEBUG
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
@@ -207,14 +207,14 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser))
                 return;
 
-            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SlgId) || x.Id.Equals(castedUser.SteamId));
+            EcoPlayer ecoPlayer = playerManager?.InternalPlayersList.FirstOrDefault(x => x.Id.Equals(castedUser.SlgId) || x.Id.Equals(castedUser.SteamId));
 
             string firstTime = string.Empty;
 
             if (ecoPlayer == null)
             {
                 ecoPlayer = new EcoPlayer(castedUser, playerManager, runtime.Container);
-                playerManager?._Players.Add(ecoPlayer);
+                playerManager?.InternalPlayersList.Add(ecoPlayer);
 
                 firstTime = " for the first time!";
             }
@@ -257,7 +257,7 @@ namespace Rocket.Eco
             if (player == null || !(player is User castedUser))
                 return;
 
-            EcoPlayer ecoPlayer = playerManager?._Players.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
+            EcoPlayer ecoPlayer = playerManager?.InternalPlayersList.FirstOrDefault(x => x.Id.Equals(castedUser.SteamId));
 
             if (ecoPlayer == null)
             {
@@ -265,7 +265,7 @@ namespace Rocket.Eco
                 return;
             }
 
-            eventManager.Emit(this, new UserDisconnectedEvent(ecoPlayer, null, EventExecutionTargetContext.NextFrame));
+            eventManager.Emit(this, new UserDisconnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame));
 
             logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
         }
@@ -292,7 +292,7 @@ namespace Rocket.Eco
                 {
                     ecoPlayer.SendErrorMessage("Execution of your command has been cancelled!");
 
-                    goto RETURN;
+                    return true;
                 }
 
                 taskScheduler
@@ -322,7 +322,6 @@ namespace Rocket.Eco
                             ecoPlayer.SendErrorMessage("That command could not be found!");
                     });
 
-                RETURN:
                 return true;
             }
 

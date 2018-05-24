@@ -60,7 +60,7 @@ namespace Rocket.Eco.Commands.EcoCommands
                 switch (player)
                 {
                     case EcoPlayer ecoPlayer:
-                        userInfo = ecoPlayer;
+                        userInfo = ecoPlayer.User;
                         break;
                     default:
                         throw new InvalidOperationException("Eco's IPlayerManager returned an invalid player! This can only happen if a plugin overrides it.");

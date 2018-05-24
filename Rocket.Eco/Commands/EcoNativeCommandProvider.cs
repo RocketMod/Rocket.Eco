@@ -16,12 +16,13 @@ namespace Rocket.Eco.Commands
     [ServicePriority(Priority = ServicePriority.Lowest)]
     public sealed class EcoVanillaCommandProvider : ICommandProvider
     {
-        private readonly List<EcoNativeCommand> commands;
+        private readonly List<EcoNativeCommand> commands = new List<EcoNativeCommand>();
         private readonly IImplementation implementation;
 
         /// <inheritdoc />
         public EcoVanillaCommandProvider(IImplementation implementation, IDependencyContainer container)
         {
+            this.implementation = implementation;
             Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)

@@ -11,27 +11,24 @@ using InternalEcoPlayer = Eco.Gameplay.Players.Player;
 namespace Rocket.Eco.Player
 {
     /// <inheritdoc cref="IPlayer" />
-    public sealed class EcoPlayer : BasePlayer<EcoPlayerEntity, EcoPlayerUser, EcoPlayer>, IUserInfo
+    public sealed class EcoPlayer : BasePlayer<EcoPlayerEntity, EcoPlayerUser, EcoPlayer>
     {
         private readonly string unbuiltId;
         private EcoPlayerEntity ecoEntity;
-        private EcoPlayerUser ecoUser;
 
         internal EcoPlayer(InternalEcoUser user, IUserManager userManager, IDependencyContainer container) : base(container)
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
 
-            ecoUser = new EcoPlayerUser(this);
+            User = new EcoPlayerUser(this, userManager);
             ecoEntity = new EcoPlayerEntity(this);
-
-            UserManager = userManager;
         }
 
         internal EcoPlayer(string id, IUserManager userManager, IDependencyContainer container) : base(container)
         {
             unbuiltId = id;
 
-            UserManager = userManager;
+            User = new EcoPlayerUser(this, userManager);
         }
 
         /// <summary>
@@ -76,7 +73,7 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public override EcoPlayerUser User => IsOnline ? ecoUser : null;
+        public override EcoPlayerUser User { get; }
 
         /// <inheritdoc />
         public override EcoPlayerEntity Entity => IsOnline ? ecoEntity : null;
@@ -101,15 +98,11 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public override string Name => InternalEcoUser?.Name;
-
-        /// <inheritdoc />
-        public IUserManager UserManager { get; }
-
+        
         internal void BuildReference(InternalEcoUser user)
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
-
-            ecoUser = new EcoPlayerUser(this);
+            
             ecoEntity = new EcoPlayerEntity(this);
         }
 

@@ -2,7 +2,6 @@
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Eco.Extensions;
-using EcoVector3 = Eco.Shared.Math.Vector3;
 
 namespace Rocket.Eco.Player
 {

@@ -8,7 +8,7 @@ namespace Rocket.Eco.Player
     /// <inheritdoc cref="IUser" />
     public sealed class EcoPlayerUser : IPlayerUser<EcoPlayer>
     {
-        internal EcoPlayerUser(EcoPlayer player)
+        internal EcoPlayerUser(EcoPlayer player, IUserManager userManager)
         {
             Player = player;
         }
@@ -26,8 +26,8 @@ namespace Rocket.Eco.Player
         public string IdentityType => IdentityTypes.Player;
 
         /// <inheritdoc />
-        public IUserManager UserManager => Player.UserManager;
-
+        public IUserManager UserManager { get; }
+   
         /// <inheritdoc />
         public bool IsOnline => Player.IsOnline;
 
