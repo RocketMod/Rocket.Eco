@@ -73,7 +73,7 @@ namespace Rocket.Eco.Commands
         public string Syntax => string.Empty;
 
         /// <inheritdoc />
-        public bool SupportsUser(Type type) => type == typeof(EcoPlayerEntity);
+        public bool SupportsUser(Type type) => type == typeof(EcoPlayerUser);
 
         /// <inheritdoc />
         public void Execute(ICommandContext context)

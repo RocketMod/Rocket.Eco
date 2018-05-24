@@ -10,7 +10,7 @@ namespace Rocket.Eco.Economy
     {
         internal EcoEconomyAccount(IIdentity player, IEconomyCurrency currency)
         {
-            if (player == null || !(player is EcoPlayer ecoPlayer) && !(player is EcoPlayerEntity))
+            if (player == null || !(player is EcoPlayer ecoPlayer) && !(player is EcoPlayerUser))
                 throw new ArgumentException("Must be of type \"EcoPlayer\".", nameof(player));
 
             Owner = player;

@@ -18,7 +18,7 @@ namespace Rocket.Eco.Permissions
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public bool SupportsTarget(IIdentity target) => target is EcoPlayer || target is EcoPlayerEntity;
+        public bool SupportsTarget(IIdentity target) => target is EcoPlayer || target is EcoPlayerUser;
 
         /// <inheritdoc />
         public PermissionResult CheckPermission(IIdentity target, string permission)

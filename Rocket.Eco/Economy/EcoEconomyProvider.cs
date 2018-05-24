@@ -64,6 +64,6 @@ namespace Rocket.Eco.Economy
 
         public IEnumerable<IEconomyAccount> GetAccounts(IIdentity owner) => throw new NotImplementedException();
 
-        public bool SupportsIdentity(IIdentity identity) => identity is EcoPlayer || identity is EcoPlayerEntity;
+        public bool SupportsIdentity(IIdentity identity) => identity is EcoPlayer || identity is EcoPlayerUser;
     }
 }
