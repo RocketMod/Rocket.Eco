@@ -10,22 +10,31 @@ namespace Rocket.Eco.Scheduling
     /// </summary>
     public sealed class ThreadSafeTask : ITask
     {
-        private readonly object exceptionLock = new object();
         private readonly object isCancelledLock = new object();
         private readonly object isFinishedLock = new object();
-        private readonly ITaskScheduler scheduler;
+        internal readonly object lastRunTimeLock = new object();
 
         private bool isCancelled;
-
         private bool isFinished;
+        private DateTime? lastRunTime;
 
         /// <inheritdoc />
-        public ThreadSafeTask(ITaskScheduler scheduler, ILifecycleObject owner, Action action, ExecutionTargetContext executionTargetContext)
+        public ThreadSafeTask(int taskId, string name, ITaskScheduler scheduler, ILifecycleObject owner, Action action, ExecutionTargetContext executionTargetContext)
         {
-            this.scheduler = scheduler;
+            TaskId = taskId;
+            Name = name;
+            Scheduler = scheduler;
             Owner = owner;
             Action = action;
             ExecutionTarget = executionTargetContext;
+        }
+
+        /// <inheritdoc />
+        public ThreadSafeTask(int taskId, string name, ITaskScheduler scheduler, ILifecycleObject owner, Action action, ExecutionTargetContext executionTargetContext, TimeSpan? period, DateTime? startTime, DateTime? endTime) : this(taskId, name, scheduler, owner, action, executionTargetContext)
+        {
+            Period = period;
+            StartTime = startTime;
+            EndTime = endTime;
         }
 
         /// <inheritdoc />
@@ -44,7 +53,23 @@ namespace Rocket.Eco.Scheduling
         public DateTime? EndTime { get; }
 
         /// <inheritdoc />
-        public DateTime? LastRunTime { get; }
+        public DateTime? LastRunTime
+        {
+            get
+            {
+                lock (lastRunTimeLock)
+                {
+                    return lastRunTime;
+                }
+            }
+            internal set
+            {
+                lock (lastRunTimeLock)
+                {
+                    lastRunTime = value;
+                }
+            }
+        }
 
         /// <inheritdoc />
         public ILifecycleObject Owner { get; }
@@ -93,6 +118,7 @@ namespace Rocket.Eco.Scheduling
             }
         }
 
+        /// <inheritdoc />
         public ITaskScheduler Scheduler { get; }
     }
 }

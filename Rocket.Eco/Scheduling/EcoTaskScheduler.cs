@@ -16,45 +16,40 @@ namespace Rocket.Eco.Scheduling
     {
         //TODO: Make this configurable
         private const long MainTargetTickrate = 60;
-        private readonly Thread asyncThread;
 
         private readonly IDependencyContainer container;
 
         private readonly object lockObj = new object();
+        private readonly ILogger logger;
+        private readonly object taskIdLock = new object();
 
-        private readonly Thread mainThread;
         private readonly List<ITask> tasks = new List<ITask>();
 
-        public EcoTaskScheduler(IDependencyContainer container)
+        private int taskId;
+
+        /// <inheritdoc />
+        public EcoTaskScheduler(IDependencyContainer container, ILogger logger)
         {
             this.container = container;
+            this.logger = logger;
 
-            mainThread = new Thread(MainThreadWork);
-            asyncThread = new Thread(AsyncThreadWork);
+            Thread mainThread = new Thread(MainThreadWork);
+            Thread asyncThread = new Thread(AsyncThreadWork);
 
             mainThread.Start();
             asyncThread.Start();
         }
 
-        //Creating a clone to ensure the collection will always be the same as the moment it was accessed.
-        public ITask SchedulePeriodically(ILifecycleObject @object, Action action, string taskName, TimeSpan period, TimeSpan? delay = null, bool runAsync = false) => throw new NotImplementedException();
-
         /// <inheritdoc />
-        public IEnumerable<ITask> Tasks
+        public ITask ScheduleAt(ILifecycleObject @object, Action action, string taskName, DateTime date, bool runAsync = false)
         {
-            get
+            ThreadSafeTask task;
+            ExecutionTargetContext context = runAsync ? ExecutionTargetContext.Async : ExecutionTargetContext.NextFrame;
+
+            lock (taskIdLock)
             {
-                lock (lockObj)
-                {
-                    return new List<ITask>(tasks.Where(c => c.Owner.IsAlive)).AsReadOnly();
-                }
+                task = new ThreadSafeTask(taskId++, taskName, this, @object, action, context, TimeSpan.Zero, date, null);
             }
-        }
-
-        /// <inheritdoc />
-        public ITask ScheduleUpdate(ILifecycleObject @object, Action action, string taskName, ExecutionTargetContext target)
-        {
-            ThreadSafeTask task = new ThreadSafeTask(this, @object, action, target);
 
             lock (lockObj)
             {
@@ -65,22 +60,57 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        public ITask ScheduleNextFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.NextFrame);
+        public ITask SchedulePeriodically(ILifecycleObject @object, Action action, string taskName, TimeSpan period, TimeSpan? delay = null, bool runAsync = false)
+        {
+            ThreadSafeTask task;
+            ExecutionTargetContext context = runAsync ? ExecutionTargetContext.Async : ExecutionTargetContext.NextFrame;
+            DateTime startTime = DateTime.UtcNow;
+
+            if (delay != null) startTime = startTime.Add(delay.Value);
+
+            lock (taskIdLock)
+            {
+                task = new ThreadSafeTask(taskId++, taskName, this, @object, action, context, period, startTime, null);
+            }
+
+            lock (lockObj)
+            {
+                tasks.Add(task);
+            }
+
+            return task;
+        }
+
+        //Creating a clone to ensure the collection will always be the same as the moment it was accessed.
+        /// <inheritdoc />
+        public IEnumerable<ITask> Tasks
+        {
+            get
+            {
+                lock (lockObj)
+                {
+                    return new List<ITask>(tasks.Where(c => c.Owner.IsAlive));
+                }
+            }
+        }
 
         /// <inheritdoc />
-        public ITask ScheduleEveryFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.EveryFrame);
+        public ITask ScheduleUpdate(ILifecycleObject @object, Action action, string taskName, ExecutionTargetContext target)
+        {
+            ThreadSafeTask task;
 
-        /// <inheritdoc />
-        public ITask ScheduleNextPhysicUpdate(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.NextPhysicsUpdate);
+            lock (taskIdLock)
+            {
+                task = new ThreadSafeTask(taskId++, taskName, this, @object, action, target);
+            }
 
-        /// <inheritdoc />
-        public ITask ScheduleEveryPhysicUpdate(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.EveryPhysicsUpdate);
+            lock (lockObj)
+            {
+                tasks.Add(task);
+            }
 
-        /// <inheritdoc />
-        public ITask ScheduleNextAsyncFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.NextAsyncFrame);
-
-        /// <inheritdoc />
-        public ITask ScheduleEveryAsyncFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.EveryAsyncFrame);
+            return task;
+        }
 
         /// <inheritdoc />
         public bool CancelTask(ITask task)
@@ -92,10 +122,6 @@ namespace Rocket.Eco.Scheduling
             return true;
         }
 
-        public ITask ScheduleDelayed(ILifecycleObject @object, Action action, string taskName, TimeSpan delay, bool runAsync = false) => throw new NotImplementedException();
-
-        public ITask ScheduleAt(ILifecycleObject @object, Action action, string taskName, DateTime date, bool runAsync = false) => throw new NotImplementedException();
-
         private void MainThreadWork()
         {
             //This will allow the `mainThread` to keep a semi-reliable tick-rate.
@@ -106,19 +132,25 @@ namespace Rocket.Eco.Scheduling
                 watch.Start();
 
                 //Using `Tasks` to prevent an outside source from modifying the list during an iteration.
-                IEnumerable<ITask> newTasks = Tasks.Where(x =>
-                    x.ExecutionTarget == ExecutionTargetContext.NextFrame || x.ExecutionTarget == ExecutionTargetContext.NextPhysicsUpdate || x.ExecutionTarget == ExecutionTargetContext.EveryFrame || x.ExecutionTarget == ExecutionTargetContext.NextPhysicsUpdate);
+                IEnumerable<ThreadSafeTask> newTasks = Tasks.Where(x =>
+                                                                x.ExecutionTarget == ExecutionTargetContext.NextFrame || x.ExecutionTarget == ExecutionTargetContext.NextPhysicsUpdate || x.ExecutionTarget == ExecutionTargetContext.EveryFrame || x.ExecutionTarget == ExecutionTargetContext.NextPhysicsUpdate)
+                                                            .Cast<ThreadSafeTask>();
 
-                foreach (ITask task in newTasks)
+                foreach (ThreadSafeTask task in newTasks)
                 {
-                    if (!task.IsCancelled && !task.IsFinished)
+                    if (!task.IsCancelled && !task.IsFinished && !(task.StartTime != null && task.StartTime > DateTime.UtcNow))
                     {
-                        task.Action.Invoke();
+                        if (task.EndTime != null && task.EndTime <= DateTime.UtcNow || task.LastRunTime != null && task.Period != null && task.LastRunTime.Value.Add(task.Period.Value) > DateTime.UtcNow)
+                            goto REMOVE;
 
-                        if (task.ExecutionTarget != ExecutionTargetContext.NextFrame && task.ExecutionTarget != ExecutionTargetContext.NextPhysicsUpdate)
+                        task.Action.Invoke();
+                        task.LastRunTime = DateTime.UtcNow;
+
+                        if (task.ExecutionTarget != ExecutionTargetContext.NextFrame && task.ExecutionTarget != ExecutionTargetContext.NextPhysicsUpdate && task.Period != null)
                             continue;
                     }
 
+                    REMOVE:
                     lock (lockObj)
                     {
                         tasks.Remove(task);
@@ -130,15 +162,13 @@ namespace Rocket.Eco.Scheduling
                 long time = watch.ElapsedMilliseconds - 1000 / MainTargetTickrate;
 
                 if (time < 0)
-                {
                     Thread.Sleep((int) -time);
-                }
                 else if (time != 0)
-                {
-                    ILogger logger = container.Resolve<ILogger>();
-                    logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
-                    logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
-                }
+                    if (time > 100)
+                    {
+                        logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
+                        logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
+                    }
 
                 watch.Reset();
             }
@@ -148,19 +178,25 @@ namespace Rocket.Eco.Scheduling
         {
             while (true)
             {
-                IEnumerable<ITask> newTasks = Tasks.Where(x =>
-                    x.ExecutionTarget == ExecutionTargetContext.NextAsyncFrame || x.ExecutionTarget == ExecutionTargetContext.EveryAsyncFrame);
+                IEnumerable<ThreadSafeTask> newTasks = Tasks.Where(x =>
+                                                                x.ExecutionTarget == ExecutionTargetContext.NextAsyncFrame || x.ExecutionTarget == ExecutionTargetContext.EveryAsyncFrame)
+                                                            .Cast<ThreadSafeTask>();
 
-                foreach (ITask task in newTasks)
+                foreach (ThreadSafeTask task in newTasks)
                 {
-                    if (!task.IsCancelled && !task.IsFinished)
+                    if (!task.IsCancelled && !task.IsFinished && !(task.StartTime != null && task.StartTime > DateTime.UtcNow))
                     {
-                        task.Action.Invoke();
+                        if (task.EndTime != null && task.EndTime <= DateTime.UtcNow || task.LastRunTime != null && task.Period != null && task.LastRunTime.Value.Add(task.Period.Value) > DateTime.UtcNow)
+                            goto REMOVE;
 
-                        if (task.ExecutionTarget != ExecutionTargetContext.NextAsyncFrame)
+                        task.Action.Invoke();
+                        task.LastRunTime = DateTime.UtcNow;
+
+                        if (task.ExecutionTarget != ExecutionTargetContext.NextAsyncFrame && task.Period != null)
                             continue;
                     }
 
+                    REMOVE:
                     lock (lockObj)
                     {
                         tasks.Remove(task);

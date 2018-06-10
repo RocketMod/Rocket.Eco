@@ -9,7 +9,7 @@ namespace Rocket.Eco.Permissions
 {
     /// <inheritdoc />
     /// <summary>
-    ///     This class ensure that any admins registered by vanilla Eco have all the commands available.
+    ///     This class ensures that any admins registered by vanilla Eco have all the commands available.
     /// </summary>
     [ServicePriority(Priority = ServicePriority.Lowest)]
     public sealed class EcoPermissionProvider : IPermissionProvider
