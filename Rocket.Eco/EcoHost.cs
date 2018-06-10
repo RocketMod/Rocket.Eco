@@ -103,7 +103,6 @@ namespace Rocket.Eco
             eventManager = runtime.Container.Resolve<IEventManager>();
             pluginManager = runtime.Container.Resolve<IPluginManager>();
             commandHandler = runtime.Container.Resolve<ICommandHandler>();
-            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco");
 
             permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
 
@@ -120,6 +119,8 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco");
             runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco");
             runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, runtime.Container), "eco_vanilla_commands");
+
+            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco");
 
 #if DEBUG
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "eco", "game");
