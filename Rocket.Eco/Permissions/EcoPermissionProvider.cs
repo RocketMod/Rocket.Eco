@@ -18,6 +18,12 @@ namespace Rocket.Eco.Permissions
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
+        public IEnumerable<string> GetGrantedPermissions(IIdentity target, bool inherit = true) => new List<string>();
+
+        /// <inheritdoc />
+        public IEnumerable<string> GetDeniedPermissions(IIdentity target, bool inherit = true) => new List<string>();
+
+        /// <inheritdoc />
         public bool SupportsTarget(IIdentity target) => target is EcoPlayer || target is EcoPlayerUser;
 
         /// <inheritdoc />

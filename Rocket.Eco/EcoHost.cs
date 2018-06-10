@@ -43,7 +43,7 @@ namespace Rocket.Eco
     /// <summary>
     ///     Rocket.Eco's implementation of Rocket's <see cref="IImplementation" />.
     /// </summary>
-    public sealed class EcoImplementation : IImplementation
+    public sealed class EcoHost : IHost
     {
         private ICommandHandler commandHandler;
         private EcoConsole console;
@@ -57,10 +57,23 @@ namespace Rocket.Eco
         private ITaskScheduler taskScheduler;
 
         /// <inheritdoc />
-        public IConsole Console => console ?? (console = new EcoConsole());
+        public ushort ServerPort
+        {
+            get
+            {
+                if (NetworkManager.Config == null) return 0;
+
+                return (ushort) NetworkManager.Config.GameServerPort;
+            }
+        }
 
         /// <inheritdoc />
-        public string InstanceId => NetworkManager.Config?.Description ?? "Unknown";
+        public IConsole Console => console ?? (console = new EcoConsole());
+
+        public string GameVersionName { get; }
+
+        /// <inheritdoc />
+        public string ServerName => NetworkManager.Config?.Description ?? "Unknown";
 
         /// <inheritdoc />
         public bool IsAlive => true;
@@ -89,7 +102,7 @@ namespace Rocket.Eco
             eventManager = runtime.Container.Resolve<IEventManager>();
             pluginManager = runtime.Container.Resolve<IPluginManager>();
             commandHandler = runtime.Container.Resolve<ICommandHandler>();
-            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("ecotaskscheduler");
+            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco");
 
             permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
 
@@ -99,17 +112,17 @@ namespace Rocket.Eco
 
             pluginManager.Init();
 
-            playerManager = new EcoPlayerManager(runtime.Container);
+            playerManager = new EcoPlayerManager(this, eventManager, runtime.Container);
 
             //TODO: This can go into DependencyRegistrator.cs after patching is migrated 
-            runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "ecousermanager");
-            runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "ecoplayermanager");
-            runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "ecotaskscheduler");
-            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, runtime.Container), "econativecommandprovider");
+            runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "eco");
+            runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco");
+            runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco");
+            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, runtime.Container), "eco_vanilla_commands");
 
 #if DEBUG
-            runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "ecogovernment");
-            runtime.Container.RegisterSingletonType<IEconomyProvider, EcoEconomyProvider>(null, "ecoeconomyprovider");
+            runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "eco", "game");
+            runtime.Container.RegisterSingletonType<IEconomyProvider, EcoEconomyProvider>(null, "eco", "game");
 #endif
 
             CheckConfig();
@@ -117,7 +130,7 @@ namespace Rocket.Eco
 
             eventManager.Emit(this, new ImplementationReadyEvent(this));
 
-            logger.LogInformation($"Rocket has initialized under the server name {InstanceId}!");
+            logger.LogInformation($"Rocket has initialized under the server name {ServerName}!");
 
             while (true)
             {
@@ -136,7 +149,7 @@ namespace Rocket.Eco
 
                         if (!wasHandled)
                             logger.LogError("That command could not be found!");
-                    });
+                    }, "Console Command");
             }
         }
 
@@ -161,7 +174,7 @@ namespace Rocket.Eco
 
                     Thread.Sleep(2000);
                     Environment.Exit(0);
-                });
+                }, "Shutdown");
         }
 
         /// <inheritdoc />
@@ -172,8 +185,15 @@ namespace Rocket.Eco
                     plugin.Load(true);
         }
 
+        //TODO: CHANGE AFTER MIGRATING PATCHING!
+        /// <inheritdoc />
+        public Version HostVersion { get; private set; }
+
         private void PostInit()
         {
+            //TODO: CHANGE AFTER MIGRATING PATCHING!
+            HostVersion = AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName()).FirstOrDefault(x => x.Name.Equals("Eco.Shared", StringComparison.InvariantCultureIgnoreCase)).Version;
+
             EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
             EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
             EcoUserChatDelegate playerChat = _EmitPlayerChat;
@@ -247,7 +267,7 @@ namespace Rocket.Eco
                 permissionProvider.PlayersConfig.Save();
             }
 
-            eventManager.Emit(this, new UserConnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame));
+            eventManager.Emit(this, new UserConnectedEvent(ecoPlayer.User, EventExecutionTargetContext.NextFrame));
 
             logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}!");
         }
@@ -320,7 +340,7 @@ namespace Rocket.Eco
 
                         if (!wasHandled)
                             ecoPlayer.SendErrorMessage("That command could not be found!");
-                    });
+                    }, "Player Chat Event");
 
                 return true;
             }

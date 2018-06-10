@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Rocket.API;
 using Rocket.API.Commands;
-using Rocket.API.DependencyInjection;
 using Rocket.Core.ServiceProxies;
 using Rocket.Eco.Commands.EcoCommands;
 
@@ -14,12 +13,12 @@ namespace Rocket.Eco.Commands
     [ServicePriority(Priority = ServicePriority.Low)]
     public sealed class EcoCommandProvider : ICommandProvider
     {
-        private readonly IDependencyContainer container;
+        private readonly IHost host;
 
         /// <inheritdoc />
-        public EcoCommandProvider(IDependencyContainer container)
+        public EcoCommandProvider(IHost host)
         {
-            this.container = container;
+            this.host = host;
 
             Commands = new ICommand[]
             {
@@ -38,7 +37,10 @@ namespace Rocket.Eco.Commands
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public ILifecycleObject GetOwner(ICommand command) => container.Resolve<IImplementation>();
+        public ILifecycleObject GetOwner(ICommand command) => host;
+
+        /// <inheritdoc />
+        public void Init() { }
 
         /// <inheritdoc />
         public IEnumerable<ICommand> Commands { get; }

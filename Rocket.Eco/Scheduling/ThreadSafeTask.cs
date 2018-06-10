@@ -29,6 +29,24 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
+        public int TaskId { get; }
+
+        /// <inheritdoc />
+        public string Name { get; }
+
+        /// <inheritdoc />
+        public TimeSpan? Period { get; }
+
+        /// <inheritdoc />
+        public DateTime? StartTime { get; }
+
+        /// <inheritdoc />
+        public DateTime? EndTime { get; }
+
+        /// <inheritdoc />
+        public DateTime? LastRunTime { get; }
+
+        /// <inheritdoc />
         public ILifecycleObject Owner { get; }
 
         /// <inheritdoc />
@@ -75,10 +93,6 @@ namespace Rocket.Eco.Scheduling
             }
         }
 
-        /// <inheritdoc />
-        public void Cancel()
-        {
-            scheduler.CancelTask(this);
-        }
+        public ITaskScheduler Scheduler { get; }
     }
 }

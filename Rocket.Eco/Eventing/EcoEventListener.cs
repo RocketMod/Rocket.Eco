@@ -20,18 +20,15 @@ namespace Rocket.Eco.Eventing
     /// >
     /// <summary>
     ///     An internal class used by Rocket.Eco to handle a <see cref="PluginManagerInitEvent" /> emitted by Rocket's
-    ///     <see cref="PluginManager" />.
+    ///     <see cref="IPluginManager" />.
     /// </summary>
     public sealed class EcoEventListener : IEventListener<PluginManagerInitEvent>
     {
-        private readonly IDependencyContainer container;
         private readonly ILogger logger;
         private readonly IPatchManager patchManager;
 
         internal EcoEventListener(IDependencyContainer container)
         {
-            this.container = container;
-
             patchManager = container.Resolve<IPatchManager>();
             logger = container.Resolve<ILogger>();
         }

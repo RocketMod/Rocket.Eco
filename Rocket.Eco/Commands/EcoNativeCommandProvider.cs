@@ -17,12 +17,12 @@ namespace Rocket.Eco.Commands
     public sealed class EcoNativeCommandProvider : ICommandProvider
     {
         private readonly List<EcoNativeCommand> commands = new List<EcoNativeCommand>();
-        private readonly IImplementation implementation;
+        private readonly IHost host;
 
         /// <inheritdoc />
-        public EcoNativeCommandProvider(IImplementation implementation, IDependencyContainer container)
+        public EcoNativeCommandProvider(IHost host, IDependencyContainer container)
         {
-            this.implementation = implementation;
+            this.host = host;
             Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
@@ -36,7 +36,10 @@ namespace Rocket.Eco.Commands
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public ILifecycleObject GetOwner(ICommand command) => implementation;
+        public ILifecycleObject GetOwner(ICommand command) => host;
+
+        /// <inheritdoc />
+        public void Init() { }
 
         /// <inheritdoc />
         public IEnumerable<ICommand> Commands => commands;

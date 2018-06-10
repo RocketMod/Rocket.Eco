@@ -98,11 +98,11 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public override string Name => InternalEcoUser?.Name;
-        
+
         internal void BuildReference(InternalEcoUser user)
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
-            
+
             ecoEntity = new EcoPlayerEntity(this);
         }
 

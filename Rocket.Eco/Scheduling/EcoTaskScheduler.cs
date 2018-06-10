@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -38,8 +37,10 @@ namespace Rocket.Eco.Scheduling
         }
 
         //Creating a clone to ensure the collection will always be the same as the moment it was accessed.
+        public ITask SchedulePeriodically(ILifecycleObject @object, Action action, string taskName, TimeSpan period, TimeSpan? delay = null, bool runAsync = false) => throw new NotImplementedException();
+
         /// <inheritdoc />
-        public ReadOnlyCollection<ITask> Tasks
+        public IEnumerable<ITask> Tasks
         {
             get
             {
@@ -51,8 +52,7 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        /// s
-        public ITask Schedule(ILifecycleObject @object, Action action, ExecutionTargetContext target)
+        public ITask ScheduleUpdate(ILifecycleObject @object, Action action, string taskName, ExecutionTargetContext target)
         {
             ThreadSafeTask task = new ThreadSafeTask(this, @object, action, target);
 
@@ -65,22 +65,22 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        public ITask ScheduleNextFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextFrame);
+        public ITask ScheduleNextFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.NextFrame);
 
         /// <inheritdoc />
-        public ITask ScheduleEveryFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryFrame);
+        public ITask ScheduleEveryFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.EveryFrame);
 
         /// <inheritdoc />
-        public ITask ScheduleNextPhysicUpdate(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextPhysicsUpdate);
+        public ITask ScheduleNextPhysicUpdate(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.NextPhysicsUpdate);
 
         /// <inheritdoc />
-        public ITask ScheduleEveryPhysicUpdate(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryPhysicsUpdate);
+        public ITask ScheduleEveryPhysicUpdate(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.EveryPhysicsUpdate);
 
         /// <inheritdoc />
-        public ITask ScheduleNextAsyncFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.NextAsyncFrame);
+        public ITask ScheduleNextAsyncFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.NextAsyncFrame);
 
         /// <inheritdoc />
-        public ITask ScheduleEveryAsyncFrame(ILifecycleObject @object, Action action) => Schedule(@object, action, ExecutionTargetContext.EveryAsyncFrame);
+        public ITask ScheduleEveryAsyncFrame(ILifecycleObject @object, Action action, string taskName) => ScheduleUpdate(@object, action, taskName, ExecutionTargetContext.EveryAsyncFrame);
 
         /// <inheritdoc />
         public bool CancelTask(ITask task)
@@ -91,6 +91,10 @@ namespace Rocket.Eco.Scheduling
 
             return true;
         }
+
+        public ITask ScheduleDelayed(ILifecycleObject @object, Action action, string taskName, TimeSpan delay, bool runAsync = false) => throw new NotImplementedException();
+
+        public ITask ScheduleAt(ILifecycleObject @object, Action action, string taskName, DateTime date, bool runAsync = false) => throw new NotImplementedException();
 
         private void MainThreadWork()
         {

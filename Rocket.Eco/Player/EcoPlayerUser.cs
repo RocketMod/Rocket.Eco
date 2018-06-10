@@ -1,7 +1,6 @@
 ﻿using System;
 using Rocket.API.Player;
 using Rocket.API.User;
-using EcoVector3 = Eco.Shared.Math.Vector3;
 
 namespace Rocket.Eco.Player
 {
@@ -11,6 +10,7 @@ namespace Rocket.Eco.Player
         internal EcoPlayerUser(EcoPlayer player, IUserManager userManager)
         {
             Player = player;
+            UserManager = userManager;
         }
 
         /// <inheritdoc cref="IPlayerUser" />
@@ -27,7 +27,7 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public IUserManager UserManager { get; }
-   
+
         /// <inheritdoc />
         public bool IsOnline => Player.IsOnline;
 

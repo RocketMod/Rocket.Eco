@@ -37,7 +37,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         /// <inheritdoc />
         public void Execute(ICommandContext context)
         {
-            context.Container.Resolve<IImplementation>().Shutdown();
+            context.Container.Resolve<IHost>().Shutdown();
         }
     }
 }

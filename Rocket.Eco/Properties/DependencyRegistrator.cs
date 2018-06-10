@@ -15,13 +15,10 @@ namespace Rocket.Eco.Properties
         /// <inheritdoc />
         public void Register(IDependencyContainer container, IDependencyResolver resolver)
         {
-            container.RegisterSingletonType<IPatchManager, PatchManager>(null, "ecopatchmanager");
-            container.RegisterSingletonType<IImplementation, EcoImplementation>(null, "eco");
-            container.RegisterSingletonType<ICommandProvider, EcoCommandProvider>("ecocommandprovider");
-            container.RegisterSingletonType<IPermissionProvider, EcoPermissionProvider>("ecopermissionprovider");
-
-            //No more IChatManager :O
-            //container.RegisterSingletonType<IChatManager, EcoChatManager>(null, "ecochatmanager");
+            container.RegisterSingletonType<IPatchManager, PatchManager>(null, "eco", "game");
+            container.RegisterSingletonType<IHost, EcoHost>(null, "eco", "game");
+            container.RegisterSingletonType<ICommandProvider, EcoCommandProvider>("eco_vanilla_commands");
+            container.RegisterSingletonType<IPermissionProvider, EcoPermissionProvider>("eco_vanilla_permissions");
         }
     }
 }

@@ -11,6 +11,7 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.API.User;
+using Rocket.Core.Player;
 using Rocket.Core.User.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
@@ -21,14 +22,20 @@ namespace Rocket.Eco.Player
     /// <inheritdoc cref="IPlayerManager" />
     public sealed class EcoPlayerManager : IPlayerManager
     {
+        private readonly IDependencyContainer container;
+        private readonly IEventManager eventManager;
+
+        private readonly IHost host;
+
         //TODO: Migrate to a thread-safe collection.
         internal readonly List<EcoPlayer> InternalPlayersList = new List<EcoPlayer>();
-        private readonly IDependencyContainer container;
 
         /// <inheritdoc />
-        public EcoPlayerManager(IDependencyContainer container)
+        public EcoPlayerManager(IHost host, IEventManager eventManager, IDependencyContainer container)
         {
             this.container = container;
+            this.host = host;
+            this.eventManager = eventManager;
 
             foreach (User user in UserManager.Users)
                 InternalPlayersList.Add(new EcoPlayer(user, this, container));
@@ -40,8 +47,19 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public IEnumerable<IPlayer> OnlinePlayers => InternalPlayersList.Where(x => x.IsOnline);
 
+        public IUserInfo GetUser(string id)
+        {
+            if (TryGetOnlinePlayerById(id, out IPlayer p))
+                return p.GetUser();
+
+            p = new EcoPlayer(id, this, container);
+            InternalPlayersList.Add((EcoPlayer) p);
+
+            return p.GetUser();
+        }
+
         /// <inheritdoc />
-        public IEnumerable<IUser> Users => InternalPlayersList.Select(x => x.User);
+        public IEnumerable<IUser> OnlineUsers => InternalPlayersList.Select(x => x.User);
 
         /// <inheritdoc />
         public IPlayer GetOnlinePlayer(string nameOrId)
@@ -133,7 +151,7 @@ namespace Rocket.Eco.Player
                 throw new InvalidOperationException("You cannot kick an offline player.");
 
             UserKickEvent e = new UserKickEvent(ecoUser, ecoUser, reason);
-            container.Resolve<IEventManager>().Emit(container.Resolve<IImplementation>(), e);
+            container.Resolve<IEventManager>().Emit(container.Resolve<IHost>(), e);
 
             if (e.IsCancelled)
                 return false;
@@ -156,7 +174,7 @@ namespace Rocket.Eco.Player
                 reason = string.Empty;
 
             UserBanEvent e = new UserBanEvent(player, caller, reason, null);
-            container.Resolve<IEventManager>().Emit(container.Resolve<IImplementation>(), e);
+            container.Resolve<IEventManager>().Emit(container.Resolve<IHost>(), e);
 
             if (e.IsCancelled)
                 return false;

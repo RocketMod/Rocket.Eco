@@ -12,6 +12,7 @@ using Rocket.Eco.API.Patching;
 
 namespace Rocket.Eco.Patching
 {
+    //TODO: remove me plox
     /// <inheritdoc cref="IPatchManager" />
     public sealed class PatchManager : IPatchManager
     {
