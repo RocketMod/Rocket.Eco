@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Rocket.Eco.Launcher.Callbacks;
 using Rocket.Eco.Patching.API;
-using Rocket.Eco.Patching.Callbacks;
 
-namespace Rocket.Eco.Patching.Patches
+namespace Rocket.Eco.Launcher.Patches
 {
     /// <inheritdoc />
     /// <summary>

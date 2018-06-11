@@ -1,6 +1,6 @@
-﻿using Rocket.Eco.Patching.Patches;
+﻿using Rocket.Eco.Launcher.Patches;
 
-namespace Rocket.Eco.Patching.Callbacks
+namespace Rocket.Eco.Launcher.Callbacks
 {
     /// <summary>
     ///     An internal delegate used by <see cref="UserPatch" /> to relay actions such as a player joining or leaving.

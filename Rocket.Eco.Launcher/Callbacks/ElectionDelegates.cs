@@ -1,1 +1,1 @@
-﻿namespace Rocket.Eco.Patching.Callbacks {}
+﻿namespace Rocket.Eco.Launcher.Callbacks {}
