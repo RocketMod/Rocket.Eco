@@ -47,6 +47,7 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public IEnumerable<IPlayer> OnlinePlayers => InternalPlayersList.Where(x => x.IsOnline);
 
+        /// <inheritdoc />
         public IUserInfo GetUser(string id)
         {
             if (TryGetOnlinePlayerById(id, out IPlayer p))

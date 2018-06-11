@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Eco.Extensions;
@@ -20,11 +21,14 @@ namespace Rocket.Eco.Player
         public string EntityTypeName => IdentityTypes.Player;
 
         /// <inheritdoc />
-        public Vector3 Position => Player.InternalEcoUser.Position.ToSystemVector3();
+        public Vector3 Position => (Player.IsOnline) ? Player.InternalEcoUser.Position.ToSystemVector3() : throw new InvalidOperationException("The player must be online.");
 
         /// <inheritdoc />
         public bool Teleport(Vector3 position)
         {
+            if (!Player.IsOnline)
+                throw new InvalidOperationException("The player must be online.");
+
             Player.InternalEcoPlayer.SetPosition(position.ToEcoVector3());
             return true;
         }
