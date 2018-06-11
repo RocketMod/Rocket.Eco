@@ -79,6 +79,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Callbacks\ElectionDelegates.cs" />
+    <Compile Include="Callbacks\UserDelegates.cs" />
+    <Compile Include="Patches\ChatManagerPatch.cs" />
+    <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
