@@ -16,11 +16,13 @@ namespace Rocket.Eco.Player
         private readonly string unbuiltId;
         private EcoPlayerEntity ecoEntity;
 
-        internal EcoPlayer(InternalEcoUser user, IUserManager userManager, IDependencyContainer container) : base(container)
+        internal EcoPlayer(InternalEcoUser user, IPlayerManager playerManager, IDependencyContainer container) : base(container)
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
 
-            User = new EcoPlayerUser(this, userManager);
+            PlayerManager = playerManager;
+
+            User = new EcoPlayerUser(this, container, playerManager);
             ecoEntity = new EcoPlayerEntity(this);
         }
 
@@ -28,7 +30,7 @@ namespace Rocket.Eco.Player
         {
             unbuiltId = id;
 
-            User = new EcoPlayerUser(this, userManager);
+            User = new EcoPlayerUser(this, container, userManager);
         }
 
         /// <summary>
@@ -80,6 +82,9 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public override bool IsOnline => InternalEcoUser?.LoggedIn ?? false;
+
+        /// <inheritdoc />
+        public override IPlayerManager PlayerManager { get; }
 
         /// <inheritdoc />
         /// <returns>

@@ -42,7 +42,7 @@ namespace Rocket.Eco
 {
     /// <inheritdoc />
     /// <summary>
-    ///     Rocket.Eco's implementation of Rocket's <see cref="IImplementation" />.
+    ///     Rocket.Eco's implementation of Rocket's <see cref="IHost" />.
     /// </summary>
     public sealed class EcoHost : IHost
     {
@@ -69,9 +69,10 @@ namespace Rocket.Eco
         }
 
         /// <inheritdoc />
-        public IConsole Console => console ?? (console = new EcoConsole());
+        public IConsole Console => console ?? (console = new EcoConsole(runtime.Container));
 
-        public string GameVersionName { get; }
+        /// <inheritdoc />
+        public Version GameVersion => AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name == "Eco.Gameplay").GetName().Version;
 
         /// <inheritdoc />
         public string ServerName => NetworkManager.Config?.Description ?? "Unknown";
@@ -118,7 +119,7 @@ namespace Rocket.Eco
             runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "eco");
             runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco");
             runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco");
-            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, runtime.Container), "eco_vanilla_commands");
+            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, logger), "eco_vanilla_commands");
 
             taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco");
 

@@ -11,9 +11,11 @@ namespace Rocket.Eco.Player
     public sealed class EcoConsole : IConsole
     {
         private readonly object lockObj = new object();
-        private IDependencyContainer container;
 
-        internal EcoConsole() { }
+        internal EcoConsole(IDependencyContainer container)
+        {
+            Container = container;
+        }
 
         /// <inheritdoc />
         public string Id => "ecoconsole";
@@ -42,6 +44,9 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public string UserType => "Console";
+
+        /// <inheritdoc />
+        public IDependencyContainer Container { get; }
 
         /// <inheritdoc />
         public void WriteLine(string format, params object[] bindings) => WriteLine(LogLevel.Information, format, bindings);
@@ -79,8 +84,6 @@ namespace Rocket.Eco.Player
 
         internal void Init(IDependencyContainer container)
         {
-            this.container = container;
-
             UserManager = container.Resolve<IUserManager>("ecousermanager");
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
 using Rocket.API.User;
 
@@ -7,10 +8,11 @@ namespace Rocket.Eco.Player
     /// <inheritdoc cref="IUser" />
     public sealed class EcoPlayerUser : IPlayerUser<EcoPlayer>
     {
-        internal EcoPlayerUser(EcoPlayer player, IUserManager userManager)
+        internal EcoPlayerUser(EcoPlayer player, IDependencyContainer container, IUserManager userManager)
         {
             Player = player;
             UserManager = userManager;
+            Container = container;
         }
 
         /// <inheritdoc cref="IPlayerUser" />
@@ -42,5 +44,8 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public string UserType => GetType().Name;
+
+        /// <inheritdoc />
+        public IDependencyContainer Container { get; }
     }
 }
