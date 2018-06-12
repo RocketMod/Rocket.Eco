@@ -48,7 +48,7 @@ namespace Rocket.Eco
     public sealed class EcoHost : IHost
     {
         private ICommandHandler commandHandler;
-        private DefaultConsole console;
+        private IConsole console;
         private IEventManager eventManager;
         private ILogger logger;
         private ConfigurationPermissionProvider permissionProvider;
@@ -116,12 +116,12 @@ namespace Rocket.Eco
             playerManager = new EcoPlayerManager(this, eventManager, runtime.Container);
 
             //TODO: This can go into DependencyRegistrator.cs after patching is migrated 
-            runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "eco");
-            runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco");
-            runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco");
+            runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "eco", "game");
+            runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco", "game");
+            runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco", "game");
             runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, logger), "eco_vanilla_commands");
 
-            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco");
+            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco", "game");
 
 #if DEBUG
             runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "eco", "game");
@@ -187,16 +187,12 @@ namespace Rocket.Eco
                 if (plugin.Unload())
                     plugin.Load(true);
         }
-
-        //TODO: CHANGE AFTER MIGRATING PATCHING!
+        
         /// <inheritdoc />
-        public Version HostVersion { get; private set; }
+        public Version HostVersion => GetType().Assembly.GetName().Version;
 
         private void PostInit()
         {
-            //TODO: CHANGE AFTER MIGRATING PATCHING!
-            HostVersion = AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName()).FirstOrDefault(x => x.Name.Equals("Eco.Shared", StringComparison.InvariantCultureIgnoreCase)).Version;
-
             EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
             EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
             EcoUserChatDelegate playerChat = _EmitPlayerChat;
