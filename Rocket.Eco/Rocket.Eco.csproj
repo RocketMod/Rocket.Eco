@@ -165,7 +165,6 @@
     <Compile Include="Patches\UserPatch.cs" />
     <Compile Include="Patching\PatchManager.cs" />
     <Compile Include="Permissions\EcoPermissionProvider.cs" />
-    <Compile Include="Player\EcoConsole.cs" />
     <Compile Include="Player\EcoPlayer.cs" />
     <Compile Include="Player\EcoPlayerManager.cs" />
     <Compile Include="Player\EcoPlayerEntity.cs" />

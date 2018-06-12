@@ -22,6 +22,7 @@ using Rocket.Core.Implementation.Events;
 using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
 using Rocket.Core.Scheduler;
+using Rocket.Core.User;
 using Rocket.Core.User.Events;
 using Rocket.Eco.API.Patching;
 using Rocket.Eco.Commands;
@@ -47,7 +48,7 @@ namespace Rocket.Eco
     public sealed class EcoHost : IHost
     {
         private ICommandHandler commandHandler;
-        private EcoConsole console;
+        private DefaultConsole console;
         private IEventManager eventManager;
         private ILogger logger;
         private ConfigurationPermissionProvider permissionProvider;
@@ -69,7 +70,7 @@ namespace Rocket.Eco
         }
 
         /// <inheritdoc />
-        public IConsole Console => console ?? (console = new EcoConsole(runtime.Container));
+        public IConsole Console => console ?? (console = new DefaultConsole(runtime.Container, playerManager));
 
         /// <inheritdoc />
         public Version GameVersion => AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name == "Eco.Gameplay").GetName().Version;
@@ -96,7 +97,6 @@ namespace Rocket.Eco
                 throw new MethodAccessException();
 
             this.runtime = runtime;
-            console.Init(runtime.Container);
 
             IPatchManager patchManager = runtime.Container.Resolve<IPatchManager>();
 
