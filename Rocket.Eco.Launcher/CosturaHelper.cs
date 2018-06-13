@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -16,13 +15,24 @@ namespace Rocket.Eco.Launcher
 
             definition.MainModule.Resources.Where(x => x.ResourceType == ResourceType.Embedded).Cast<EmbeddedResource>().Where(x => x.Name.EndsWith(".compressed") && x.Name.StartsWith("costura")).ForEach(x =>
             {
-                string finalName = x.Name.Replace(".compressed", "").Replace("costura.", "");
-
                 using (Stream stream = x.GetResourceStream())
                 {
                     using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
                     {
-                        
+                        using (MemoryStream memStream = new MemoryStream())
+                        {
+                            byte[] array = new byte[81920];
+
+                            int count;
+                            while ((count = deflateStream.Read(array, 0, array.Length)) != 0)
+                            {
+                                memStream.Write(array, 0, count);
+                            }
+
+                            memStream.Position = 0;
+
+                            definitions.Add(AssemblyDefinition.ReadAssembly(memStream));
+                        }
                     }
                 }
             });

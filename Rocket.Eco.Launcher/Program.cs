@@ -41,21 +41,24 @@ namespace Rocket.Eco.Launcher
         {
             IPatchingService patchingService = new PatchingService();
 
-            AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly("EcoServer.exe");
+            AssemblyDefinition ecoServerDefinition = AssemblyDefinition.ReadAssembly("EcoServer.exe");
 
-            CosturaHelper.ExtractCosturaAssemblies(ecoServer).ForEach(x => patchingService.RegisterAssembly(x));
+            CosturaHelper.ExtractCosturaAssemblies(ecoServerDefinition).ForEach(x => patchingService.RegisterAssembly(x));
 
             patchingService.RegisterPatch<UserPatch>();
             patchingService.RegisterPatch<ChatManagerPatch>();
 
             patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
 
-            patchingService.RegisterAssembly(ecoServer);
+            patchingService.RegisterAssembly(ecoServerDefinition);
             patchingService.RegisterPatch<StartupPatch>();
 
             patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
 
-            Console.ReadLine();
+            Assembly ecoServer = AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name == "EcoServer");
+
+
+            //Runtime.Bootstrap();
         }
 
         private static void LoadAssemblyFromDefinition(AssemblyDefinition definition)
@@ -71,79 +74,5 @@ namespace Rocket.Eco.Launcher
                 Assembly.Load(buffer);
             }
         }
-
-        /*
-        public static void Main(string[] args)
-        {
-            string currentPath = Directory.GetCurrentDirectory();
-
-            bool isExtraction = args.Length != 0 && args.Contains("-extract", StringComparer.InvariantCultureIgnoreCase);
-
-            string path = Path.Combine(currentPath, "Rocket", "Binaries");
-            string rocketEcoFile = Path.Combine(path, "Rocket.Eco.dll");
-
-            Assembly.LoadFile(rocketEcoFile);
-
-            foreach (string file in Directory.GetFiles(path).Where(x => x.EndsWith(".dll")))
-                try
-                {
-                    if (file != rocketEcoFile)
-                        Assembly.LoadFile(file);
-                }
-                catch { } //Assembly already loaded.
-
-            AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
-
-            if (isExtraction)
-            {
-                Assembly.LoadFile(Path.Combine(currentPath, "EcoServer.exe"));
-            }
-            else
-            {
-                DefaultAssemblyResolver monoAssemblyResolver = new DefaultAssemblyResolver();
-                monoAssemblyResolver.AddSearchDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco"));
-
-                ReaderParameters reader = new ReaderParameters
-                {
-                    AssemblyResolver = monoAssemblyResolver
-                };
-
-                AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly(Path.Combine(currentPath, "EcoServer.exe"), reader);
-
-                //TODO: Make this WAY better! https://i.redd.it/atf1ietqwaxy.jpg
-                try
-                {
-                    TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
-
-                    //PatchStartup(startup);
-
-                    string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
-
-                    WriterParameters writer = new WriterParameters();
-
-                    using (FileStream file = new FileStream(outputDir, FileMode.Create))
-                    {
-                        ecoServer.Write(file, writer);
-                    }
-
-                    Assembly.LoadFile(outputDir);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.GetType().ToString());
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
-                    Console.WriteLine("Launching failed! (Maybe you didn't extract)");
-                    return;
-                }
-                finally
-                {
-                    ecoServer.Dispose();
-                }
-            }
-
-            Runtime.Bootstrap();
-        }
-        */
     }
 }
