@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using Rocket.Eco.Launcher.Callbacks;
 using Rocket.Eco.Patching.API;
 
@@ -47,6 +48,8 @@ namespace Rocket.Eco.Launcher.Patches
 
             foreach (Instruction t in injection)
                 il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
+
+            il.Body.Optimize();
         }
     }
 }

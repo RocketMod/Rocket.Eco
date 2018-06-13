@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Practices.ObjectBuilder2;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
+using Rocket.Eco.Launcher.Patches;
+using Rocket.Eco.Patching;
+using Rocket.Eco.Patching.API;
 
 namespace Rocket.Eco.Launcher
 {
@@ -34,6 +35,44 @@ namespace Rocket.Eco.Launcher
             };
         }
 
+        private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));
+
+        public static void Main(string[] args)
+        {
+            IPatchingService patchingService = new PatchingService();
+
+            AssemblyDefinition ecoServer = AssemblyDefinition.ReadAssembly("EcoServer.exe");
+
+            CosturaHelper.ExtractCosturaAssemblies(ecoServer).ForEach(x => patchingService.RegisterAssembly(x));
+
+            patchingService.RegisterPatch<UserPatch>();
+            patchingService.RegisterPatch<ChatManagerPatch>();
+
+            patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
+
+            patchingService.RegisterAssembly(ecoServer);
+            patchingService.RegisterPatch<StartupPatch>();
+
+            patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
+
+            Console.ReadLine();
+        }
+
+        private static void LoadAssemblyFromDefinition(AssemblyDefinition definition)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                definition.Write(stream);
+                stream.Position = 0; //Is this needed?
+
+                byte[] buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, buffer.Length);
+
+                Assembly.Load(buffer);
+            }
+        }
+
+        /*
         public static void Main(string[] args)
         {
             string currentPath = Directory.GetCurrentDirectory();
@@ -51,7 +90,7 @@ namespace Rocket.Eco.Launcher
                     if (file != rocketEcoFile)
                         Assembly.LoadFile(file);
                 }
-                catch { }
+                catch { } //Assembly already loaded.
 
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
 
@@ -76,7 +115,7 @@ namespace Rocket.Eco.Launcher
                 {
                     TypeDefinition startup = ecoServer.MainModule.GetType("Eco.Server.Startup");
 
-                    PatchStartup(startup);
+                    //PatchStartup(startup);
 
                     string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco", "EcoServer.exe");
 
@@ -105,40 +144,6 @@ namespace Rocket.Eco.Launcher
 
             Runtime.Bootstrap();
         }
-
-        private static void PatchStartup(TypeDefinition definition)
-        {
-            ILProcessor il = definition.Methods.First(x => x.Name == "Start").Body.GetILProcessor();
-
-            int index = default(int);
-
-            for (int i = il.Body.Instructions.Count - 1; i != 0; i--)
-                if (il.Body.Instructions[i].OpCode == OpCodes.Newobj)
-                {
-                    index = i + 1;
-                    break;
-                }
-
-            List<Instruction> removedInstructions = new List<Instruction>();
-
-            for (int i = index; i < il.Body.Instructions.Count; i++)
-                removedInstructions.Add(il.Body.Instructions[i]);
-
-            foreach (Instruction i in removedInstructions)
-                il.Remove(i);
-
-            il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Pop));
-            il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
-
-            il.Body.ExceptionHandlers.Clear();
-            il.Body.Variables.Clear();
-
-            il.Body.InitLocals = false;
-
-            il.Body.Optimize();
-            il.Body.OptimizeMacros();
-        }
-
-        private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));
+        */
     }
 }

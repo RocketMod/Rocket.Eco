@@ -7,7 +7,7 @@ using Rocket.Eco.Patching.API;
 namespace Rocket.Eco.Patching
 {
     /// <inheritdoc />
-    public sealed class PatchService : IPatchingService
+    public sealed class PatchingService : IPatchingService
     {
         private readonly List<AssemblyDefinition> assemblies = new List<AssemblyDefinition>();
         private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();

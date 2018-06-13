@@ -50,7 +50,7 @@
   <ItemGroup>
     <Compile Include="API\IAssemblyPatch.cs" />
     <Compile Include="API\IPatchingService.cs" />
-    <Compile Include="PatchService.cs" />
+    <Compile Include="PatchingService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
