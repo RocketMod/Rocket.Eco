@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Mono.Cecil;
 using Rocket.Eco.Patching.API;
 
@@ -62,6 +63,9 @@ namespace Rocket.Eco.Patching
                         }
                     }
                 }
+
+                //I hope this kills the Stream...
+                assemblies.ForEach(x => x.Dispose());
 
                 AssemblyDefinition[] asmArray = assemblies.ToArray();
 
