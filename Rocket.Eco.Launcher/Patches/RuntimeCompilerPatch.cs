@@ -49,16 +49,16 @@ namespace Rocket.Eco.Launcher.Patches
                 Instruction.Create(OpCodes.Call, method.Module.ImportReference(typeof(Path).GetMethod("Combine", new[]{typeof(string), typeof(string), typeof(string), typeof(string)}))),
                 Instruction.Create(OpCodes.Stfld, method.DeclaringType.Fields.First(x => x.Name.Equals("exeDir", StringComparison.InvariantCultureIgnoreCase))), 
             };
+
+            for (int i = instructions.Length - 1; i >= 0; i++)
+            {
+                il.InsertBefore(il.Body.Instructions[0], instructions[i]);
+            }
         }
 
         private static void PatchLoadOrCompileMods(MethodDefinition method)
         {
 
-        }
-
-        void test()
-        {
-            string exedir = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "Eco");
         }
     }
 }
