@@ -40,8 +40,7 @@ namespace Rocket.Eco.Launcher.Patches
 
             Instruction[] instructions = 
             {
-                Instruction.Create(OpCodes.Ldarg_0),
-                Instruction.Create(OpCodes.Call, method.Module.ImportReference(typeof(object).GetConstructor(new Type[0]))),
+                Instruction.Create(OpCodes.Ldarg_0), 
                 Instruction.Create(OpCodes.Call, method.Module.ImportReference(typeof(Directory).GetMethod("GetCurrentDirectory"))),
                 Instruction.Create(OpCodes.Ldstr, "Rocket"),
                 Instruction.Create(OpCodes.Ldstr, "Eco"),
@@ -50,7 +49,7 @@ namespace Rocket.Eco.Launcher.Patches
                 Instruction.Create(OpCodes.Stfld, method.DeclaringType.Fields.First(x => x.Name.Equals("exeDir", StringComparison.InvariantCultureIgnoreCase))), 
             };
 
-            for (int i = instructions.Length - 1; i >= 0; i++)
+            for (int i = instructions.Length - 1; i >= 0; i--)
             {
                 il.InsertBefore(il.Body.Instructions[0], instructions[i]);
             }
