@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Practices.ObjectBuilder2;
 using Mono.Cecil;
+using MoreLinq.Extensions;
 using Rocket.Eco.Launcher.Patches;
 using Rocket.Eco.Launcher.Utils;
 using Rocket.Eco.Patching;
@@ -19,7 +18,7 @@ namespace Rocket.Eco.Launcher
         {
             AppDomain.CurrentDomain.AssemblyResolve += GatherRocketDependencies;
 
-            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
+            AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
             {
                 try
                 {
@@ -43,7 +42,7 @@ namespace Rocket.Eco.Launcher
         public static void Main(string[] args)
         {
             IPatchingService patchingService = new PatchingService();
-            
+
             FileStream stream = File.OpenRead("EcoServer.exe");
 
             AssemblyDefinition defn = AssemblyDefinition.ReadAssembly(stream);
@@ -55,14 +54,14 @@ namespace Rocket.Eco.Launcher
 
             List<AssemblyDefinition> patches = patchingService.Patch().ToList();
 
-            patches.ForEach(x => Console.WriteLine(x.Name.Name));
+            //patches.ForEach(x => Console.WriteLine(x.Name.Name));
 
             //This fixes only ONE of the errors.
-            AssemblyDefinition ecoShared = patches.First(x => x.Name.Name.Equals("Eco.Shared", StringComparison.InvariantCultureIgnoreCase));
+            //AssemblyDefinition ecoShared = patches.First(x => x.Name.Name.Equals("Eco.Shared", StringComparison.InvariantCultureIgnoreCase));
 
-            patches.Remove(ecoShared);
+            //patches.Remove(ecoShared);
 
-            LoadAssemblyFromDefinition(ecoShared);
+            //LoadAssemblyFromDefinition(ecoShared);
 
             patches.ForEach(LoadAssemblyFromDefinition);
 
@@ -80,7 +79,7 @@ namespace Rocket.Eco.Launcher
 #endif
 
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
-
+            /*
             AppDomain.CurrentDomain.GetAssemblies()
                      .First(x => x.GetName().Name.Equals("EcoServer"))
                      .GetType("Eco.Server.Startup")
@@ -88,6 +87,7 @@ namespace Rocket.Eco.Launcher
                      .Invoke(null, new object[]
                          {args.Where(x => !x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
 
+    */
             Console.WriteLine("Houston, we have control!");
 
             //Runtime.Bootstrap();
@@ -97,7 +97,6 @@ namespace Rocket.Eco.Launcher
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                //definition.MainModule.ImportReference(typeof(BindingFlags)); //Failed attempt to resolve System.Reflection.BindingFlags that it keeps complaining about.
                 definition.Write(stream);
 
                 stream.Position = 0; //Is this needed?

@@ -17,6 +17,9 @@ namespace Rocket.Eco.Commands.EcoCommands
     public sealed class CommandUnAdmin : ICommand
     {
         /// <inheritdoc />
+        public string Permission => "Rocket.RemoveAdmin";
+
+        /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
@@ -30,9 +33,6 @@ namespace Rocket.Eco.Commands.EcoCommands
 
         /// <inheritdoc />
         public string Description => null;
-
-        /// <inheritdoc />
-        public string Permission => "Rocket.RemoveAdmin";
 
         /// <inheritdoc />
         public string Syntax => "[[n]ame / id]";

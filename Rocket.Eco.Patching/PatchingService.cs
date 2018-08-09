@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Mono.Cecil;
 using Rocket.Eco.Patching.API;
 
@@ -11,9 +10,9 @@ namespace Rocket.Eco.Patching
     public sealed class PatchingService : IPatchingService
     {
         private readonly List<AssemblyDefinition> assemblies = new List<AssemblyDefinition>();
-        private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();
 
         private readonly object lockObj = new object();
+        private readonly List<IAssemblyPatch> patches = new List<IAssemblyPatch>();
 
         /// <inheritdoc />
         public bool RegisterPatch<T>() where T : IAssemblyPatch, new()

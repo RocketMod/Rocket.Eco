@@ -35,7 +35,7 @@ namespace Rocket.Eco.Commands
                     ?? throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
             command = (ChatCommandAttribute) method.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
-            
+
             if (command != null)
             {
                 commandMethod = method;
@@ -48,6 +48,9 @@ namespace Rocket.Eco.Commands
         }
 
         /// <inheritdoc />
+        public string Permission => $"Eco.Base.{Name}";
+
+        /// <inheritdoc />
         public string[] Aliases => new string[0];
 
         /// <inheritdoc />
@@ -58,9 +61,6 @@ namespace Rocket.Eco.Commands
 
         /// <inheritdoc />
         public string Name => command.UseMethodName ? commandMethod.Name : command.CommandName;
-
-        /// <inheritdoc />
-        public string Permission => $"Eco.Base.{Name}";
 
         /// <inheritdoc />
         public string Description => command.HelpText;

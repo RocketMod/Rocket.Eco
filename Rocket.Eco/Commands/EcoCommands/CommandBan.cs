@@ -16,6 +16,9 @@ namespace Rocket.Eco.Commands.EcoCommands
     public sealed class CommandBan : ICommand
     {
         /// <inheritdoc />
+        public string Permission => "Rocket.Ban";
+
+        /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
@@ -29,9 +32,6 @@ namespace Rocket.Eco.Commands.EcoCommands
 
         /// <inheritdoc />
         public string Description => null;
-
-        /// <inheritdoc />
-        public string Permission => "Rocket.Ban";
 
         /// <inheritdoc />
         public string Syntax => "[[n]ame / id] <reason>";

@@ -15,7 +15,7 @@ using Rocket.Core.Player;
 using Rocket.Core.User.Events;
 using Rocket.Eco.API;
 using Rocket.Eco.Extensions;
-using Color = System.Drawing.Color;
+using Color = Rocket.API.Drawing.Color;
 
 namespace Rocket.Eco.Player
 {
@@ -23,19 +23,14 @@ namespace Rocket.Eco.Player
     public sealed class EcoPlayerManager : IPlayerManager
     {
         private readonly IDependencyContainer container;
-        private readonly IEventManager eventManager;
-
-        private readonly IHost host;
 
         //TODO: Migrate to a thread-safe collection.
         internal readonly List<EcoPlayer> InternalPlayersList = new List<EcoPlayer>();
 
         /// <inheritdoc />
-        public EcoPlayerManager(IHost host, IEventManager eventManager, IDependencyContainer container)
+        public EcoPlayerManager(IDependencyContainer container)
         {
             this.container = container;
-            this.host = host;
-            this.eventManager = eventManager;
 
             foreach (User user in UserManager.Users)
                 InternalPlayersList.Add(new EcoPlayer(user, this, container));
@@ -46,6 +41,11 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public IEnumerable<IPlayer> OnlinePlayers => InternalPlayersList.Where(x => x.IsOnline);
+
+        public void Broadcast(IUser sender, string message, Color? color = null, params object[] arguments)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc />
         public IUserInfo GetUser(string id)
@@ -152,7 +152,7 @@ namespace Rocket.Eco.Player
                 throw new InvalidOperationException("You cannot kick an offline player.");
 
             UserKickEvent e = new UserKickEvent(ecoUser, ecoUser, reason);
-            container.Resolve<IEventManager>().Emit(container.Resolve<IHost>(), e);
+            container.Resolve<IEventBus>().Emit(container.Resolve<IHost>(), e);
 
             if (e.IsCancelled)
                 return false;
@@ -175,7 +175,7 @@ namespace Rocket.Eco.Player
                 reason = string.Empty;
 
             UserBanEvent e = new UserBanEvent(player, caller, reason, null);
-            container.Resolve<IEventManager>().Emit(container.Resolve<IHost>(), e);
+            container.Resolve<IEventBus>().Emit(container.Resolve<IHost>(), e);
 
             if (e.IsCancelled)
                 return false;
@@ -260,14 +260,6 @@ namespace Rocket.Eco.Player
             string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
 
             foreach (EcoPlayerUser ecoUser in users) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
-        }
-
-        /// <inheritdoc />
-        public void Broadcast(IUser sender, string message, Color? color = null, params object[] arguments)
-        {
-            string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.Name) ? message : $"[{sender.Name}] {message}", arguments);
-
-            foreach (EcoPlayer ecoPlayer in OnlinePlayers.Cast<EcoPlayer>()) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoPlayer.InternalEcoUser);
         }
 
         private static bool AddBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.AddUnique(user);

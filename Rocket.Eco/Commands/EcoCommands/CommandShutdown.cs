@@ -11,6 +11,9 @@ namespace Rocket.Eco.Commands.EcoCommands
     public sealed class CommandShutdown : ICommand
     {
         /// <inheritdoc />
+        public string Permission => "Rocket.Shutdown";
+
+        /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
@@ -24,9 +27,6 @@ namespace Rocket.Eco.Commands.EcoCommands
 
         /// <inheritdoc />
         public string Description => null;
-
-        /// <inheritdoc />
-        public string Permission => "Rocket.Shutdown";
 
         /// <inheritdoc />
         public string Syntax => "";

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using Microsoft.Practices.ObjectBuilder2;
 using Mono.Cecil;
+using MoreLinq.Extensions;
 
 namespace Rocket.Eco.Launcher.Utils
 {
@@ -16,29 +16,43 @@ namespace Rocket.Eco.Launcher.Utils
         {
             List<AssemblyDefinition> definitions = new List<AssemblyDefinition>();
 
-            definition.MainModule.Resources.Where(x => x.ResourceType == ResourceType.Embedded).Cast<EmbeddedResource>().Where(x => x.Name.EndsWith(".compressed") && x.Name.StartsWith("costura")).ForEach(x =>
-            {
-                using (Stream stream = x.GetResourceStream())
-                {
-                    using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
-                    {
-                        MemoryStream memStream = new MemoryStream();
+            Directory.CreateDirectory(Path.Combine("Rocket", "Binaries", "Eco"));
 
-                        byte[] array = new byte[81920];
+            definition.MainModule.Resources.Where(x => x.ResourceType == ResourceType.Embedded)
+                      .Cast<EmbeddedResource>()
+                      .Where(x => x.Name.EndsWith(".compressed") && x.Name.StartsWith("costura"))
+                      .ForEach(x =>
+                      {
+                          using (Stream stream = x.GetResourceStream())
+                          {
+                              using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
+                              {
+                                  byte[] assembly;
 
-                        int count;
-                        while ((count = deflateStream.Read(array, 0, array.Length)) != 0)
-                        {
-                            memStream.Write(array, 0, count);
-                        }
+                                  using (MemoryStream memStream = new MemoryStream())
+                                  {
+                                      byte[] array = new byte[4096];
 
-                        Assemblies[x.Name.Replace(".dll.compressed", "").Replace("costura.", "")] = new AssemblyData(memStream, null);
-                    }
-                }
-            });
+                                      int count;
+                                      while ((count = deflateStream.Read(array, 0, array.Length)) != 0) memStream.Write(array, 0, count);
 
-            CosturaAssemblyResolver resolver = new CosturaAssemblyResolver();
-            ReaderParameters parameters = new ReaderParameters()
+                                      memStream.Position = 0;
+
+                                      assembly = new byte[memStream.Length];
+                                      memStream.Read(assembly, 0, assembly.Length);
+
+                                      File.WriteAllBytes(Path.Combine("Rocket", "Binaries", "Eco", x.Name.Replace(".compressed", "").Replace("costura.", "")), assembly);
+                                  }
+
+                                  Assemblies[x.Name.Replace(".dll.compressed", "").Replace("costura.", "")] = new AssemblyData(new MemoryStream(assembly), null);
+                              }
+                          }
+                      });
+
+            DefaultAssemblyResolver resolver = new DefaultAssemblyResolver();
+            resolver.AddSearchDirectory(Path.Combine("Rocket", "Binaries", "Eco"));
+
+            ReaderParameters parameters = new ReaderParameters
             {
                 AssemblyResolver = resolver
             };

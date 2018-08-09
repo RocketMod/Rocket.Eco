@@ -14,6 +14,9 @@ namespace Rocket.Eco.Commands.EcoCommands
     public sealed class CommandFeed : ICommand
     {
         /// <inheritdoc />
+        public string Permission => "Rocket.Feed";
+
+        /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
@@ -27,9 +30,6 @@ namespace Rocket.Eco.Commands.EcoCommands
 
         /// <inheritdoc />
         public string Description => null;
-
-        /// <inheritdoc />
-        public string Permission => "Rocket.Feed";
 
         /// <inheritdoc />
         public string Syntax => "<[n]ame / id>";

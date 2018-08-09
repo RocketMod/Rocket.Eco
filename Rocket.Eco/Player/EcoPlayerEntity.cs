@@ -21,7 +21,7 @@ namespace Rocket.Eco.Player
         public string EntityTypeName => IdentityTypes.Player;
 
         /// <inheritdoc />
-        public Vector3 Position => (Player.IsOnline) ? Player.InternalEcoUser.Position.ToSystemVector3() : throw new InvalidOperationException("The player must be online.");
+        public Vector3 Position => Player.IsOnline ? Player.InternalEcoUser.Position.ToSystemVector3() : throw new InvalidOperationException("The player must be online.");
 
         /// <inheritdoc />
         public bool Teleport(Vector3 position)

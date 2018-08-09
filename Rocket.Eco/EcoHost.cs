@@ -15,28 +15,18 @@ using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
 using Rocket.API.Plugins;
-using Rocket.API.Scheduler;
-using Rocket.API.User;
+using Rocket.API.Scheduling;
 using Rocket.Core.Commands.Events;
 using Rocket.Core.Implementation.Events;
 using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
-using Rocket.Core.Scheduler;
+using Rocket.Core.Scheduling;
 using Rocket.Core.User;
 using Rocket.Core.User.Events;
-using Rocket.Eco.API.Patching;
-using Rocket.Eco.Commands;
-using Rocket.Eco.Delegates;
-using Rocket.Eco.Eventing;
-using Rocket.Eco.Patches;
+using Rocket.Eco.Launcher.Callbacks;
 using Rocket.Eco.Player;
-using Rocket.Eco.Scheduling;
-
 #if DEBUG
-using Rocket.Eco.API.Legislation;
-using Rocket.Eco.Economy;
-using Rocket.Eco.Legislation;
-using Rocket.API.Economy;
+
 #endif
 
 namespace Rocket.Eco
@@ -49,7 +39,7 @@ namespace Rocket.Eco
     {
         private ICommandHandler commandHandler;
         private IConsole console;
-        private IEventManager eventManager;
+        private IEventBus eventManager;
         private ILogger logger;
         private ConfigurationPermissionProvider permissionProvider;
         private EcoPlayerManager playerManager;
@@ -70,7 +60,10 @@ namespace Rocket.Eco
         }
 
         /// <inheritdoc />
-        public IConsole Console => console ?? (console = new DefaultConsole(runtime.Container, playerManager));
+        public IConsole Console => console ?? (console = new StdConsole(runtime.Container));
+
+        /// <inheritdoc />
+        public string GameName => "Eco";
 
         /// <inheritdoc />
         public Version GameVersion => AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name == "Eco.Gameplay").GetName().Version;
@@ -98,38 +91,27 @@ namespace Rocket.Eco
 
             this.runtime = runtime;
 
-            IPatchManager patchManager = runtime.Container.Resolve<IPatchManager>();
-
             logger = runtime.Container.Resolve<ILogger>();
-            eventManager = runtime.Container.Resolve<IEventManager>();
+            eventManager = runtime.Container.Resolve<IEventBus>();
             pluginManager = runtime.Container.Resolve<IPluginManager>();
             commandHandler = runtime.Container.Resolve<ICommandHandler>();
-
             permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
-
-            patchManager.RegisterPatch<UserPatch>();
-            patchManager.RegisterPatch<ChatManagerPatch>();
-            eventManager.AddEventListener(this, new EcoEventListener(runtime.Container));
-
-            pluginManager.Init();
-
-            playerManager = new EcoPlayerManager(this, eventManager, runtime.Container);
-
-            //TODO: This can go into DependencyRegistrator.cs after patching is migrated 
-            runtime.Container.RegisterSingletonInstance<IUserManager>(playerManager, "eco", "game");
-            runtime.Container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco", "game");
-            runtime.Container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco", "game");
-            runtime.Container.RegisterSingletonInstance<ICommandProvider>(new EcoNativeCommandProvider(this, logger), "eco_vanilla_commands");
-
-            taskScheduler = runtime.Container.Resolve<ITaskScheduler>("eco", "game");
-
-#if DEBUG
-            runtime.Container.RegisterSingletonType<IGovernment, EcoGovernment>(null, "eco", "game");
-            runtime.Container.RegisterSingletonType<IEconomyProvider, EcoEconomyProvider>(null, "eco", "game");
-#endif
+            playerManager = (EcoPlayerManager) runtime.Container.Resolve<IPlayerManager>("eco");
 
             CheckConfig();
-            PostInit();
+
+            EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
+            EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
+            EcoUserChatDelegate playerChat = _EmitPlayerChat;
+
+            Type userType = typeof(User);
+            Type chatManagerType = typeof(ChatManager);
+
+            userType.GetField("OnUserLogin").SetValue(null, playerJoin);
+            userType.GetField("OnUserLogout").SetValue(null, playerLeave);
+            chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
+
+            pluginManager.Init();
 
             eventManager.Emit(this, new ImplementationReadyEvent(this));
 
@@ -187,23 +169,9 @@ namespace Rocket.Eco
                 if (plugin.Unload())
                     plugin.Load(true);
         }
-        
+
         /// <inheritdoc />
         public Version HostVersion => GetType().Assembly.GetName().Version;
-
-        private void PostInit()
-        {
-            EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
-            EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
-            EcoUserChatDelegate playerChat = _EmitPlayerChat;
-
-            Type userType = typeof(User);
-            Type chatManagerType = typeof(ChatManager);
-
-            userType.GetField("OnUserLogin").SetValue(null, playerJoin);
-            userType.GetField("OnUserLogout").SetValue(null, playerLeave);
-            chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
-        }
 
         private void CheckConfig()
         {

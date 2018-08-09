@@ -6,7 +6,7 @@ using System.Threading;
 using Rocket.API;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
-using Rocket.API.Scheduler;
+using Rocket.API.Scheduling;
 using Rocket.Core.Logging;
 
 namespace Rocket.Eco.Scheduling

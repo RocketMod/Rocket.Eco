@@ -1,6 +1,6 @@
 ﻿using System;
 using Rocket.API;
-using Rocket.API.Scheduler;
+using Rocket.API.Scheduling;
 
 namespace Rocket.Eco.Scheduling
 {

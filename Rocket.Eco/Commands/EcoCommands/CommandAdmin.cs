@@ -19,6 +19,9 @@ namespace Rocket.Eco.Commands.EcoCommands
     public sealed class CommandAdmin : ICommand
     {
         /// <inheritdoc />
+        public string Permission => "Rocket.Admin";
+
+        /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
@@ -32,9 +35,6 @@ namespace Rocket.Eco.Commands.EcoCommands
 
         /// <inheritdoc />
         public string Description => null;
-
-        /// <inheritdoc />
-        public string Permission => "Rocket.Admin";
 
         /// <inheritdoc />
         public string Syntax => "[[n]ame / id]";

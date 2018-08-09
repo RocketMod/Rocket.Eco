@@ -4,6 +4,7 @@ using System.Reflection;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
 using Rocket.Core.ServiceProxies;
 
@@ -20,13 +21,15 @@ namespace Rocket.Eco.Commands
         private readonly IHost host;
 
         /// <inheritdoc />
-        public EcoNativeCommandProvider(IHost host, ILogger logger)
+        public EcoNativeCommandProvider(IDependencyContainer container)
         {
-            this.host = host;
+            host = container.Resolve<IHost>();
             Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
                 throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
+
+            ILogger logger = container.Resolve<ILogger>();
 
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
                 commands.Add(new EcoNativeCommand(pair.Value, logger));

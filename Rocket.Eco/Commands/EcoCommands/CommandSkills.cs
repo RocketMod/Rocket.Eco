@@ -15,6 +15,9 @@ namespace Rocket.Eco.Commands.EcoCommands
     public sealed class CommandSkills : ICommand
     {
         /// <inheritdoc />
+        public string Permission => "Rocket.Skills";
+
+        /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
         /// <inheritdoc />
@@ -28,9 +31,6 @@ namespace Rocket.Eco.Commands.EcoCommands
 
         /// <inheritdoc />
         public string Description => null;
-
-        /// <inheritdoc />
-        public string Permission => "Rocket.Skills";
 
         /// <inheritdoc />
         public string Syntax => "[[n]ame / id] [points] | [points]";
