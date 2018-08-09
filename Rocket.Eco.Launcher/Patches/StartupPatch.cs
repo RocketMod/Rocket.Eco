@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
+using MoreLinq;
 using Rocket.Eco.Patching.API;
 
 namespace Rocket.Eco.Launcher.Patches
@@ -45,11 +47,16 @@ namespace Rocket.Eco.Launcher.Patches
             il.InsertAfter(il.Body.Instructions[il.Body.Instructions.Count - 1], il.Create(OpCodes.Ret));
 
             il.Body.ExceptionHandlers.Clear();
+
+            VariableDefinition variable = il.Body.Variables[0];
             il.Body.Variables.Clear();
+            il.Body.Variables.Add(variable);
 
             il.Body.InitLocals = false;
 
             il.Body.Optimize();
+
+            il.Body.Instructions.ForEach(x => Console.WriteLine(x.OpCode.ToString()));
         }
     }
 }

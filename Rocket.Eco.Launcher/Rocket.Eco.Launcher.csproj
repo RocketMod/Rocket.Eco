@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="Callbacks\ElectionDelegates.cs" />
     <Compile Include="Callbacks\UserDelegates.cs" />
+    <Compile Include="Patches\RuntimeCompilerPatch.cs" />
     <Compile Include="Utils\CosturaHelper.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />
     <Compile Include="Patches\StartupPatch.cs" />

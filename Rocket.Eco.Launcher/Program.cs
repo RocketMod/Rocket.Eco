@@ -54,15 +54,6 @@ namespace Rocket.Eco.Launcher
 
             List<AssemblyDefinition> patches = patchingService.Patch().ToList();
 
-            //patches.ForEach(x => Console.WriteLine(x.Name.Name));
-
-            //This fixes only ONE of the errors.
-            //AssemblyDefinition ecoShared = patches.First(x => x.Name.Name.Equals("Eco.Shared", StringComparison.InvariantCultureIgnoreCase));
-
-            //patches.Remove(ecoShared);
-
-            //LoadAssemblyFromDefinition(ecoShared);
-
             patches.ForEach(LoadAssemblyFromDefinition);
 
             CosturaHelper.DisposeStreams();
@@ -79,7 +70,7 @@ namespace Rocket.Eco.Launcher
 #endif
 
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
-            /*
+            
             AppDomain.CurrentDomain.GetAssemblies()
                      .First(x => x.GetName().Name.Equals("EcoServer"))
                      .GetType("Eco.Server.Startup")
@@ -87,7 +78,6 @@ namespace Rocket.Eco.Launcher
                      .Invoke(null, new object[]
                          {args.Where(x => !x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
 
-    */
             Console.WriteLine("Houston, we have control!");
 
             //Runtime.Bootstrap();
