@@ -58,6 +58,8 @@ namespace Rocket.Eco.Patching
 
                             patch.Patch(typeDef);
 
+                            Console.WriteLine($"The patch `{patch.GetType().FullName}` has been applied to `{typeDef.FullName}`");
+
                             break;
                         }
                     }

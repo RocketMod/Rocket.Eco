@@ -51,6 +51,7 @@ namespace Rocket.Eco.Launcher
 
             patchingService.RegisterPatch<UserPatch>();
             patchingService.RegisterPatch<ChatManagerPatch>();
+            patchingService.RegisterPatch<RuntimeCompilerPatch>();
 
             List<AssemblyDefinition> patches = patchingService.Patch().ToList();
 
@@ -64,10 +65,6 @@ namespace Rocket.Eco.Launcher
             patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
 
             stream.Dispose();
-
-#if DEBUG
-            AppDomain.CurrentDomain.GetAssemblies().ForEach(x => Console.WriteLine(x.FullName));
-#endif
 
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
             
