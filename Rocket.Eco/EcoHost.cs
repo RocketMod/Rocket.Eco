@@ -10,6 +10,7 @@ using Eco.Plugins.Networking;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.Configuration;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Logging;
 using Rocket.API.Permissions;
@@ -38,7 +39,6 @@ namespace Rocket.Eco
     public sealed class EcoHost : IHost
     {
         private ICommandHandler commandHandler;
-        private IConsole console;
         private IEventBus eventManager;
         private ILogger logger;
         private ConfigurationPermissionProvider permissionProvider;
@@ -60,7 +60,7 @@ namespace Rocket.Eco
         }
 
         /// <inheritdoc />
-        public IConsole Console => console ?? (console = new StdConsole(runtime.Container));
+        public IConsole Console { get; }
 
         /// <inheritdoc />
         public string GameName => "Eco";
@@ -83,6 +83,11 @@ namespace Rocket.Eco
         /// <inheritdoc />
         public string Name => "Rocket.Eco";
 
+        public EcoHost(IDependencyContainer container)
+        {
+            Console = new StdConsole(container);
+        }
+
         /// <inheritdoc />
         public void Init(IRuntime runtime)
         {
@@ -95,6 +100,7 @@ namespace Rocket.Eco
             eventManager = runtime.Container.Resolve<IEventBus>();
             pluginManager = runtime.Container.Resolve<IPluginManager>();
             commandHandler = runtime.Container.Resolve<ICommandHandler>();
+            taskScheduler = runtime.Container.Resolve<ITaskScheduler>();
             permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
             playerManager = (EcoPlayerManager) runtime.Container.Resolve<IPlayerManager>("eco");
 
@@ -130,7 +136,7 @@ namespace Rocket.Eco
                         if (input.StartsWith("/", StringComparison.InvariantCulture))
                             input = input.Remove(0, 1);
 
-                        bool wasHandled = commandHandler.HandleCommand(console, input, string.Empty);
+                        bool wasHandled = commandHandler.HandleCommand(Console, input, string.Empty);
 
                         if (!wasHandled)
                             logger.LogError("That command could not be found!");

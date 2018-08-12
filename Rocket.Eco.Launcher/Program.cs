@@ -67,17 +67,23 @@ namespace Rocket.Eco.Launcher
             stream.Dispose();
 
             AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
-            
+
+            List<string> newArgs = args.ToList();
+            newArgs.Add("-nogui");
+
             AppDomain.CurrentDomain.GetAssemblies()
                      .First(x => x.GetName().Name.Equals("EcoServer"))
                      .GetType("Eco.Server.Startup")
                      .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
                      .Invoke(null, new object[]
-                         {args.Where(x => !x.Equals("-extract", StringComparison.InvariantCultureIgnoreCase)).ToArray()});
+                         {newArgs.ToArray()});
 
-            Console.WriteLine("Houston, we have control!");
+            foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries")))
+            {
+                Assembly.LoadFile(file);
+            }
 
-            //Runtime.Bootstrap();
+            Runtime.Bootstrap();
         }
 
         private static void LoadAssemblyFromDefinition(AssemblyDefinition definition)

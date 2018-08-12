@@ -164,7 +164,7 @@ namespace Rocket.Eco.Scheduling
                 if (time < 0)
                     Thread.Sleep((int) -time);
                 else if (time != 0)
-                    if (time > 100)
+                    if (time > 1000)
                     {
                         logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
                         logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
