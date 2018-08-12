@@ -47,8 +47,10 @@ namespace Rocket.Eco.Commands
             }
         }
 
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => $"Eco.Base.{Name}";
+        */
 
         /// <inheritdoc />
         public string[] Aliases => new string[0];
@@ -88,3 +90,4 @@ namespace Rocket.Eco.Commands
         }
     }
 }
+ 
