@@ -1,19 +1,22 @@
 ﻿using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
-using Rocket.API.Economy;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
 using Rocket.API.Scheduling;
 using Rocket.API.User;
 using Rocket.Core.User;
-using Rocket.Eco.API.Legislation;
 using Rocket.Eco.Commands;
-using Rocket.Eco.Economy;
-using Rocket.Eco.Legislation;
 using Rocket.Eco.Permissions;
 using Rocket.Eco.Player;
 using Rocket.Eco.Scheduling;
+
+#if DEBUG
+using Rocket.Eco.API.Legislation;
+using Rocket.Eco.Economy;
+using Rocket.Eco.Legislation;
+using Rocket.API.Economy;
+#endif
 
 namespace Rocket.Eco.Properties
 {

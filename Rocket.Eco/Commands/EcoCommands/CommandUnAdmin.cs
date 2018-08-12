@@ -16,8 +16,10 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandUnAdmin : ICommand
     {
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => "Rocket.RemoveAdmin";
+        */
 
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;

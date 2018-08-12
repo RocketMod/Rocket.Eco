@@ -15,8 +15,10 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandBan : ICommand
     {
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => "Rocket.Ban";
+        */
 
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
@@ -51,7 +53,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer onlinePlayer))
             {
-                userInfo = ((EcoPlayer) onlinePlayer).User;
+                userInfo = ((EcoPlayer)onlinePlayer).User;
             }
             else
             {

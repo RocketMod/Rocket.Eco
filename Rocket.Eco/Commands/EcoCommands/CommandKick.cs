@@ -14,8 +14,10 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandKick : ICommand
     {
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => "Rocket.Kick";
+        */
 
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;

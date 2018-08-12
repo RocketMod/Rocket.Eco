@@ -13,8 +13,10 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandFeed : ICommand
     {
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => "Rocket.Feed";
+        */
 
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;

@@ -10,8 +10,10 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandShutdown : ICommand
     {
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => "Rocket.Shutdown";
+        */
 
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;

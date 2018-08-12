@@ -18,8 +18,10 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandAdmin : ICommand
     {
+        /* why is this gone? D:
         /// <inheritdoc />
         public string Permission => "Rocket.Admin";
+        */
 
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;

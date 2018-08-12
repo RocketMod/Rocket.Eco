@@ -49,6 +49,7 @@ namespace Rocket.Eco
         private IRuntime runtime;
         private ITaskScheduler taskScheduler;
 
+        /// <inheritdoc />
         public EcoHost(IDependencyContainer container)
         {
             Console = new StdConsole(container);
