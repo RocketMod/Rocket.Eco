@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if DEBUG
+using System.Collections.Generic;
 using Rocket.API.Player;
 
 namespace Rocket.Eco.API.Legislation
@@ -12,3 +13,4 @@ namespace Rocket.Eco.API.Legislation
         IReadOnlyCollection<ILawVote> Votes { get; }
     }
 }
+#endif

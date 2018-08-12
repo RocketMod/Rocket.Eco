@@ -2,11 +2,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using Eco.Core.Utils;
 using Eco.ModKit;
 using Eco.Shared.Utils;
@@ -47,8 +45,8 @@ namespace Rocket.Eco.Launcher.Patches
                 Instruction.Create(OpCodes.Dup),
                 Instruction.Create(OpCodes.Ldstr, "CompilerVersion"),
                 Instruction.Create(OpCodes.Ldstr, "v4.0"), //Why was this set to `v4.0` if the game uses a `v4.6` runtime?
-                Instruction.Create(OpCodes.Callvirt, method.Module.ImportReference(typeof(Dictionary<string, string>).GetMethod("Add", new []{typeof(string), typeof(string)}))),
-                Instruction.Create(OpCodes.Newobj, method.Module.ImportReference(typeof(CSharpCodeProvider).GetConstructor(new []{typeof(Dictionary<string, string>)}))),
+                Instruction.Create(OpCodes.Callvirt, method.Module.ImportReference(typeof(Dictionary<string, string>).GetMethod("Add", new[] {typeof(string), typeof(string)}))),
+                Instruction.Create(OpCodes.Newobj, method.Module.ImportReference(typeof(CSharpCodeProvider).GetConstructor(new[] {typeof(Dictionary<string, string>)}))),
                 Instruction.Create(OpCodes.Stloc_0),
                 Instruction.Create(OpCodes.Ldarg_0),
                 Instruction.Create(OpCodes.Ldloc_0),
@@ -66,10 +64,7 @@ namespace Rocket.Eco.Launcher.Patches
                 Instruction.Create(OpCodes.Ret)
             };
 
-            foreach (Instruction instruction in instructions)
-            {
-                il.Body.Instructions.Add(instruction);
-            }
+            foreach (Instruction instruction in instructions) il.Body.Instructions.Add(instruction);
         }
 
         public static CompilerResults CompileMods(object compiler, CSharpCodeProvider provider)
@@ -119,14 +114,14 @@ namespace Rocket.Eco.Launcher.Patches
 
                 foreach (object obj in results.Errors)
                 {
-                    CompilerError compilerError = (CompilerError)obj;
+                    CompilerError compilerError = (CompilerError) obj;
                     stringBuilder.AppendLine(
                         $"Error in {Path.GetFileNameWithoutExtension(compilerError.FileName)} at {compilerError.Line}: {compilerError.ErrorText} ({compilerError.ErrorNumber})"
                     );
                 }
 
                 string error = stringBuilder.ToString();
-                    
+
                 Log.WriteLine("Mods recompiled with errors.");
                 Log.WriteLine(error);
 

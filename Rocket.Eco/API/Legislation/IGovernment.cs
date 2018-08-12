@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if DEBUG
+using System.Collections.Generic;
 using Rocket.API.Player;
 using Rocket.Eco.Player;
 
@@ -28,3 +29,4 @@ namespace Rocket.Eco.API.Legislation
         bool ForceNewLeader(IPlayer player);
     }
 }
+#endif

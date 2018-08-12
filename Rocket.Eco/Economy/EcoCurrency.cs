@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using System.Collections.Generic;
 using Eco.Gameplay.Economy;
 using Rocket.API.DependencyInjection;
@@ -40,3 +41,4 @@ namespace Rocket.Eco.Economy
         public decimal Exchange(double amount, IEconomyCurrency targetCurrency) => throw new NotSupportedException("Vanilla currencies may not exchange with each-other.");
     }
 }
+#endif

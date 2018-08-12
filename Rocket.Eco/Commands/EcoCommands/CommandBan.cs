@@ -45,7 +45,7 @@ namespace Rocket.Eco.Commands.EcoCommands
             if (context.Parameters.Length == 0)
                 throw new CommandWrongUsageException();
 
-            IPlayerManager playerManager = context.Container.Resolve<IPlayerManager>("ecoplayermanager");
+            IPlayerManager playerManager = context.Container.Resolve<IPlayerManager>("eco");
 
             IUserInfo userInfo;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using Rocket.API.Player;
 
 namespace Rocket.Eco.API.Legislation
@@ -11,3 +12,4 @@ namespace Rocket.Eco.API.Legislation
         DateTime? VoteLastChanged { get; }
     }
 }
+#endif

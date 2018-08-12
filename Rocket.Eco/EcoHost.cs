@@ -26,6 +26,7 @@ using Rocket.Core.User;
 using Rocket.Core.User.Events;
 using Rocket.Eco.Launcher.Callbacks;
 using Rocket.Eco.Player;
+
 #if DEBUG
 
 #endif
@@ -47,6 +48,11 @@ namespace Rocket.Eco
 
         private IRuntime runtime;
         private ITaskScheduler taskScheduler;
+
+        public EcoHost(IDependencyContainer container)
+        {
+            Console = new StdConsole(container);
+        }
 
         /// <inheritdoc />
         public ushort ServerPort
@@ -82,11 +88,6 @@ namespace Rocket.Eco
 
         /// <inheritdoc />
         public string Name => "Rocket.Eco";
-
-        public EcoHost(IDependencyContainer container)
-        {
-            Console = new StdConsole(container);
-        }
 
         /// <inheritdoc />
         public void Init(IRuntime runtime)
@@ -209,13 +210,12 @@ namespace Rocket.Eco
                 ecoPlayer = new EcoPlayer(castedUser, playerManager, runtime.Container);
                 playerManager?.InternalPlayersList.Add(ecoPlayer);
 
-                firstTime = " for the first time!";
+                firstTime = " for the first time";
             }
             else if (ecoPlayer.InternalEcoUser == null)
             {
                 ecoPlayer.BuildReference(castedUser);
-
-                firstTime = " for the first time!";
+                firstTime = " for the first time";
             }
 
             IConfigurationSection configurationSection = permissionProvider.PlayersConfig["EcoUser"];
@@ -242,7 +242,7 @@ namespace Rocket.Eco
 
             eventManager.Emit(this, new UserConnectedEvent(ecoPlayer.User, EventExecutionTargetContext.NextFrame));
 
-            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}!");
+            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}.");
         }
 
         internal void _EmitPlayerLeave(object player)
@@ -260,7 +260,7 @@ namespace Rocket.Eco
 
             eventManager.Emit(this, new UserDisconnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame));
 
-            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has left!");
+            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has left.");
         }
 
         internal bool _EmitPlayerChat(object user, string text)

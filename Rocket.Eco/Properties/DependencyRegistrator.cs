@@ -2,8 +2,6 @@
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Economy;
-using Rocket.API.Eventing;
-using Rocket.API.Logging;
 using Rocket.API.Permissions;
 using Rocket.API.Player;
 using Rocket.API.Scheduling;
@@ -32,7 +30,7 @@ namespace Rocket.Eco.Properties
             container.RegisterSingletonType<ITaskScheduler, EcoTaskScheduler>(null, "eco", "game");
 
             IPlayerManager playerManager = new EcoPlayerManager(container);
-            container.RegisterSingletonInstance<IPlayerManager>(playerManager, null, "eco", "game");
+            container.RegisterSingletonInstance(playerManager, null, "eco", "game");
             container.RegisterSingletonInstance<IUserManager>(playerManager, "eco", "game");
             container.RegisterSingletonType<IUserManager, StdConsoleUserManager>("stdconsole");
 

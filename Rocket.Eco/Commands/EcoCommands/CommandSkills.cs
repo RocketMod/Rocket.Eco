@@ -62,7 +62,7 @@ namespace Rocket.Eco.Commands.EcoCommands
                 if (!float.TryParse(context.Parameters[1], out skills))
                     throw new CommandWrongUsageException("Please specify a valid amount.");
 
-                if (!context.Container.Resolve<IPlayerManager>("ecoplayermanager").TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
+                if (!context.Container.Resolve<IPlayerManager>("eco").TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
                     throw new CommandWrongUsageException("The target player couldn't be found or isn't online!");
 
                 target = (EcoPlayer) player;

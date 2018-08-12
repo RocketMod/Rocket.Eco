@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rocket.API.DependencyInjection;
@@ -67,3 +68,4 @@ namespace Rocket.Eco.Economy
         public bool SupportsIdentity(IIdentity identity) => identity is EcoPlayer || identity is EcoPlayerUser;
     }
 }
+#endif

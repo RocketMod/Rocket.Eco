@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using Rocket.API.Economy;
 using Rocket.API.User;
 using Rocket.Eco.Player;
@@ -30,3 +31,4 @@ namespace Rocket.Eco.Economy
         public decimal Balance { get; }
     }
 }
+#endif

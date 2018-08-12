@@ -78,10 +78,7 @@ namespace Rocket.Eco.Launcher
                      .Invoke(null, new object[]
                          {newArgs.ToArray()});
 
-            foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries")))
-            {
-                Assembly.LoadFile(file);
-            }
+            foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries"))) Assembly.LoadFile(file);
 
             Runtime.Bootstrap();
         }

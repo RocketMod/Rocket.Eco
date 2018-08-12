@@ -1,4 +1,5 @@
-﻿namespace Rocket.Eco.API.Legislation
+﻿#if DEBUG
+namespace Rocket.Eco.API.Legislation
 {
     public interface ILaw
     {
@@ -7,3 +8,4 @@
         bool IsEnacted { get; }
     }
 }
+#endif

@@ -54,7 +54,7 @@ namespace Rocket.Eco.Commands.EcoCommands
             if (string.IsNullOrWhiteSpace(context.Parameters[0]))
                 throw new CommandWrongUsageException();
 
-            if (!context.Container.Resolve<IPlayerManager>("ecoplayermanager").TryGetOnlinePlayer(context.Parameters[0], out IPlayer player) || !(player is EcoPlayer ecoPlayer))
+            if (!context.Container.Resolve<IPlayerManager>("eco").TryGetOnlinePlayer(context.Parameters[0], out IPlayer player) || !(player is EcoPlayer ecoPlayer))
             {
                 context.User.SendMessage("We couldn't find that user!");
                 return;

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if DEBUG
+using System.Linq;
 using Rocket.API.Player;
 
 namespace Rocket.Eco.API.Legislation
@@ -9,3 +10,4 @@ namespace Rocket.Eco.API.Legislation
         IOrderedEnumerable<IPlayer> Votes { get; }
     }
 }
+#endif
