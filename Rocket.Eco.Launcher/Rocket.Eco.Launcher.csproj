@@ -73,14 +73,14 @@
     <Reference Include="RestSharp, Version=106.3.1.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.106.3.1\lib\net452\RestSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.API, Version=5.0.0.581, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.API.5.0.0.581\lib\net461\Rocket.API.dll</HintPath>
+    <Reference Include="Rocket.API, Version=5.0.0.580, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.API.5.0.0.580\lib\net461\Rocket.API.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Core, Version=5.0.0.581, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Core.5.0.0.581\lib\net461\Rocket.Core.dll</HintPath>
+    <Reference Include="Rocket.Core, Version=5.0.0.580, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Core.5.0.0.580\lib\net461\Rocket.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Runtime, Version=5.0.0.581, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rocket.Runtime.5.0.0.581\lib\net461\Rocket.Runtime.dll</HintPath>
+    <Reference Include="Rocket.Runtime, Version=5.0.0.580, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rocket.Runtime.5.0.0.580\lib\net461\Rocket.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
