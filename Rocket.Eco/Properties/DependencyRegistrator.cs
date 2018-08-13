@@ -29,7 +29,7 @@ namespace Rocket.Eco.Properties
         public void Register(IDependencyContainer container, IDependencyResolver resolver)
         {
             container.RegisterSingletonType<IHost, EcoHost>(null, "eco", "game");
-            container.RegisterSingletonType<IEcoSettingsProvider, EcoSettingsProvider>(null);
+            container.RegisterSingletonType<IEcoSettingsProvider, EcoSettingsProvider>();
 
             IEcoSettingsProvider settingsProvider = container.Resolve<IEcoSettingsProvider>();
             settingsProvider.Load();
