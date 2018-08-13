@@ -125,6 +125,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Configuration\EcoSettings.cs" />
+    <Compile Include="API\Configuration\IEcoSettingsProvider.cs" />
     <Compile Include="API\UserIdType.cs" />
     <Compile Include="API\Legislation\IElection.cs" />
     <Compile Include="API\Legislation\IElectionVote.cs" />
@@ -144,6 +146,7 @@
     <Compile Include="Commands\EcoCommands\CommandBan.cs" />
     <Compile Include="Commands\EcoCommands\CommandKick.cs" />
     <Compile Include="Commands\EcoNativeCommand.cs" />
+    <Compile Include="Configuration\EcoSettingsProvider.cs" />
     <Compile Include="EcoHost.cs" />
     <Compile Include="Economy\EcoEconomyAccount.cs" />
     <Compile Include="Economy\EcoEconomyProvider.cs" />

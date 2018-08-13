@@ -40,8 +40,11 @@ namespace Rocket.Eco.Launcher.Utils
 
                                       assembly = new byte[memStream.Length];
                                       memStream.Read(assembly, 0, assembly.Length);
+                                      
+                                      string fileName = x.Name.Remove(0, 8);
+                                      fileName = fileName.Remove(fileName.Length - 11, 11);
 
-                                      File.WriteAllBytes(Path.Combine("Rocket", "Binaries", "Eco", x.Name.Replace(".compressed", "").Replace("costura.", "")), assembly);
+                                      File.WriteAllBytes(Path.Combine("Rocket", "Binaries", "Eco", fileName), assembly);
                                   }
 
                                   Assemblies[x.Name.Replace(".dll.compressed", "").Replace("costura.", "")] = new AssemblyData(new MemoryStream(assembly), null);

@@ -6,7 +6,9 @@ using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Logging;
+using Rocket.Core.Logging;
 using Rocket.Core.ServiceProxies;
+using Rocket.Eco.API.Configuration;
 
 namespace Rocket.Eco.Commands
 {
@@ -21,15 +23,21 @@ namespace Rocket.Eco.Commands
         private readonly IHost host;
 
         /// <inheritdoc />
-        public EcoNativeCommandProvider(IDependencyContainer container)
+        public EcoNativeCommandProvider(IDependencyContainer container, IEcoSettingsProvider settingsProvider)
         {
+            ILogger logger = container.Resolve<ILogger>();
+
+            if (!settingsProvider.Settings.EnableVanillaCommands)
+            {
+                logger.LogInformation("Native commmands are disabled in the settings, none will be loaded.");
+                return;
+            }
+
             host = container.Resolve<IHost>();
             Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
                 throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
-
-            ILogger logger = container.Resolve<ILogger>();
 
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
                 commands.Add(new EcoNativeCommand(pair.Value, logger));
