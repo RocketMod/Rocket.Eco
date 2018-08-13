@@ -21,6 +21,7 @@ using Rocket.Core.Commands.Events;
 using Rocket.Core.Implementation.Events;
 using Rocket.Core.Logging;
 using Rocket.Core.Permissions;
+using Rocket.Core.Player.Events;
 using Rocket.Core.Scheduling;
 using Rocket.Core.User;
 using Rocket.Core.User.Events;
@@ -108,6 +109,7 @@ namespace Rocket.Eco
 
             CheckConfig();
 
+            EcoUserCancelableActionDelegate prePlayerJoin = _EmitPlayerPreJoin;
             EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
             EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
             EcoUserChatDelegate playerChat = _EmitPlayerChat;
@@ -115,6 +117,7 @@ namespace Rocket.Eco
             Type userType = typeof(User);
             Type chatManagerType = typeof(ChatManager);
 
+            userType.GetField("OnUserPreLogin").SetValue(null, prePlayerJoin);
             userType.GetField("OnUserLogin").SetValue(null, playerJoin);
             userType.GetField("OnUserLogout").SetValue(null, playerLeave);
             chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
@@ -197,27 +200,39 @@ namespace Rocket.Eco
             }
         }
 
+        internal bool _EmitPlayerPreJoin(object user)
+        {
+            if (user == null || !(user is User castedUser))
+                return false;
+
+            EcoPlayer ecoPlayer = playerManager?.InternalPlayersList.FirstOrDefault(x => x.Id.Equals(castedUser.SlgId) || x.Id.Equals(castedUser.SteamId));
+
+            if (ecoPlayer == null)
+            {
+                ecoPlayer = new EcoPlayer(castedUser, playerManager, runtime.Container);
+                playerManager?.InternalPlayersList.Add(ecoPlayer);
+            }
+            else if (ecoPlayer.InternalEcoUser == null)
+            {
+                ecoPlayer.BuildReference(castedUser);
+            }
+
+            PlayerPreConnectEvent e = new PlayerPreConnectEvent(ecoPlayer);
+            eventManager.Emit(this, e);
+
+            if (!e.IsCancelled) return true;
+
+            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} was prevent from joining for the reason: " + (e.RejectionReason ?? "No reason was supplied."));
+            ecoPlayer.InternalEcoPlayer.Client.Disconnect("You have been prevented from joining.", e.RejectionReason ?? "No reason was supplied.");
+            return false;
+        }
+
         internal void _EmitPlayerJoin(object user)
         {
             if (user == null || !(user is User castedUser))
                 return;
 
             EcoPlayer ecoPlayer = playerManager?.InternalPlayersList.FirstOrDefault(x => x.Id.Equals(castedUser.SlgId) || x.Id.Equals(castedUser.SteamId));
-
-            string firstTime = string.Empty;
-
-            if (ecoPlayer == null)
-            {
-                ecoPlayer = new EcoPlayer(castedUser, playerManager, runtime.Container);
-                playerManager?.InternalPlayersList.Add(ecoPlayer);
-
-                firstTime = " for the first time";
-            }
-            else if (ecoPlayer.InternalEcoUser == null)
-            {
-                ecoPlayer.BuildReference(castedUser);
-                firstTime = " for the first time";
-            }
 
             IConfigurationSection configurationSection = permissionProvider.PlayersConfig["EcoUser"];
 
@@ -243,7 +258,7 @@ namespace Rocket.Eco
 
             eventManager.Emit(this, new UserConnectedEvent(ecoPlayer.User, EventExecutionTargetContext.NextFrame));
 
-            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined{firstTime}.");
+            logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined.");
         }
 
         internal void _EmitPlayerLeave(object player)

@@ -8,6 +8,9 @@ namespace Rocket.Eco.Launcher.Callbacks
     /// <param name="user">An object where the Eco runtime passes its representation of a User.</param>
     public delegate void EcoUserActionDelegate(object user);
 
+    //TODO
+    public delegate bool EcoUserCancelableActionDelegate(object user);
+
     /// <summary>
     ///     An internal delegate used by <see cref="ChatManagerPatch" /> to relay when a player sends a message and if the
     ///     sending should be cancelled.
