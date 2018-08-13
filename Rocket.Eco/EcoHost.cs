@@ -217,6 +217,7 @@ namespace Rocket.Eco
                 ecoPlayer.BuildReference(castedUser);
             }
 
+            logger.LogDebug($"Emitting PlayerPreConnectEvent [{ecoPlayer.Id}]");
             PlayerPreConnectEvent e = new PlayerPreConnectEvent(ecoPlayer);
             eventManager.Emit(this, e);
 
@@ -256,6 +257,7 @@ namespace Rocket.Eco
                 permissionProvider.PlayersConfig.Save();
             }
 
+            logger.LogDebug($"Emitting UserConnectedEvent [{ecoPlayer.Id}]");
             eventManager.Emit(this, new UserConnectedEvent(ecoPlayer.User, EventExecutionTargetContext.NextFrame));
 
             logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined.");
@@ -274,6 +276,7 @@ namespace Rocket.Eco
                 return;
             }
 
+            logger.LogDebug($"Emitting UserDisconnectedEvent [{ecoPlayer.Id}]");
             eventManager.Emit(this, new UserDisconnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame));
 
             logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has left.");
@@ -294,6 +297,7 @@ namespace Rocket.Eco
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
+                logger.LogDebug($"Emitting PreCommandExecutionEvent [{ecoPlayer.Id}, {text}]");
                 PreCommandExecutionEvent commandEvent = new PreCommandExecutionEvent(ecoPlayer.User, text.Remove(0, 1));
                 eventManager.Emit(this, commandEvent);
 
@@ -334,6 +338,7 @@ namespace Rocket.Eco
                 return true;
             }
 
+            logger.LogDebug($"Emitting UserChatEvent [{ecoPlayer.Id}, {text}]");
             UserChatEvent chatEvent = new UserChatEvent(ecoPlayer.User, text)
             {
                 IsCancelled = false
