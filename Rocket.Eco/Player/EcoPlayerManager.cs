@@ -42,11 +42,9 @@ namespace Rocket.Eco.Player
         /// <inheritdoc />
         public IEnumerable<IPlayer> OnlinePlayers => InternalPlayersList.Where(x => x.IsOnline);
 
-        public void Broadcast(IUser sender, string message, Color? color = null, params object[] arguments)
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <inheritdoc />
+        public void Broadcast(IUser sender, string message, Color? color = null, params object[] arguments) => Broadcast(sender, OnlineUsers, message, color, arguments);
+        
         /// <inheritdoc />
         public IUserInfo GetUser(string id)
         {
