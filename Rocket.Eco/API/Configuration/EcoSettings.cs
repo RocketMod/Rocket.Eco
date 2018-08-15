@@ -2,6 +2,6 @@
 {
     public sealed class EcoSettings
     {
-        public bool EnableVanillaCommands { get; set; } = true;
+        public bool EnableVanillaCommands { get; set; } = false;
     }
 }
