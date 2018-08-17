@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
-using Rocket.Eco.Launcher.Callbacks;
-using Rocket.Eco.Patching.API;
+using Rocket.Patching.API;
 
 namespace Rocket.Eco.Launcher.Patches
 {
@@ -22,7 +22,7 @@ namespace Rocket.Eco.Launcher.Patches
         /// <inheritdoc />
         public void Patch(TypeDefinition definition)
         {
-            FieldDefinition chatDelegate = new FieldDefinition("OnUserChat", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserChatDelegate)));
+            FieldDefinition chatDelegate = new FieldDefinition("OnUserChat", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Func<object, string, bool>)));
 
             definition.Fields.Add(chatDelegate);
 
@@ -55,7 +55,7 @@ namespace Rocket.Eco.Launcher.Patches
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_3),
                 il.Create(OpCodes.Ldarg_2),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserChatDelegate).GetMethod("Invoke"))),
+                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Func<object, string, bool>).GetMethod("Invoke"))),
                 il.Create(OpCodes.Brfalse_S, il.Body.Instructions[index + 2])
             };
 

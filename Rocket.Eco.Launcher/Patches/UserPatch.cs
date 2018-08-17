@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
-using Rocket.Eco.Launcher.Callbacks;
-using Rocket.Eco.Patching.API;
+using Rocket.Patching.API;
 
 namespace Rocket.Eco.Launcher.Patches
 {
@@ -22,9 +22,9 @@ namespace Rocket.Eco.Launcher.Patches
         /// <inheritdoc />
         public void Patch(TypeDefinition definition)
         {
-            FieldDefinition preLoginDelegate = new FieldDefinition("OnUserPreLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserCancelableActionDelegate)));
-            FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));
-            FieldDefinition logoutDelegate = new FieldDefinition("OnUserLogout", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(EcoUserActionDelegate)));
+            FieldDefinition preLoginDelegate = new FieldDefinition("OnUserPreLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Func<object, bool>)));
+            FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Action<object>)));
+            FieldDefinition logoutDelegate = new FieldDefinition("OnUserLogout", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Action<object>)));
 
             definition.Fields.Add(preLoginDelegate);
             definition.Fields.Add(loginDelegate);
@@ -45,7 +45,7 @@ namespace Rocket.Eco.Launcher.Patches
             {
                 il.Create(OpCodes.Ldsfld, preDelegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserCancelableActionDelegate).GetMethod("Invoke"))),
+                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Func<object, bool>).GetMethod("Invoke"))),
                 il.Create(OpCodes.Brtrue_S, il.Body.Instructions[0]),
                 il.Create(OpCodes.Ret)
             };
@@ -54,7 +54,7 @@ namespace Rocket.Eco.Launcher.Patches
             {
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
+                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Action<object>).GetMethod("Invoke")))
             };
 
             for (int i = 0; i < startInjection.Length; i++)
@@ -79,7 +79,7 @@ namespace Rocket.Eco.Launcher.Patches
             {
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(EcoUserActionDelegate).GetMethod("Invoke")))
+                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Action<object>).GetMethod("Invoke")))
             };
 
             foreach (Instruction t in endInjection)

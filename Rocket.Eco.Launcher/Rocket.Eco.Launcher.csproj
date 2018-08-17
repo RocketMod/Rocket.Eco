@@ -96,8 +96,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Callbacks\ElectionDelegates.cs" />
-    <Compile Include="Callbacks\UserDelegates.cs" />
     <Compile Include="Patches\RuntimeCompilerPatch.cs" />
     <Compile Include="Utils\CosturaHelper.cs" />
     <Compile Include="Patches\ChatManagerPatch.cs" />
@@ -111,9 +109,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rocket.Eco.Patching\Rocket.Eco.Patching.csproj">
+    <ProjectReference Include="..\Rocket.Patching\Rocket.Patching.csproj">
       <Project>{a279bc59-4d69-410c-a6a1-d87cdf070376}</Project>
-      <Name>Rocket.Eco.Patching</Name>
+      <Name>Rocket.Patching</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

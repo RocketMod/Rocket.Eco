@@ -3,9 +3,9 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
-using Rocket.Eco.Patching.API;
+using Rocket.Patching.API;
 
-namespace Rocket.Eco.Launcher.Patches
+namespace Rocket.Launcher.Patches
 {
     /// <inheritdoc />
     /// <summary>

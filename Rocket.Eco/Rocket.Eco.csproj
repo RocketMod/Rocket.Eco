@@ -177,11 +177,5 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Rocket.Eco.Launcher\Rocket.Eco.Launcher.csproj">
-      <Project>{45552E32-FE23-405F-A683-AAC820637C9B}</Project>
-      <Name>Rocket.Eco.Launcher</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

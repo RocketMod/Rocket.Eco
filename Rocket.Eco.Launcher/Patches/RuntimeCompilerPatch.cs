@@ -11,7 +11,7 @@ using Eco.Shared.Utils;
 using Microsoft.CSharp;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Rocket.Eco.Patching.API;
+using Rocket.Patching.API;
 
 namespace Rocket.Eco.Launcher.Patches
 {

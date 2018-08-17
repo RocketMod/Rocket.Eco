@@ -7,8 +7,9 @@ using Mono.Cecil;
 using MoreLinq.Extensions;
 using Rocket.Eco.Launcher.Patches;
 using Rocket.Eco.Launcher.Utils;
-using Rocket.Eco.Patching;
-using Rocket.Eco.Patching.API;
+using Rocket.Launcher.Patches;
+using Rocket.Patching;
+using Rocket.Patching.API;
 
 namespace Rocket.Eco.Launcher
 {

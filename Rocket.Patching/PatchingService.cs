@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
-using Rocket.Eco.Patching.API;
+using Rocket.Patching.API;
 
-namespace Rocket.Eco.Patching
+namespace Rocket.Patching
 {
     /// <inheritdoc />
     public sealed class PatchingService : IPatchingService

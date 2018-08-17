@@ -25,7 +25,6 @@ using Rocket.Core.Player.Events;
 using Rocket.Core.Scheduling;
 using Rocket.Core.User;
 using Rocket.Core.User.Events;
-using Rocket.Eco.Launcher.Callbacks;
 using Rocket.Eco.Player;
 
 #if DEBUG
@@ -109,10 +108,10 @@ namespace Rocket.Eco
 
             CheckConfig();
 
-            EcoUserCancelableActionDelegate prePlayerJoin = _EmitPlayerPreJoin;
-            EcoUserActionDelegate playerJoin = _EmitPlayerJoin;
-            EcoUserActionDelegate playerLeave = _EmitPlayerLeave;
-            EcoUserChatDelegate playerChat = _EmitPlayerChat;
+            Func<object, bool> prePlayerJoin = _EmitPlayerPreJoin;
+            Action<object> playerJoin = _EmitPlayerJoin;
+            Action<object> playerLeave = _EmitPlayerLeave;
+            Func<object, string, bool> playerChat = _EmitPlayerChat;
 
             Type userType = typeof(User);
             Type chatManagerType = typeof(ChatManager);

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Mono.Cecil;
 
-namespace Rocket.Eco.Patching.API
+namespace Rocket.Patching.API
 {
     public interface IPatchingService
     {

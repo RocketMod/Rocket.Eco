@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco", "Rocket.Eco\Ro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco.Launcher", "Rocket.Eco.Launcher\Rocket.Eco.Launcher.csproj", "{45552E32-FE23-405F-A683-AAC820637C9B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Eco.Patching", "Rocket.Eco.Patching\Rocket.Eco.Patching.csproj", "{A279BC59-4D69-410C-A6A1-D87CDF070376}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Patching", "Rocket.Patching\Rocket.Patching.csproj", "{A279BC59-4D69-410C-A6A1-D87CDF070376}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,7 +32,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
 		SolutionGuid = {9E720FE4-4AF4-459B-BB72-75D868C322C1}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
 	EndGlobalSection
 EndGlobal
