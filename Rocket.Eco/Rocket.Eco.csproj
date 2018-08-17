@@ -151,6 +151,11 @@
     <Compile Include="Economy\EcoEconomyAccount.cs" />
     <Compile Include="Economy\EcoEconomyProvider.cs" />
     <Compile Include="Economy\EcoCurrency.cs" />
+    <Compile Include="Entity\EcoAnimal.cs" />
+    <Compile Include="Events\Animal\AnimalDamageEvent.cs" />
+    <Compile Include="Events\Animal\AnimalDeathEvent.cs" />
+    <Compile Include="Events\Animal\AnimalEvent.cs" />
+    <Compile Include="Events\Animal\AnimalSpawnEvent.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="Legislation\EcoGovernment.cs" />
