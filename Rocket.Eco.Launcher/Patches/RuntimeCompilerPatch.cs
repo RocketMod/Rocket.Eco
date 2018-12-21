@@ -44,7 +44,7 @@ namespace Rocket.Eco.Launcher.Patches
                 Instruction.Create(OpCodes.Newobj, method.Module.ImportReference(typeof(Dictionary<string, string>).GetConstructor(new Type[0]))),
                 Instruction.Create(OpCodes.Dup),
                 Instruction.Create(OpCodes.Ldstr, "CompilerVersion"),
-                Instruction.Create(OpCodes.Ldstr, "v4.0"), //Why was this set to `v4.0` if the game uses a `v4.6` runtime?
+                Instruction.Create(OpCodes.Ldstr, "v4.0"), 
                 Instruction.Create(OpCodes.Callvirt, method.Module.ImportReference(typeof(Dictionary<string, string>).GetMethod("Add", new[] {typeof(string), typeof(string)}))),
                 Instruction.Create(OpCodes.Newobj, method.Module.ImportReference(typeof(CSharpCodeProvider).GetConstructor(new[] {typeof(Dictionary<string, string>)}))),
                 Instruction.Create(OpCodes.Stloc_0),
