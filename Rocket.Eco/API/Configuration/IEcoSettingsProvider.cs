@@ -3,11 +3,11 @@
     public interface IEcoSettingsProvider
     {
         EcoSettings Settings { get; }
-        
+
         void Load();
-        
+
         void Reload();
-        
+
         void Save();
     }
 }

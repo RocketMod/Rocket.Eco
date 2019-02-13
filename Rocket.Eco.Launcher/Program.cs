@@ -28,7 +28,10 @@ namespace Rocket.Eco.Launcher
 
                     return (from assembly in assemblies
                             let interatedName = assembly.GetName()
-                            where string.Equals(interatedName.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(interatedName.CultureInfo?.Name ?? "", assemblyName.CultureInfo?.Name ?? "", StringComparison.InvariantCultureIgnoreCase)
+                            where string.Equals(interatedName.Name, assemblyName.Name,
+                                    StringComparison.InvariantCultureIgnoreCase)
+                                && string.Equals(interatedName.CultureInfo?.Name ?? "",
+                                    assemblyName.CultureInfo?.Name ?? "", StringComparison.InvariantCultureIgnoreCase)
                             select assembly).FirstOrDefault();
                 }
                 catch
@@ -38,7 +41,9 @@ namespace Rocket.Eco.Launcher
             };
         }
 
-        private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));
+        private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(
+            Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries",
+                args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));
 
         public static void Main(string[] args)
         {
@@ -79,7 +84,8 @@ namespace Rocket.Eco.Launcher
                      .Invoke(null, new object[]
                          {newArgs.ToArray()});
 
-            foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries"))) Assembly.LoadFile(file);
+            foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket",
+                "Binaries"))) Assembly.LoadFile(file);
 
             new Runtime().BootstrapAsync().GetAwaiter().GetResult();
         }

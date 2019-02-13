@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Rocket.API.Configuration;
 using Rocket.API.Permissions;
-using Rocket.API.User;
 using Rocket.Core.ServiceProxies;
 using Rocket.Eco.Player;
 
@@ -19,10 +18,12 @@ namespace Rocket.Eco.Permissions
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public Task<IEnumerable<string>> GetGrantedPermissionsAsync(IPermissionEntity target, bool inherit = true) => Task.FromResult(new List<string>() as IEnumerable<string>);
+        public Task<IEnumerable<string>> GetGrantedPermissionsAsync(IPermissionEntity target, bool inherit = true)
+            => Task.FromResult(new List<string>() as IEnumerable<string>);
 
         /// <inheritdoc />
-        public Task<IEnumerable<string>> GetDeniedPermissionsAsync(IPermissionEntity target, bool inherit = true) => Task.FromResult(new List<string>() as IEnumerable<string>);
+        public Task<IEnumerable<string>> GetDeniedPermissionsAsync(IPermissionEntity target, bool inherit = true)
+            => Task.FromResult(new List<string>() as IEnumerable<string>);
 
         /// <inheritdoc />
         public bool SupportsTarget(IPermissionEntity target) => target is EcoPlayerUser;
@@ -73,25 +74,30 @@ namespace Rocket.Eco.Permissions
         public Task<bool> AddPermissionAsync(IPermissionEntity target, string permission) => Task.FromResult(false);
 
         /// <inheritdoc />
-        public Task<bool> AddDeniedPermissionAsync(IPermissionEntity target, string permission) => Task.FromResult(false);
+        public Task<bool> AddDeniedPermissionAsync(IPermissionEntity target, string permission)
+            => Task.FromResult(false);
 
         /// <inheritdoc />
         public Task<bool> RemovePermissionAsync(IPermissionEntity target, string permission) => Task.FromResult(false);
 
         /// <inheritdoc />
-        public Task<bool> RemoveDeniedPermissionAsync(IPermissionEntity target, string permission) => Task.FromResult(false);
+        public Task<bool> RemoveDeniedPermissionAsync(IPermissionEntity target, string permission)
+            => Task.FromResult(false);
 
         /// <inheritdoc />
-        public Task<IPermissionGroup> GetPrimaryGroupAsync(IPermissionEntity user) => Task.FromResult(null as IPermissionGroup);
+        public Task<IPermissionGroup> GetPrimaryGroupAsync(IPermissionEntity user)
+            => Task.FromResult(null as IPermissionGroup);
 
         /// <inheritdoc />
         public Task<IPermissionGroup> GetGroupAsync(string id) => Task.FromResult(null as IPermissionGroup);
 
         /// <inheritdoc />
-        public Task<IEnumerable<IPermissionGroup>> GetGroupsAsync(IPermissionEntity target) => Task.FromResult(new List<IPermissionGroup>() as IEnumerable<IPermissionGroup>);
+        public Task<IEnumerable<IPermissionGroup>> GetGroupsAsync(IPermissionEntity target)
+            => Task.FromResult(new List<IPermissionGroup>() as IEnumerable<IPermissionGroup>);
 
         /// <inheritdoc />
-        public Task<IEnumerable<IPermissionGroup>> GetGroupsAsync() => Task.FromResult(new List<IPermissionGroup>() as IEnumerable<IPermissionGroup>);
+        public Task<IEnumerable<IPermissionGroup>> GetGroupsAsync()
+            => Task.FromResult(new List<IPermissionGroup>() as IEnumerable<IPermissionGroup>);
 
         /// <inheritdoc />
         public Task<bool> UpdateGroupAsync(IPermissionGroup group) => Task.FromResult(false);

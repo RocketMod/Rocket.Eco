@@ -10,7 +10,8 @@ namespace Rocket.Eco.Launcher.Utils
 {
     public static class CosturaHelper
     {
-        internal static Dictionary<string, AssemblyData> Assemblies = new Dictionary<string, AssemblyData>(StringComparer.InvariantCultureIgnoreCase);
+        internal static Dictionary<string, AssemblyData> Assemblies =
+            new Dictionary<string, AssemblyData>(StringComparer.InvariantCultureIgnoreCase);
 
         public static IEnumerable<AssemblyDefinition> ExtractCosturaAssemblies(AssemblyDefinition definition)
         {
@@ -25,7 +26,8 @@ namespace Rocket.Eco.Launcher.Utils
                       {
                           using (Stream stream = x.GetResourceStream())
                           {
-                              using (DeflateStream deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
+                              using (DeflateStream deflateStream =
+                                  new DeflateStream(stream, CompressionMode.Decompress))
                               {
                                   byte[] assembly;
 
@@ -34,20 +36,23 @@ namespace Rocket.Eco.Launcher.Utils
                                       byte[] array = new byte[4096];
 
                                       int count;
-                                      while ((count = deflateStream.Read(array, 0, array.Length)) != 0) memStream.Write(array, 0, count);
+                                      while ((count = deflateStream.Read(array, 0, array.Length)) != 0)
+                                          memStream.Write(array, 0, count);
 
                                       memStream.Position = 0;
 
                                       assembly = new byte[memStream.Length];
                                       memStream.Read(assembly, 0, assembly.Length);
-                                      
+
                                       string fileName = x.Name.Remove(0, 8);
                                       fileName = fileName.Remove(fileName.Length - 11, 11);
 
-                                      File.WriteAllBytes(Path.Combine("Rocket", "Binaries", "Eco", fileName), assembly);
+                                      File.WriteAllBytes(Path.Combine("Rocket", "Binaries", "Eco", fileName),
+                                          assembly);
                                   }
 
-                                  Assemblies[x.Name.Replace(".dll.compressed", "").Replace("costura.", "")] = new AssemblyData(new MemoryStream(assembly), null);
+                                  Assemblies[x.Name.Replace(".dll.compressed", "").Replace("costura.", "")] =
+                                      new AssemblyData(new MemoryStream(assembly), null);
                               }
                           }
                       });

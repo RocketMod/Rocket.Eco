@@ -19,6 +19,9 @@ namespace Rocket.Eco.Extensions
         ///     <value>true</value>
         ///     when the parent <see cref="String" /> contains the target <see cref="String" />.
         /// </returns>
-        public static bool ComparerContains(this string text, string value, StringComparison stringComparison = StringComparison.InvariantCultureIgnoreCase) => text.IndexOf(value, stringComparison) >= 0;
+        public static bool ComparerContains(this string text, string value,
+                                            StringComparison stringComparison =
+                                                StringComparison.InvariantCultureIgnoreCase)
+            => text.IndexOf(value, stringComparison) >= 0;
     }
 }

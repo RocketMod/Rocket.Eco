@@ -30,16 +30,19 @@ namespace Rocket.Eco.Economy
             throw new NotImplementedException();
         }
 
-        public bool Transfer(IEconomyAccount source, IEconomyAccount target, decimal amount, string reason = null) => throw new NotImplementedException();
+        public bool Transfer(IEconomyAccount source, IEconomyAccount target, decimal amount, string reason =
+ null) => throw new NotImplementedException();
 
         public void AddBalance(IEconomyAccount account, decimal amount, string reason = null)
         {
             throw new NotImplementedException();
         }
 
-        public bool RemoveBalance(IIdentity owner, decimal amount, string reason = null) => throw new NotImplementedException();
+        public bool RemoveBalance(IIdentity owner, decimal amount, string reason =
+ null) => throw new NotImplementedException();
 
-        public bool RemoveBalance(IEconomyAccount account, decimal amount, string reason = null) => throw new NotImplementedException();
+        public bool RemoveBalance(IEconomyAccount account, decimal amount, string reason =
+ null) => throw new NotImplementedException();
 
         public void SetBalance(IIdentity owner, decimal amount)
         {
@@ -61,7 +64,8 @@ namespace Rocket.Eco.Economy
 
         public bool DeleteAccount(IEconomyAccount account) => throw new NotSupportedException("You may not delete vanilla accounts.");
 
-        public IEconomyAccount GetAccount(IIdentity owner, string accountName = null) => throw new NotImplementedException();
+        public IEconomyAccount GetAccount(IIdentity owner, string accountName =
+ null) => throw new NotImplementedException();
 
         public IEnumerable<IEconomyAccount> GetAccounts(IIdentity owner) => throw new NotImplementedException();
 

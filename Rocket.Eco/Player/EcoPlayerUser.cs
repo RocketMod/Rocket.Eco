@@ -1,8 +1,8 @@
-﻿using Rocket.API.DependencyInjection;
-using Rocket.API.User;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
+using Rocket.API.User;
 
 namespace Rocket.Eco.Player
 {
@@ -33,13 +33,13 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public string DisplayName => UserName;
-        
+
         /// <inheritdoc />
         public IUserManager UserManager { get; }
-        
+
         /// <inheritdoc />
         public DateTime? LastSeen => null;
-        
+
         /// <inheritdoc />
         public IDependencyContainer Container { get; }
     }
