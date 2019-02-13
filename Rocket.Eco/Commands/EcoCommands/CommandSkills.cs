@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using Eco.Core.Controller;
 using Rocket.API.Commands;
 using Rocket.API.Player;
@@ -14,11 +15,6 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandSkills : ICommand
     {
-        /* why is this gone? D:
-        /// <inheritdoc />
-        public string Permission => "Rocket.Skills";
-        */
-
         /// <inheritdoc />
         public bool SupportsUser(Type user) => true;
 
@@ -79,3 +75,4 @@ namespace Rocket.Eco.Commands.EcoCommands
         }
     }
 }
+*/

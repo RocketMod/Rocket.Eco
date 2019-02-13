@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Rocket.API.Commands;
 using Rocket.API.Player;
 using Rocket.API.User;
 using Rocket.Core.Commands;
-using Rocket.Core.User;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Commands.EcoCommands
@@ -15,13 +15,8 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandBan : ICommand
     {
-        /* why is this gone? D:
         /// <inheritdoc />
-        public string Permission => "Rocket.Ban";
-        */
-
-        /// <inheritdoc />
-        public bool SupportsUser(Type user) => true;
+        public bool SupportsUser(IUser user) => true;
 
         /// <inheritdoc />
         public string Name => "Ban";
@@ -42,14 +37,14 @@ namespace Rocket.Eco.Commands.EcoCommands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public async Task ExecuteAsync(ICommandContext context)
         {
             if (context.Parameters.Length == 0)
                 throw new CommandWrongUsageException();
 
             IPlayerManager playerManager = context.Container.Resolve<IPlayerManager>("eco");
 
-            IUserInfo userInfo;
+            IUser userInfo;
 
             if (playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer onlinePlayer))
             {
@@ -57,7 +52,7 @@ namespace Rocket.Eco.Commands.EcoCommands
             }
             else
             {
-                IPlayer player = playerManager.GetPlayer(context.Parameters[0]);
+                IPlayer player = await playerManager.GetPlayerAsync(context.Parameters[0]);
 
                 switch (player)
                 {
@@ -74,9 +69,9 @@ namespace Rocket.Eco.Commands.EcoCommands
             if (context.Parameters.Length > 1)
                 reason = string.Join(" ", context.Parameters.Skip(1));
 
-            playerManager.Ban(userInfo, context.User, reason);
+            await playerManager.BanAsync(userInfo, context.User, reason);
 
-            context.User.SendMessage("The requested user has been banned.");
+            await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user has been banned.");
         }
     }
 }

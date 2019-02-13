@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Rocket.API;
 using Rocket.API.Commands;
 using Rocket.Core.ServiceProxies;
@@ -27,9 +28,7 @@ namespace Rocket.Eco.Commands
                 new CommandAdmin(),
                 new CommandUnAdmin(),
                 new CommandSave(),
-                new CommandShutdown(),
-                new CommandFeed(),
-                new CommandSkills()
+                new CommandShutdown()
             };
         }
 
@@ -40,7 +39,7 @@ namespace Rocket.Eco.Commands
         public ILifecycleObject GetOwner(ICommand command) => host;
 
         /// <inheritdoc />
-        public void Init() { }
+        public Task InitAsync() => Task.CompletedTask;
 
         /// <inheritdoc />
         public IEnumerable<ICommand> Commands { get; }

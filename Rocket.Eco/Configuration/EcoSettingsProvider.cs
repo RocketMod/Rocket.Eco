@@ -19,19 +19,19 @@ namespace Rocket.Eco.Configuration
         public void Load()
         {
             ConfigurationContext context = new ConfigurationContext(host, "Configuration");
-            configuration.Load(context, Settings);
+            configuration.LoadAsync(context, Settings).GetAwaiter().GetResult();
             Settings = configuration.Get(Settings);
         }
 
         public void Reload()
         {
-            configuration.Reload();
+            configuration.ReloadAsync().GetAwaiter().GetResult();
         }
 
         public void Save()
         {
             configuration.Set(Settings);
-            configuration.Save();
+            configuration.SaveAsync().GetAwaiter().GetResult();
         }
 
         public EcoSettings Settings { get; private set; } = new EcoSettings();

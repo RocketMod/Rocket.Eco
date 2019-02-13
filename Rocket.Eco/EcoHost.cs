@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Eco.Core.Plugins;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
@@ -24,7 +26,6 @@ using Rocket.Core.Permissions;
 using Rocket.Core.Player.Events;
 using Rocket.Core.Scheduling;
 using Rocket.Core.User;
-using Rocket.Core.User.Events;
 using Rocket.Eco.Player;
 
 #if DEBUG
@@ -44,7 +45,7 @@ namespace Rocket.Eco
         private ILogger logger;
         private ConfigurationPermissionProvider permissionProvider;
         private EcoPlayerManager playerManager;
-        private IPluginManager pluginManager;
+        private IPluginLoader pluginManager;
 
         private IRuntime runtime;
         private ITaskScheduler taskScheduler;
@@ -91,7 +92,7 @@ namespace Rocket.Eco
         public string Name => "Rocket.Eco";
 
         /// <inheritdoc />
-        public void Init(IRuntime runtime)
+        public async Task InitAsync(IRuntime runtime)
         {
             if (Assembly.GetCallingAssembly().GetName().Name != "Rocket.Runtime")
                 throw new MethodAccessException();
@@ -100,7 +101,7 @@ namespace Rocket.Eco
 
             logger = runtime.Container.Resolve<ILogger>();
             eventManager = runtime.Container.Resolve<IEventBus>();
-            pluginManager = runtime.Container.Resolve<IPluginManager>();
+            pluginManager = runtime.Container.Resolve<IPluginLoader>();
             commandHandler = runtime.Container.Resolve<ICommandHandler>();
             taskScheduler = runtime.Container.Resolve<ITaskScheduler>();
             permissionProvider = (ConfigurationPermissionProvider) runtime.Container.Resolve<IPermissionProvider>("default_permissions");
@@ -121,7 +122,7 @@ namespace Rocket.Eco
             userType.GetField("OnUserLogout").SetValue(null, playerLeave);
             chatManagerType.GetField("OnUserChat").SetValue(null, playerChat);
 
-            pluginManager.Init();
+            await pluginManager.InitAsync();
 
             eventManager.Emit(this, new ImplementationReadyEvent(this));
 
@@ -135,12 +136,12 @@ namespace Rocket.Eco
                     continue;
 
                 taskScheduler
-                    .ScheduleNextFrame(this, () =>
+                    .ScheduleNextFrame(this, async () =>
                     {
                         if (input.StartsWith("/", StringComparison.InvariantCulture))
                             input = input.Remove(0, 1);
 
-                        bool wasHandled = commandHandler.HandleCommand(Console, input, string.Empty);
+                        bool wasHandled = await commandHandler.HandleCommandAsync(Console, input, string.Empty);
 
                         if (!wasHandled)
                             logger.LogError("That command could not be found!");
@@ -149,20 +150,20 @@ namespace Rocket.Eco
         }
 
         /// <inheritdoc />
-        public void Shutdown()
+        public async Task ShutdownAsync()
         {
             taskScheduler
-                .ScheduleNextFrame(this, () =>
+                .ScheduleNextFrame(this, async () =>
                 {
                     logger.LogInformation("The shutdown sequence has been initiated.");
 
                     StorageManager.SaveAndFlush();
 
                     foreach (IPlugin plugin in pluginManager)
-                        plugin.Unload();
+                        await plugin.DeactivateAsync();
 
-                    foreach (EcoPlayer player in playerManager.OnlinePlayers.Cast<EcoPlayer>())
-                        playerManager.Kick(player.User, null, "The server is shutting down.");
+                    foreach (EcoPlayer player in (await playerManager.GetPlayersAsync()).Cast<EcoPlayer>())
+                        await playerManager.KickAsync(player.User, null, "The server is shutting down.");
 
                     //TODO: This appears to cause a StackOverflowException.
                     //runtime.Shutdown();
@@ -170,14 +171,18 @@ namespace Rocket.Eco
                     Thread.Sleep(2000);
                     Environment.Exit(0);
                 }, "Shutdown");
+
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public void Reload()
+        public async Task ReloadAsync()
         {
+            
             foreach (IPlugin plugin in pluginManager)
-                if (plugin.Unload())
-                    plugin.Load(true);
+                if (await plugin.DeactivateAsync())
+                    await plugin.ActivateAsync(true);
+            
         }
 
         /// <inheritdoc />
@@ -195,7 +200,7 @@ namespace Rocket.Eco
                 logger.LogInformation("Detected first-time initialization for Permissions config, regenerating it now.");
 
                 permissionProvider.PlayersConfig.CreateSection("EcoUser", SectionType.Array);
-                permissionProvider.PlayersConfig.Save();
+                permissionProvider.PlayersConfig.SaveAsync().GetAwaiter().GetResult();
             }
         }
 
@@ -253,11 +258,11 @@ namespace Rocket.Eco
 
                 configurationSection.Set(playerPermissions);
 
-                permissionProvider.PlayersConfig.Save();
+                permissionProvider.PlayersConfig.SaveAsync().GetAwaiter().GetResult();
             }
 
             logger.LogDebug($"Emitting UserConnectedEvent [{ecoPlayer.Id}]");
-            eventManager.Emit(this, new UserConnectedEvent(ecoPlayer.User, EventExecutionTargetContext.NextFrame));
+            eventManager.Emit(this, new PlayerConnectedEvent(ecoPlayer, EventExecutionTargetContext.NextFrame));
 
             logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has joined.");
         }
@@ -276,7 +281,7 @@ namespace Rocket.Eco
             }
 
             logger.LogDebug($"Emitting UserDisconnectedEvent [{ecoPlayer.Id}]");
-            eventManager.Emit(this, new UserDisconnectedEvent(ecoPlayer.User, null, EventExecutionTargetContext.NextFrame));
+            eventManager.Emit(this, new PlayerConnectedEvent(ecoPlayer, EventExecutionTargetContext.NextFrame));
 
             logger.LogInformation($"[{ecoPlayer.Id}] {ecoPlayer.Name} has left.");
         }
@@ -286,9 +291,7 @@ namespace Rocket.Eco
             if (user == null || !(user is User castedUser) || !castedUser.LoggedIn)
                 return true;
 
-            EcoPlayer ecoPlayer = (EcoPlayer) playerManager.GetOnlinePlayerById(castedUser.SteamId);
-
-            if (ecoPlayer == null)
+            if (!playerManager.TryGetOnlinePlayerById(castedUser.SteamId, out IPlayer ecoPlayer))
             {
                 logger.LogWarning("An unknown player has chatted. Please report this to a Rocket.Eco developer!");
                 return false;
@@ -296,13 +299,13 @@ namespace Rocket.Eco
 
             if (text.StartsWith("/", StringComparison.InvariantCulture))
             {
-                logger.LogDebug($"Emitting PreCommandExecutionEvent [{ecoPlayer.Id}, {text}]");
+                logger.LogDebug($"Emitting PreCommandExecutionEvent [{ecoPlayer.User.Id}, {text}]");
                 PreCommandExecutionEvent commandEvent = new PreCommandExecutionEvent(ecoPlayer.User, text.Remove(0, 1));
                 eventManager.Emit(this, commandEvent);
 
                 if (commandEvent.IsCancelled)
                 {
-                    ecoPlayer.SendErrorMessage("Execution of your command has been cancelled!");
+                    playerManager.SendMessageAsync(null, ecoPlayer.User, "Execution of your command has been cancelled!");
 
                     return true;
                 }
@@ -314,31 +317,32 @@ namespace Rocket.Eco
 
                         try
                         {
-                            wasHandled = commandHandler.HandleCommand(ecoPlayer.User, text.Remove(0, 1), string.Empty);
+                            wasHandled = commandHandler.HandleCommandAsync(ecoPlayer.User, text.Remove(0, 1), string.Empty).GetAwaiter().GetResult();
                         }
                         catch (NotEnoughPermissionsException)
                         {
-                            ecoPlayer.SendErrorMessage("You do not have enough permission to execute this command!");
+                            playerManager.SendMessageAsync(null, ecoPlayer.User, "You do not have enough permission to execute this command!");
                         }
                         catch (Exception e)
                         {
-                            logger.LogError($"{ecoPlayer.Name} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
+                            logger.LogError($"{ecoPlayer.User.UserName} failed to execute the command `{text.Remove(0, 1).Split(' ')[0]}`!");
                             logger.LogError($"{e.Message}\n{e.StackTrace}");
 
-                            ecoPlayer.SendErrorMessage("A runtime error occurred while executing this command, please contact an administrator!");
+                            playerManager.SendMessageAsync(null, ecoPlayer.User, ("A runtime error occurred while executing this command, please contact an administrator!"));
 
                             return;
                         }
 
                         if (!wasHandled)
-                            ecoPlayer.SendErrorMessage("That command could not be found!");
+                            playerManager.SendMessageAsync(null, ecoPlayer.User, ("That command could not be found!"));
                     }, "Player Chat Event");
 
                 return true;
             }
 
-            logger.LogDebug($"Emitting UserChatEvent [{ecoPlayer.Id}, {text}]");
-            UserChatEvent chatEvent = new UserChatEvent(ecoPlayer.User, text)
+            logger.LogDebug($"Emitting UserChatEvent [{ecoPlayer.User.Id}, {text}]");
+
+            PlayerChatEvent chatEvent = new PlayerChatEvent(ecoPlayer, text)
             {
                 IsCancelled = false
             };
@@ -346,7 +350,7 @@ namespace Rocket.Eco
             eventManager.Emit(this, chatEvent);
 
             string commandCancelled = chatEvent.IsCancelled ? "[CANCELLED] " : "";
-            logger.LogInformation($"{commandCancelled}[{ecoPlayer.Id}] {ecoPlayer.Name}: {text}");
+            logger.LogInformation($"{commandCancelled}[{ecoPlayer.User.Id}] {ecoPlayer.User.UserName}: {text}");
 
             return chatEvent.IsCancelled;
         }

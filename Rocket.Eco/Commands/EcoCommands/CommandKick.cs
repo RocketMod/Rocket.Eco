@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Rocket.API.Commands;
 using Rocket.API.Player;
+using Rocket.API.User;
 using Rocket.Core.Commands;
-using Rocket.Core.User;
 using Rocket.Eco.Player;
 
 namespace Rocket.Eco.Commands.EcoCommands
@@ -14,13 +15,8 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandKick : ICommand
     {
-        /* why is this gone? D:
         /// <inheritdoc />
-        public string Permission => "Rocket.Kick";
-        */
-
-        /// <inheritdoc />
-        public bool SupportsUser(Type user) => true;
+        public bool SupportsUser(IUser user) => true;
 
         /// <inheritdoc />
         public string Name => "Kick";
@@ -41,7 +37,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public async Task ExecuteAsync(ICommandContext context)
         {
             if (context.Parameters.Length == 0)
                 throw new CommandWrongUsageException();
@@ -50,7 +46,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (!playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
             {
-                context.User.SendMessage("The requested user is not online.");
+                await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user is not online.");
                 return;
             }
 
@@ -59,9 +55,9 @@ namespace Rocket.Eco.Commands.EcoCommands
             if (context.Parameters.Length > 1)
                 reason = string.Join(" ", context.Parameters.Skip(1));
 
-            playerManager.Kick(((EcoPlayer) player).User, context.User, reason);
+            await playerManager.KickAsync(((EcoPlayer) player).User, context.User, reason);
 
-            context.User.SendMessage("The requested user has been kicked.");
+            await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user has been kicked.");
         }
     }
 }

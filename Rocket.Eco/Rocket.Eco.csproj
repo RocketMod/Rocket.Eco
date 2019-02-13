@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rocket.Runtime" Version="5.0.0.580" />
+    <PackageReference Include="Rocket.Runtime" Version="5.0.0.606" />
   </ItemGroup>
 
   <ItemGroup>

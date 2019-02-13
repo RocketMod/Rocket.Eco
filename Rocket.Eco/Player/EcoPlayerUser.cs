@@ -1,7 +1,8 @@
-﻿using System;
-using Rocket.API.DependencyInjection;
-using Rocket.API.Player;
+﻿using Rocket.API.DependencyInjection;
 using Rocket.API.User;
+using System;
+using System.Collections.Generic;
+using Rocket.API.Player;
 
 namespace Rocket.Eco.Player
 {
@@ -15,36 +16,30 @@ namespace Rocket.Eco.Player
             Container = container;
         }
 
-        /// <inheritdoc cref="IPlayerUser" />
+        /// <inheritdoc />
         public EcoPlayer Player { get; }
 
         /// <inheritdoc />
         public string Id => Player.Id;
 
         /// <inheritdoc />
-        public string Name => Player.Name;
+        public string UserType => "PLAYER";
 
         /// <inheritdoc />
-        public string IdentityType => IdentityTypes.Player;
+        public List<IIdentity> Identities => new List<IIdentity>();
 
+        /// <inheritdoc />
+        public string UserName => Player.Name;
+
+        /// <inheritdoc />
+        public string DisplayName => UserName;
+        
         /// <inheritdoc />
         public IUserManager UserManager { get; }
-
-        /// <inheritdoc />
-        public bool IsOnline => Player.IsOnline;
-
-        /// <inheritdoc />
-        public DateTime SessionConnectTime => DateTime.MinValue;
-
-        /// <inheritdoc />
-        public DateTime? SessionDisconnectTime => null;
-
+        
         /// <inheritdoc />
         public DateTime? LastSeen => null;
-
-        /// <inheritdoc />
-        public string UserType => GetType().Name;
-
+        
         /// <inheritdoc />
         public IDependencyContainer Container { get; }
     }

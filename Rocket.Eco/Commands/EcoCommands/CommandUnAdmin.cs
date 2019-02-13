@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Rocket.API.Commands;
 using Rocket.API.Player;
+using Rocket.API.User;
 using Rocket.Core.Commands;
-using Rocket.Core.User;
 using Rocket.Eco.API;
 using Rocket.Eco.Player;
 
@@ -16,13 +17,8 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandUnAdmin : ICommand
     {
-        /* why is this gone? D:
         /// <inheritdoc />
-        public string Permission => "Rocket.RemoveAdmin";
-        */
-
-        /// <inheritdoc />
-        public bool SupportsUser(Type user) => true;
+        public bool SupportsUser(IUser user) => true;
 
         /// <inheritdoc />
         public string Name => "UnAdmin";
@@ -43,7 +39,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public async Task ExecuteAsync(ICommandContext context)
         {
             if (context.Parameters.Length == 0)
                 throw new CommandWrongUsageException();
@@ -51,17 +47,17 @@ namespace Rocket.Eco.Commands.EcoCommands
             IPlayerManager playerManager = context.Container.Resolve<IPlayerManager>("eco");
 
             if (playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
-                ((EcoPlayer) player).User.SendMessage("You have been stripped of your administator permissions.");
+                await context.User.UserManager.SendMessageAsync(null, ((EcoPlayer)player).User, "You have been stripped of your administrator permissions.");
             else
-                player = playerManager.GetPlayer(context.Parameters[0]);
+                player = await playerManager.GetPlayerAsync(context.Parameters[0]);
 
             if (player is EcoPlayer ecoPlayer && ecoPlayer.UserIdType == UserIdType.Both)
                 UserManager.Config.Admins.Remove(ecoPlayer.InternalEcoUser.SteamId);
 
-            UserManager.Config.Admins.Remove(player.Id);
+            UserManager.Config.Admins.Remove(player.User.Id);
             UserManager.Obj.SaveConfig();
 
-            context.User.SendMessage("The requested user has been removed as an administrator.");
+            await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user has been removed as an administrator.");
         }
     }
 }

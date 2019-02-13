@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API;
 using Rocket.API.Commands;
@@ -29,7 +30,7 @@ namespace Rocket.Eco.Commands
 
             if (!settingsProvider.Settings.EnableVanillaCommands)
             {
-                logger.LogInformation("Native commmands are disabled in the settings, none will be loaded.");
+                logger.LogInformation("Native commands are disabled in the settings, none will be loaded.");
                 return;
             }
 
@@ -50,7 +51,7 @@ namespace Rocket.Eco.Commands
         public ILifecycleObject GetOwner(ICommand command) => host;
 
         /// <inheritdoc />
-        public void Init() { }
+        public Task InitAsync() => Task.CompletedTask;
 
         /// <inheritdoc />
         public IEnumerable<ICommand> Commands => commands;

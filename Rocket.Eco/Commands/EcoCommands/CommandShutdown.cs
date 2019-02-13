@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Rocket.API;
 using Rocket.API.Commands;
+using Rocket.API.User;
 
 namespace Rocket.Eco.Commands.EcoCommands
 {
@@ -10,13 +12,8 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandShutdown : ICommand
     {
-        /* why is this gone? D:
         /// <inheritdoc />
-        public string Permission => "Rocket.Shutdown";
-        */
-
-        /// <inheritdoc />
-        public bool SupportsUser(Type user) => true;
+        public bool SupportsUser(IUser user) => true;
 
         /// <inheritdoc />
         public string Name => "Shutdown";
@@ -37,9 +34,9 @@ namespace Rocket.Eco.Commands.EcoCommands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public async Task ExecuteAsync(ICommandContext context)
         {
-            context.Container.Resolve<IHost>().Shutdown();
+            await context.Container.Resolve<IHost>().ShutdownAsync();
         }
     }
 }

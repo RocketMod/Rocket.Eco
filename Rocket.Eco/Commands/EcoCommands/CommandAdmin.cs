@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Rocket.API.Commands;
 using Rocket.API.Logging;
 using Rocket.API.Player;
+using Rocket.API.User;
 using Rocket.Core.Commands;
 using Rocket.Core.Logging;
-using Rocket.Core.User;
 using Rocket.Eco.API;
 using Rocket.Eco.Player;
 
@@ -18,13 +19,8 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandAdmin : ICommand
     {
-        /* why is this gone? D:
         /// <inheritdoc />
-        public string Permission => "Rocket.Admin";
-        */
-
-        /// <inheritdoc />
-        public bool SupportsUser(Type user) => true;
+        public bool SupportsUser(IUser user) => true;
 
         /// <inheritdoc />
         public string Name => "Admin";
@@ -45,7 +41,7 @@ namespace Rocket.Eco.Commands.EcoCommands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public async Task ExecuteAsync(ICommandContext context)
         {
             if (context.Parameters.Length == 0)
                 throw new CommandWrongUsageException();
@@ -54,7 +50,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (!playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
             {
-                context.User.SendMessage("The requested user needs to be online.");
+                await context.User.UserManager.SendMessageAsync(null,context.User, "The requested user needs to be online.");
                 return;
             }
 
@@ -63,13 +59,13 @@ namespace Rocket.Eco.Commands.EcoCommands
             if (ecoPlayer.UserIdType == UserIdType.Both)
                 UserManager.Config.Admins.Add(ecoPlayer.InternalEcoUser.SteamId);
 
-            UserManager.Config.Admins.Add(player.Id);
+            UserManager.Config.Admins.Add(player.User.Id);
             UserManager.Obj.SaveConfig();
 
-            context.Container.Resolve<ILogger>().LogInformation($"{context.User.Name} has granted {player.Name} administrator permissions.");
+            context.Container.Resolve<ILogger>().LogInformation($"{context.User.UserName} has granted {player.User.UserName} administrator permissions.");
 
-            context.User.SendMessage("The requested user has been made an administrator.");
-            ((EcoPlayer) player).User.SendMessage("You have been granted administrator permissions.");
+            await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user has been made an administrator.");
+            await context.User.UserManager.SendMessageAsync(null, ((EcoPlayer)player).User, "You have been granted administrator permissions.");
         }
     }
 }

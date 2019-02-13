@@ -81,7 +81,7 @@ namespace Rocket.Eco.Launcher
 
             foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries"))) Assembly.LoadFile(file);
 
-            Runtime.Bootstrap();
+            new Runtime().BootstrapAsync().GetAwaiter().GetResult();
         }
 
         private static void LoadAssemblyFromDefinition(AssemblyDefinition definition)

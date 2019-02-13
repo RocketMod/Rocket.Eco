@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Eco.Core.Plugins;
 using Rocket.API.Commands;
+using Rocket.API.User;
 
 namespace Rocket.Eco.Commands.EcoCommands
 {
@@ -10,13 +12,8 @@ namespace Rocket.Eco.Commands.EcoCommands
     /// </summary>
     public sealed class CommandSave : ICommand
     {
-        /* why is this gone? D:
         /// <inheritdoc />
-        public string Permission => "Rocket.Save";
-        */
-
-        /// <inheritdoc />
-        public bool SupportsUser(Type user) => true;
+        public bool SupportsUser(IUser user) => true;
 
         /// <inheritdoc />
         public string Name => "Save";
@@ -37,9 +34,10 @@ namespace Rocket.Eco.Commands.EcoCommands
         public IChildCommand[] ChildCommands => new IChildCommand[0];
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public Task ExecuteAsync(ICommandContext context)
         {
             StorageManager.SaveAndFlush();
+            return Task.CompletedTask;
         }
     }
 }

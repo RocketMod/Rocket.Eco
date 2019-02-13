@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Eco.Gameplay.Systems.Chat;
 using Rocket.API.Commands;
 using Rocket.API.Logging;
+using Rocket.API.User;
 using Rocket.Core.Logging;
 using Rocket.Eco.Player;
 
@@ -46,12 +48,7 @@ namespace Rocket.Eco.Commands
                 logger.LogError($"An attempt was made to register a vanilla command (method: {method.DeclaringType?.FullName ?? "UnknownType"}.{method.Name}) with inproper attributes!");
             }
         }
-
-        /* why is this gone? D:
-        /// <inheritdoc />
-        public string Permission => $"Eco.Base.{Name}";
-        */
-
+        
         /// <inheritdoc />
         public string[] Aliases => new string[0];
 
@@ -72,10 +69,10 @@ namespace Rocket.Eco.Commands
         public string Syntax => string.Empty;
 
         /// <inheritdoc />
-        public bool SupportsUser(Type type) => type == typeof(EcoPlayerUser);
+        public bool SupportsUser(IUser type) => type is EcoPlayerUser;
 
         /// <inheritdoc />
-        public void Execute(ICommandContext context)
+        public Task ExecuteAsync(ICommandContext context)
         {
             string args = string.Join(",", context.Parameters);
 
@@ -85,8 +82,10 @@ namespace Rocket.Eco.Commands
             }
             catch (Exception e)
             {
-                logger.LogError($"{context.User.Name} failed to execute the vanilla command `{Name}`!", e);
+                logger.LogError($"{context.User.DisplayName} failed to execute the vanilla command `{Name}`!", e);
             }
+
+            return Task.CompletedTask;
         }
     }
 }
