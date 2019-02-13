@@ -93,9 +93,9 @@ namespace Rocket.Eco.Launcher.Utils
             public AssemblyDefinition Assembly;
             public Stream Stream;
 
-            public AssemblyData(Stream stream, AssemblyDefinition admdef)
+            public AssemblyData(Stream stream, AssemblyDefinition asmdef)
             {
-                Assembly = admdef;
+                Assembly = asmdef;
                 Stream = stream;
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Eco.Core.Utils;
 using Eco.Gameplay.Economy;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
@@ -131,7 +132,7 @@ namespace Rocket.Eco.Player
             if (!IsOnline)
                 throw new InvalidOperationException("The player must be online.");
 
-            InternalEcoPlayer.SendTemporaryMessageAlreadyLocalized(string.Format(message, arguments));
+            InternalEcoPlayer.SendTemporaryError(string.Format(message, arguments).ToLocString());
         }
 
         /// <summary>
@@ -147,7 +148,7 @@ namespace Rocket.Eco.Player
             if (!IsOnline)
                 throw new InvalidOperationException("The player must be online.");
 
-            InternalEcoPlayer.SendTemporaryErrorAlreadyLocalized(string.Format(message, arguments));
+            InternalEcoPlayer.SendTemporaryError(string.Format(message, arguments).ToLocString());
         }
     }
 }

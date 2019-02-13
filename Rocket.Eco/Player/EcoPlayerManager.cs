@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Eco.Core.Plugins.Interfaces;
+using Eco.Core.Utils;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
 using Eco.Shared.Utils;
@@ -235,7 +236,7 @@ namespace Rocket.Eco.Player
                     string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}",
                     arguments);
 
-            ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
+            ChatManager.ServerMessageToPlayer(formattedMessage.ToLocString(), ecoUser.Player.InternalEcoUser);
             return Task.CompletedTask;
         }
 
@@ -262,13 +263,13 @@ namespace Rocket.Eco.Player
                     arguments);
 
             foreach (EcoPlayerUser ecoUser in users)
-                ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
+                ChatManager.ServerMessageToPlayer(formattedMessage.ToLocString(), ecoUser.Player.InternalEcoUser);
 
             return Task.CompletedTask;
         }
 
         private static bool AddBanBlacklist(string user)
-            => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.AddUnique(user);
+            => !string.IsNullOrWhiteSpace(user) && CollectionExtensions.AddUnique(UserManager.Config.BlackList, user);
 
         private static bool RemoveBanBlacklist(string user)
             => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.Remove(user);

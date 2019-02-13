@@ -109,10 +109,11 @@ namespace Rocket.Eco.Launcher.Patches
             parameters.ReferencedAssemblies.Add(Path.Combine(path, "Eco.Stats.dll".ToLowerInvariant()));
             parameters.ReferencedAssemblies.Add(Path.Combine(path, "Eco.WorldGenerator.dll".ToLowerInvariant()));
             parameters.ReferencedAssemblies.Add(Path.Combine(path, "LiteDB.dll".ToLowerInvariant()));
+            parameters.ReferencedAssemblies.Add(Path.Combine(path, "Priority Queue.dll".ToLowerInvariant()));
 
             string[] files = Directory.GetFiles(ModKitPlugin.ModDirectory, "*.cs", SearchOption.AllDirectories);
 
-            using (new TimedTask("Compiling mods (handled by RocketMod)"))
+            using (new TimedTask("Compiling mods (handled by RocketMod)".ToLocString()))
             {
                 CompilerResults results = provider.CompileAssemblyFromFile(parameters, files);
 
@@ -134,8 +135,8 @@ namespace Rocket.Eco.Launcher.Patches
 
                 string error = stringBuilder.ToString();
 
-                Log.WriteLine("Mods recompiled with errors.");
-                Log.WriteLine(error);
+                Log.WriteLine("Mods recompiled with errors.".ToLocString());
+                Log.WriteLine(error.ToLocString());
 
                 compiler.GetType().GetProperty("HasError").SetValue(compiler, true);
                 compiler.GetType().GetProperty("LastError").SetValue(compiler, error);
