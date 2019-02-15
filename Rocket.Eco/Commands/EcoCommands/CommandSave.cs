@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Eco.Core.Plugins;
 using Rocket.API.Commands;
 using Rocket.API.User;

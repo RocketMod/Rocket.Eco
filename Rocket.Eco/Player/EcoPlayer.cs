@@ -1,8 +1,8 @@
 ﻿using System;
+using Eco.Core.Utils;
 using Eco.Gameplay.Economy;
 using Rocket.API.DependencyInjection;
 using Rocket.API.Player;
-using Rocket.API.User;
 using Rocket.Core.Player;
 using Rocket.Eco.API;
 using InternalEcoUser = Eco.Gameplay.Players.User;
@@ -16,7 +16,8 @@ namespace Rocket.Eco.Player
         private readonly string unbuiltId;
         private EcoPlayerEntity ecoEntity;
 
-        internal EcoPlayer(InternalEcoUser user, IPlayerManager playerManager, IDependencyContainer container) : base(container, playerManager)
+        internal EcoPlayer(InternalEcoUser user, IPlayerManager playerManager, IDependencyContainer container) : base(
+            container, playerManager)
         {
             InternalEcoUser = user ?? throw new ArgumentNullException(nameof(user));
 
@@ -26,7 +27,8 @@ namespace Rocket.Eco.Player
             ecoEntity = new EcoPlayerEntity(this);
         }
 
-        internal EcoPlayer(string id, IPlayerManager playerManager, IDependencyContainer container) : base(container, playerManager)
+        internal EcoPlayer(string id, IPlayerManager playerManager, IDependencyContainer container) : base(container,
+            playerManager)
         {
             unbuiltId = id;
 
@@ -37,7 +39,9 @@ namespace Rocket.Eco.Player
         ///     The internal Eco representation of a player attached to this object.
         /// </summary>
         /// <exception cref="InvalidOperationException"> when the player is not online.</exception>
-        public InternalEcoPlayer InternalEcoPlayer => IsOnline ? InternalEcoUser.Player : throw new InvalidOperationException("The player must be online to access this field.");
+        public InternalEcoPlayer InternalEcoPlayer => IsOnline
+            ? InternalEcoUser.Player
+            : throw new InvalidOperationException("The player must be online to access this field.");
 
         /// <summary>
         ///     The internal Eco representation of a user attached to this object.
@@ -88,7 +92,7 @@ namespace Rocket.Eco.Player
 
         /// <inheritdoc />
         public override DateTime? SessionDisconnectTime => throw new NotImplementedException();
-        
+
         /// <returns>
         ///     Will return the players Slg ID, if that is not available, their Steam ID will be returned.
         /// </returns>
@@ -99,10 +103,12 @@ namespace Rocket.Eco.Player
                 if (InternalEcoUser == null)
                     return unbuiltId;
 
-                return string.IsNullOrWhiteSpace(InternalEcoUser.SlgId) ? InternalEcoUser.SteamId : InternalEcoUser.SlgId;
+                return string.IsNullOrWhiteSpace(InternalEcoUser.SlgId)
+                    ? InternalEcoUser.SteamId
+                    : InternalEcoUser.SlgId;
             }
         }
-        
+
         public string Name => InternalEcoUser?.Name;
 
         //TODO: This is not required anymore and needs to be phased out.
@@ -126,7 +132,7 @@ namespace Rocket.Eco.Player
             if (!IsOnline)
                 throw new InvalidOperationException("The player must be online.");
 
-            InternalEcoPlayer.SendTemporaryMessageAlreadyLocalized(string.Format(message, arguments));
+            InternalEcoPlayer.SendTemporaryError(string.Format(message, arguments).ToLocString());
         }
 
         /// <summary>
@@ -142,7 +148,7 @@ namespace Rocket.Eco.Player
             if (!IsOnline)
                 throw new InvalidOperationException("The player must be online.");
 
-            InternalEcoPlayer.SendTemporaryErrorAlreadyLocalized(string.Format(message, arguments));
+            InternalEcoPlayer.SendTemporaryError(string.Format(message, arguments).ToLocString());
         }
     }
 }

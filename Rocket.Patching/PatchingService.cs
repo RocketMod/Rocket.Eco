@@ -26,7 +26,9 @@ namespace Rocket.Patching
         /// <inheritdoc />
         public bool RegisterAssembly(AssemblyDefinition assemblyDefinition)
         {
-            if (assemblies.FirstOrDefault(x => x.Name.Name.Equals(assemblyDefinition.Name.Name, StringComparison.InvariantCultureIgnoreCase)) != null)
+            if (assemblies.FirstOrDefault(x
+                    => x.Name.Name.Equals(assemblyDefinition.Name.Name, StringComparison.InvariantCultureIgnoreCase))
+                != null)
                 return false;
 
             assemblies.Add(assemblyDefinition);
@@ -42,14 +44,17 @@ namespace Rocket.Patching
                 {
                     foreach (ModuleDefinition modDef in asmDef.Modules)
                     {
-                        TypeDefinition typeDef = modDef.Types.FirstOrDefault(x => x.FullName.Equals(patch.TargetType, StringComparison.InvariantCultureIgnoreCase));
+                        TypeDefinition typeDef = modDef.Types.FirstOrDefault(x
+                            => x.FullName.Equals(patch.TargetType,
+                                StringComparison.InvariantCultureIgnoreCase));
 
                         if (typeDef == null)
                             continue;
 
                         patch.Patch(typeDef);
 
-                        Console.WriteLine($"The patch `{patch.GetType().FullName}` has been applied to `{typeDef.FullName}`");
+                        Console.WriteLine(
+                            $"The patch `{patch.GetType().FullName}` has been applied to `{typeDef.FullName}`");
 
                         break;
                     }

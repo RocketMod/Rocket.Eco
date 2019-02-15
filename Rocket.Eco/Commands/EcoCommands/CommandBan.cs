@@ -48,7 +48,7 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer onlinePlayer))
             {
-                userInfo = ((EcoPlayer)onlinePlayer).User;
+                userInfo = ((EcoPlayer) onlinePlayer).User;
             }
             else
             {
@@ -60,7 +60,8 @@ namespace Rocket.Eco.Commands.EcoCommands
                         userInfo = ecoPlayer.User;
                         break;
                     default:
-                        throw new InvalidOperationException("Eco's IPlayerManager returned an invalid player! This can only happen if a plugin overrides it.");
+                        throw new InvalidOperationException(
+                            "Eco's IPlayerManager returned an invalid player! This can only happen if a plugin overrides it.");
                 }
             }
 

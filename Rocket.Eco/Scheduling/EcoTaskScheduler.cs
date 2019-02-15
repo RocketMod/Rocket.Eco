@@ -41,14 +41,16 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        public ITask ScheduleAt(ILifecycleObject @object, Action action, string taskName, DateTime date, bool runAsync = false)
+        public ITask ScheduleAt(ILifecycleObject @object, Action action, string taskName, DateTime date,
+                                bool runAsync = false)
         {
             ThreadSafeTask task;
             ExecutionTargetContext context = runAsync ? ExecutionTargetContext.Async : ExecutionTargetContext.NextFrame;
 
             lock (taskIdLock)
             {
-                task = new ThreadSafeTask(taskId++, taskName, this, @object, action, context, TimeSpan.Zero, date, null);
+                task = new ThreadSafeTask(taskId++, taskName, this, @object, action, context, TimeSpan.Zero, date,
+                    null);
             }
 
             lock (lockObj)
@@ -60,7 +62,8 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        public ITask SchedulePeriodically(ILifecycleObject @object, Action action, string taskName, TimeSpan period, TimeSpan? delay = null, bool runAsync = false)
+        public ITask SchedulePeriodically(ILifecycleObject @object, Action action, string taskName, TimeSpan period,
+                                          TimeSpan? delay = null, bool runAsync = false)
         {
             ThreadSafeTask task;
             ExecutionTargetContext context = runAsync ? ExecutionTargetContext.Async : ExecutionTargetContext.NextFrame;
@@ -95,7 +98,8 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        public ITask ScheduleUpdate(ILifecycleObject @object, Action action, string taskName, ExecutionTargetContext target)
+        public ITask ScheduleUpdate(ILifecycleObject @object, Action action, string taskName,
+                                    ExecutionTargetContext target)
         {
             ThreadSafeTask task;
 
@@ -133,20 +137,33 @@ namespace Rocket.Eco.Scheduling
 
                 //Using `Tasks` to prevent an outside source from modifying the list during an iteration.
                 IEnumerable<ThreadSafeTask> newTasks = Tasks.Where(x =>
-                                                                x.ExecutionTarget == ExecutionTargetContext.NextFrame || x.ExecutionTarget == ExecutionTargetContext.NextPhysicsUpdate || x.ExecutionTarget == ExecutionTargetContext.EveryFrame || x.ExecutionTarget == ExecutionTargetContext.NextPhysicsUpdate)
+                                                                x.ExecutionTarget == ExecutionTargetContext.NextFrame
+                                                                || x.ExecutionTarget
+                                                                == ExecutionTargetContext.NextPhysicsUpdate
+                                                                || x.ExecutionTarget
+                                                                == ExecutionTargetContext.EveryFrame
+                                                                || x.ExecutionTarget
+                                                                == ExecutionTargetContext.NextPhysicsUpdate)
                                                             .Cast<ThreadSafeTask>();
 
                 foreach (ThreadSafeTask task in newTasks)
                 {
-                    if (!task.IsCancelled && !task.IsFinished && !(task.StartTime != null && task.StartTime > DateTime.UtcNow))
+                    if (!task.IsCancelled
+                        && !task.IsFinished
+                        && !(task.StartTime != null && task.StartTime > DateTime.UtcNow))
                     {
-                        if (task.EndTime != null && task.EndTime <= DateTime.UtcNow || task.LastRunTime != null && task.Period != null && task.LastRunTime.Value.Add(task.Period.Value) > DateTime.UtcNow)
+                        if (task.EndTime != null && task.EndTime <= DateTime.UtcNow
+                            || task.LastRunTime != null
+                            && task.Period != null
+                            && task.LastRunTime.Value.Add(task.Period.Value) > DateTime.UtcNow)
                             goto REMOVE;
 
                         task.Action.Invoke();
                         task.LastRunTime = DateTime.UtcNow;
 
-                        if (task.ExecutionTarget != ExecutionTargetContext.NextFrame && task.ExecutionTarget != ExecutionTargetContext.NextPhysicsUpdate && task.Period != null)
+                        if (task.ExecutionTarget != ExecutionTargetContext.NextFrame
+                            && task.ExecutionTarget != ExecutionTargetContext.NextPhysicsUpdate
+                            && task.Period != null)
                             continue;
                     }
 
@@ -167,7 +184,8 @@ namespace Rocket.Eco.Scheduling
                     if (time > 1000)
                     {
                         logger.LogWarning($"The main/physics thread has fallen behind by {time} milliseconds!");
-                        logger.LogWarning("Please try to reduce the amount of IO based or heavy tasks called on this thread.");
+                        logger.LogWarning(
+                            "Please try to reduce the amount of IO based or heavy tasks called on this thread.");
                     }
 
                 watch.Reset();
@@ -179,14 +197,22 @@ namespace Rocket.Eco.Scheduling
             while (true)
             {
                 IEnumerable<ThreadSafeTask> newTasks = Tasks.Where(x =>
-                                                                x.ExecutionTarget == ExecutionTargetContext.NextAsyncFrame || x.ExecutionTarget == ExecutionTargetContext.EveryAsyncFrame)
+                                                                x.ExecutionTarget
+                                                                == ExecutionTargetContext.NextAsyncFrame
+                                                                || x.ExecutionTarget
+                                                                == ExecutionTargetContext.EveryAsyncFrame)
                                                             .Cast<ThreadSafeTask>();
 
                 foreach (ThreadSafeTask task in newTasks)
                 {
-                    if (!task.IsCancelled && !task.IsFinished && !(task.StartTime != null && task.StartTime > DateTime.UtcNow))
+                    if (!task.IsCancelled
+                        && !task.IsFinished
+                        && !(task.StartTime != null && task.StartTime > DateTime.UtcNow))
                     {
-                        if (task.EndTime != null && task.EndTime <= DateTime.UtcNow || task.LastRunTime != null && task.Period != null && task.LastRunTime.Value.Add(task.Period.Value) > DateTime.UtcNow)
+                        if (task.EndTime != null && task.EndTime <= DateTime.UtcNow
+                            || task.LastRunTime != null
+                            && task.Period != null
+                            && task.LastRunTime.Value.Add(task.Period.Value) > DateTime.UtcNow)
                             goto REMOVE;
 
                         task.Action.Invoke();

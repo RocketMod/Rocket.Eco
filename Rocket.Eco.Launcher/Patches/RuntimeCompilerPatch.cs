@@ -41,26 +41,38 @@ namespace Rocket.Eco.Launcher.Patches
             Instruction[] instructions =
             {
                 Instruction.Create(OpCodes.Ldarg_0),
-                Instruction.Create(OpCodes.Newobj, method.Module.ImportReference(typeof(Dictionary<string, string>).GetConstructor(new Type[0]))),
+                Instruction.Create(OpCodes.Newobj,
+                    method.Module.ImportReference(typeof(Dictionary<string, string>).GetConstructor(new Type[0]))),
                 Instruction.Create(OpCodes.Dup),
                 Instruction.Create(OpCodes.Ldstr, "CompilerVersion"),
-                Instruction.Create(OpCodes.Ldstr, "v4.0"), 
-                Instruction.Create(OpCodes.Callvirt, method.Module.ImportReference(typeof(Dictionary<string, string>).GetMethod("Add", new[] {typeof(string), typeof(string)}))),
-                Instruction.Create(OpCodes.Newobj, method.Module.ImportReference(typeof(CSharpCodeProvider).GetConstructor(new[] {typeof(Dictionary<string, string>)}))),
+                Instruction.Create(OpCodes.Ldstr, "v4.0"),
+                Instruction.Create(OpCodes.Callvirt,
+                    method.Module.ImportReference(
+                        typeof(Dictionary<string, string>).GetMethod("Add",
+                            new[] {typeof(string), typeof(string)}))),
+                Instruction.Create(OpCodes.Newobj,
+                    method.Module.ImportReference(
+                        typeof(CSharpCodeProvider).GetConstructor(new[] {typeof(Dictionary<string, string>)}))),
                 Instruction.Create(OpCodes.Stloc_0),
                 Instruction.Create(OpCodes.Ldarg_0),
                 Instruction.Create(OpCodes.Ldloc_0),
                 Instruction.Create(OpCodes.Stfld, method.DeclaringType.Fields.First(x => x.Name.Equals("provider"))),
                 Instruction.Create(OpCodes.Ldarg_0),
                 Instruction.Create(OpCodes.Ldloc_0),
-                Instruction.Create(OpCodes.Call, method.Module.ImportReference(typeof(RuntimeCompilerPatch).GetMethod("CompileMods", BindingFlags.Static | BindingFlags.Public))),
+                Instruction.Create(OpCodes.Call,
+                    method.Module.ImportReference(typeof(RuntimeCompilerPatch).GetMethod("CompileMods",
+                        BindingFlags.Static | BindingFlags.Public))),
                 Instruction.Create(OpCodes.Stloc_1),
                 Instruction.Create(OpCodes.Ldarg_0),
                 Instruction.Create(OpCodes.Ldloc_1),
-                Instruction.Create(OpCodes.Stfld, method.DeclaringType.Fields.First(x => x.Name.Equals("compilerResults"))),
+                Instruction.Create(OpCodes.Stfld,
+                    method.DeclaringType.Fields.First(x => x.Name.Equals("compilerResults"))),
                 Instruction.Create(OpCodes.Ldloc_1),
-                Instruction.Create(OpCodes.Callvirt, method.Module.ImportReference(typeof(CompilerResults).GetMethod("get_CompiledAssembly", BindingFlags.Instance | BindingFlags.Public))),
-                Instruction.Create(OpCodes.Stfld, method.DeclaringType.Fields.First(x => x.Name.Equals("modkitAssembly"))),
+                Instruction.Create(OpCodes.Callvirt,
+                    method.Module.ImportReference(typeof(CompilerResults).GetMethod("get_CompiledAssembly",
+                        BindingFlags.Instance | BindingFlags.Public))),
+                Instruction.Create(OpCodes.Stfld,
+                    method.DeclaringType.Fields.First(x => x.Name.Equals("modkitAssembly"))),
                 Instruction.Create(OpCodes.Ret)
             };
 
@@ -97,10 +109,11 @@ namespace Rocket.Eco.Launcher.Patches
             parameters.ReferencedAssemblies.Add(Path.Combine(path, "Eco.Stats.dll".ToLowerInvariant()));
             parameters.ReferencedAssemblies.Add(Path.Combine(path, "Eco.WorldGenerator.dll".ToLowerInvariant()));
             parameters.ReferencedAssemblies.Add(Path.Combine(path, "LiteDB.dll".ToLowerInvariant()));
+            parameters.ReferencedAssemblies.Add(Path.Combine(path, "Priority Queue.dll".ToLowerInvariant()));
 
             string[] files = Directory.GetFiles(ModKitPlugin.ModDirectory, "*.cs", SearchOption.AllDirectories);
 
-            using (new TimedTask("Compiling mods (handled by RocketMod)"))
+            using (new TimedTask("Compiling mods (handled by RocketMod)".ToLocString()))
             {
                 CompilerResults results = provider.CompileAssemblyFromFile(parameters, files);
 
@@ -122,8 +135,8 @@ namespace Rocket.Eco.Launcher.Patches
 
                 string error = stringBuilder.ToString();
 
-                Log.WriteLine("Mods recompiled with errors.");
-                Log.WriteLine(error);
+                Log.WriteLine("Mods recompiled with errors.".ToLocString());
+                Log.WriteLine(error.ToLocString());
 
                 compiler.GetType().GetProperty("HasError").SetValue(compiler, true);
                 compiler.GetType().GetProperty("LastError").SetValue(compiler, error);

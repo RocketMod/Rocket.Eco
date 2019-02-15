@@ -19,7 +19,8 @@ namespace Rocket.Eco.Scheduling
         private DateTime? lastRunTime;
 
         /// <inheritdoc />
-        public ThreadSafeTask(int taskId, string name, ITaskScheduler scheduler, ILifecycleObject owner, Action action, ExecutionTargetContext executionTargetContext)
+        public ThreadSafeTask(int taskId, string name, ITaskScheduler scheduler, ILifecycleObject owner, Action action,
+                              ExecutionTargetContext executionTargetContext)
         {
             TaskId = taskId;
             Name = name;
@@ -30,7 +31,9 @@ namespace Rocket.Eco.Scheduling
         }
 
         /// <inheritdoc />
-        public ThreadSafeTask(int taskId, string name, ITaskScheduler scheduler, ILifecycleObject owner, Action action, ExecutionTargetContext executionTargetContext, TimeSpan? period, DateTime? startTime, DateTime? endTime) : this(taskId, name, scheduler, owner, action, executionTargetContext)
+        public ThreadSafeTask(int taskId, string name, ITaskScheduler scheduler, ILifecycleObject owner, Action action,
+                              ExecutionTargetContext executionTargetContext, TimeSpan? period, DateTime? startTime,
+                              DateTime? endTime) : this(taskId, name, scheduler, owner, action, executionTargetContext)
         {
             Period = period;
             StartTime = startTime;

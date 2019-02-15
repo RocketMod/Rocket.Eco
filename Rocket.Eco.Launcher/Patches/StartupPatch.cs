@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -10,7 +9,7 @@ namespace Rocket.Launcher.Patches
 {
     /// <inheritdoc />
     /// <summary>
-    ///     A patch to inject delegate calls into Eco's User class.
+    ///     A patch to inject delegate calls into Eco's Startup class.
     /// </summary>
     public sealed class StartupPatch : IAssemblyPatch
     {
@@ -28,9 +27,9 @@ namespace Rocket.Launcher.Patches
             int index = default(int);
 
             for (int i = il.Body.Instructions.Count - 1; i != 0; i--)
-                if (il.Body.Instructions[i].OpCode == OpCodes.Nop)
+                if (il.Body.Instructions[i].OpCode == OpCodes.Leave)
                 {
-                    index = i + 1;
+                    index = i;
                     break;
                 }
 
@@ -49,11 +48,13 @@ namespace Rocket.Launcher.Patches
 
             VariableDefinition variable1 = il.Body.Variables[0];
             VariableDefinition variable2 = il.Body.Variables[1];
+            VariableDefinition variable3 = il.Body.Variables[2];
 
             il.Body.Variables.Clear();
 
             il.Body.Variables.Add(variable1);
             il.Body.Variables.Add(variable2);
+            il.Body.Variables.Add(variable3);
 
             il.Body.InitLocals = false;
 

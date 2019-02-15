@@ -22,14 +22,17 @@ namespace Rocket.Eco.Launcher.Patches
         /// <inheritdoc />
         public void Patch(TypeDefinition definition)
         {
-            FieldDefinition chatDelegate = new FieldDefinition("OnUserChat", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Func<object, string, bool>)));
+            FieldDefinition chatDelegate = new FieldDefinition("OnUserChat",
+                FieldAttributes.Public | FieldAttributes.Static,
+                definition.Module.ImportReference(typeof(Func<object, string, bool>)));
 
             definition.Fields.Add(chatDelegate);
 
             //Let's kill this method.
             definition.Methods.Remove(definition.Methods.First(x => x.Name.Equals("ProcessAsCommand")));
 
-            MethodDefinition sendChatMethod = definition.Methods.First(x => x.Name.Equals("SendChat") && x.Parameters.Count == 3);
+            MethodDefinition sendChatMethod =
+                definition.Methods.First(x => x.Name.Equals("SendChat") && x.Parameters.Count == 3);
 
             PatchSendChat(sendChatMethod, chatDelegate);
         }
@@ -55,7 +58,8 @@ namespace Rocket.Eco.Launcher.Patches
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_3),
                 il.Create(OpCodes.Ldarg_2),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Func<object, string, bool>).GetMethod("Invoke"))),
+                il.Create(OpCodes.Callvirt,
+                    definition.Module.ImportReference(typeof(Func<object, string, bool>).GetMethod("Invoke"))),
                 il.Create(OpCodes.Brfalse_S, il.Body.Instructions[index + 2])
             };
 

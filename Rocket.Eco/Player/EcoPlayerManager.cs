@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Eco.Core.Plugins.Interfaces;
+using Eco.Core.Utils;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
 using Eco.Shared.Utils;
@@ -12,7 +13,6 @@ using Rocket.API.DependencyInjection;
 using Rocket.API.Eventing;
 using Rocket.API.Player;
 using Rocket.API.User;
-using Rocket.Core.Player;
 using Rocket.Core.Player.Events;
 using Rocket.Core.User.Events;
 using Rocket.Eco.API;
@@ -42,10 +42,12 @@ namespace Rocket.Eco.Player
         public string ServiceName => GetType().Name;
 
         /// <inheritdoc />
-        public Task<IEnumerable<IPlayer>> GetPlayersAsync() => Task.FromResult(InternalPlayersList.Where(x => x.IsOnline).Cast<IPlayer>());
+        public Task<IEnumerable<IPlayer>> GetPlayersAsync()
+            => Task.FromResult(InternalPlayersList.Where(x => x.IsOnline).Cast<IPlayer>());
 
         /// <inheritdoc />
-        public Task BroadcastAsync(IUser sender, string message, Color? color = null, params object[] arguments) => BroadcastAsync(sender, InternalPlayersList.Select(x => x.User), message, color, arguments);
+        public Task BroadcastAsync(IUser sender, string message, Color? color = null, params object[] arguments)
+            => BroadcastAsync(sender, InternalPlayersList.Select(x => x.User), message, color, arguments);
 
         /// <inheritdoc />
         public Task<IIdentity> GetIdentity /*Async*/(string identity) => throw new NotImplementedException();
@@ -123,14 +125,15 @@ namespace Rocket.Eco.Player
         {
             IEnumerable<EcoPlayer> players = GetPlayersAsync().GetAwaiter().GetResult().Cast<EcoPlayer>();
 
-            EcoPlayer player = players.FirstOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+            EcoPlayer player =
+                players.FirstOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                 ?? players.FirstOrDefault(x => x.Name.ComparerContains(name));
 
             output = player;
 
             return player != null;
         }
-        
+
         /// <inheritdoc />
         public Task<bool> KickAsync(IUser user, IUser kickedBy = null, string reason = null)
         {
@@ -211,28 +214,35 @@ namespace Rocket.Eco.Player
         }
 
         /// <inheritdoc />
-        public Task SendMessageAsync(IUser sender, IUser receiver, string message, Color? color = null, params object[] arguments)
+        public Task SendMessageAsync(IUser sender, IUser receiver, string message, Color? color = null,
+                                     params object[] arguments)
         {
             if (!(receiver is EcoPlayerUser ecoUser))
             {
                 if (!(receiver is IConsole console))
                     throw new ArgumentException("Must be of type `EcoUser`.", nameof(receiver));
 
-                console.WriteLine(string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}", arguments);
+                console.WriteLine(
+                    string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}",
+                    arguments);
                 return Task.CompletedTask;
             }
 
             if (!ecoUser.Player.IsOnline)
                 throw new ArgumentException("Must be online.", nameof(receiver));
 
-            string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}", arguments);
+            string formattedMessage =
+                string.Format(
+                    string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}",
+                    arguments);
 
-            ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
+            ChatManager.ServerMessageToPlayer(formattedMessage.ToLocString(), ecoUser.Player.InternalEcoUser);
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task BroadcastAsync(IUser sender, IEnumerable<IUser> receivers, string message, Color? color = null, params object[] arguments)
+        public Task BroadcastAsync(IUser sender, IEnumerable<IUser> receivers, string message, Color? color = null,
+                                   params object[] arguments)
         {
             List<EcoPlayerUser> users = new List<EcoPlayerUser>();
 
@@ -247,14 +257,21 @@ namespace Rocket.Eco.Player
                 users.Add(ecoUser);
             }
 
-            string formattedMessage = string.Format(string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}", arguments);
+            string formattedMessage =
+                string.Format(
+                    string.IsNullOrWhiteSpace(sender?.DisplayName) ? message : $"[{sender.DisplayName}] {message}",
+                    arguments);
 
-            foreach (EcoPlayerUser ecoUser in users) ChatManager.ServerMessageToPlayerAlreadyLocalized(formattedMessage, ecoUser.Player.InternalEcoUser);
+            foreach (EcoPlayerUser ecoUser in users)
+                ChatManager.ServerMessageToPlayer(formattedMessage.ToLocString(), ecoUser.Player.InternalEcoUser);
 
             return Task.CompletedTask;
         }
 
-        private static bool AddBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.AddUnique(user);
-        private static bool RemoveBanBlacklist(string user) => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.Remove(user);
+        private static bool AddBanBlacklist(string user)
+            => !string.IsNullOrWhiteSpace(user) && CollectionExtensions.AddUnique(UserManager.Config.BlackList, user);
+
+        private static bool RemoveBanBlacklist(string user)
+            => !string.IsNullOrWhiteSpace(user) && UserManager.Config.BlackList.Remove(user);
     }
 }

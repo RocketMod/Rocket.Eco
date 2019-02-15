@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Rocket.API.Commands;
@@ -50,7 +49,8 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (!playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
             {
-                await context.User.UserManager.SendMessageAsync(null,context.User, "The requested user needs to be online.");
+                await context.User.UserManager.SendMessageAsync(null, context.User,
+                    "The requested user needs to be online.");
                 return;
             }
 
@@ -62,10 +62,14 @@ namespace Rocket.Eco.Commands.EcoCommands
             UserManager.Config.Admins.Add(player.User.Id);
             UserManager.Obj.SaveConfig();
 
-            context.Container.Resolve<ILogger>().LogInformation($"{context.User.UserName} has granted {player.User.UserName} administrator permissions.");
+            context.Container.Resolve<ILogger>()
+                   .LogInformation(
+                       $"{context.User.UserName} has granted {player.User.UserName} administrator permissions.");
 
-            await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user has been made an administrator.");
-            await context.User.UserManager.SendMessageAsync(null, ((EcoPlayer)player).User, "You have been granted administrator permissions.");
+            await context.User.UserManager.SendMessageAsync(null, context.User,
+                "The requested user has been made an administrator.");
+            await context.User.UserManager.SendMessageAsync(null, ((EcoPlayer) player).User,
+                "You have been granted administrator permissions.");
         }
     }
 }

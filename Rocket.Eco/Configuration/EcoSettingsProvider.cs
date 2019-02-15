@@ -7,8 +7,8 @@ namespace Rocket.Eco.Configuration
 {
     public sealed class EcoSettingsProvider : IEcoSettingsProvider
     {
-        private readonly IHost host;
         private readonly IConfiguration configuration;
+        private readonly IHost host;
 
         public EcoSettingsProvider(IHost host, IConfiguration configuration)
         {

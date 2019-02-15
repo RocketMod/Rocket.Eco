@@ -29,14 +29,20 @@ namespace Rocket.Eco.Commands
             this.logger = logger;
 
             if (ecoChatManager == null)
-                ecoChatManager = (ChatManager) typeof(ChatServer).GetField("netChatManager", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatServer.Obj)
-                    ?? throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
+                ecoChatManager = (ChatManager) typeof(ChatServer)
+                                               .GetField("netChatManager",
+                                                   BindingFlags.Instance | BindingFlags.NonPublic)
+                                               ?.GetValue(ChatServer.Obj)
+                    ?? throw new Exception(
+                        "A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
             if (execute == null)
                 execute = typeof(ChatManager).GetMethod("InvokeCommand", BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?? throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
+                    ?? throw new Exception(
+                        "A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
-            command = (ChatCommandAttribute) method.GetCustomAttributes().FirstOrDefault(x => x is ChatCommandAttribute);
+            command = (ChatCommandAttribute) method.GetCustomAttributes()
+                                                   .FirstOrDefault(x => x is ChatCommandAttribute);
 
             if (command != null)
             {
@@ -45,10 +51,11 @@ namespace Rocket.Eco.Commands
             }
             else
             {
-                logger.LogError($"An attempt was made to register a vanilla command (method: {method.DeclaringType?.FullName ?? "UnknownType"}.{method.Name}) with inproper attributes!");
+                logger.LogError(
+                    $"An attempt was made to register a vanilla command (method: {method.DeclaringType?.FullName ?? "UnknownType"}.{method.Name}) with inproper attributes!");
             }
         }
-        
+
         /// <inheritdoc />
         public string[] Aliases => new string[0];
 
@@ -78,7 +85,8 @@ namespace Rocket.Eco.Commands
 
             try
             {
-                execute.Invoke(ecoChatManager, new object[] {Name, commandMethod, args, ((EcoPlayerUser) context.User).Player.InternalEcoUser});
+                execute.Invoke(ecoChatManager,
+                    new object[] {Name, commandMethod, args, ((EcoPlayerUser) context.User).Player.InternalEcoUser});
             }
             catch (Exception e)
             {
@@ -89,4 +97,3 @@ namespace Rocket.Eco.Commands
         }
     }
 }
- 

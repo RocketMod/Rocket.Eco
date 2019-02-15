@@ -22,9 +22,15 @@ namespace Rocket.Eco.Launcher.Patches
         /// <inheritdoc />
         public void Patch(TypeDefinition definition)
         {
-            FieldDefinition preLoginDelegate = new FieldDefinition("OnUserPreLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Func<object, bool>)));
-            FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Action<object>)));
-            FieldDefinition logoutDelegate = new FieldDefinition("OnUserLogout", FieldAttributes.Public | FieldAttributes.Static, definition.Module.ImportReference(typeof(Action<object>)));
+            FieldDefinition preLoginDelegate = new FieldDefinition("OnUserPreLogin",
+                FieldAttributes.Public | FieldAttributes.Static,
+                definition.Module.ImportReference(typeof(Func<object, bool>)));
+            FieldDefinition loginDelegate = new FieldDefinition("OnUserLogin",
+                FieldAttributes.Public | FieldAttributes.Static,
+                definition.Module.ImportReference(typeof(Action<object>)));
+            FieldDefinition logoutDelegate = new FieldDefinition("OnUserLogout",
+                FieldAttributes.Public | FieldAttributes.Static,
+                definition.Module.ImportReference(typeof(Action<object>)));
 
             definition.Fields.Add(preLoginDelegate);
             definition.Fields.Add(loginDelegate);
@@ -37,7 +43,8 @@ namespace Rocket.Eco.Launcher.Patches
             PatchLogout(logout, logoutDelegate);
         }
 
-        private static void PatchLogin(MethodDefinition definition, FieldReference delegateDefinition, FieldReference preDelegateDefinition)
+        private static void PatchLogin(MethodDefinition definition, FieldReference delegateDefinition,
+                                       FieldReference preDelegateDefinition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
 
@@ -45,7 +52,8 @@ namespace Rocket.Eco.Launcher.Patches
             {
                 il.Create(OpCodes.Ldsfld, preDelegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Func<object, bool>).GetMethod("Invoke"))),
+                il.Create(OpCodes.Callvirt,
+                    definition.Module.ImportReference(typeof(Func<object, bool>).GetMethod("Invoke"))),
                 il.Create(OpCodes.Brtrue_S, il.Body.Instructions[0]),
                 il.Create(OpCodes.Ret)
             };
@@ -54,16 +62,15 @@ namespace Rocket.Eco.Launcher.Patches
             {
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Action<object>).GetMethod("Invoke")))
+                il.Create(OpCodes.Callvirt,
+                    definition.Module.ImportReference(typeof(Action<object>).GetMethod("Invoke")))
             };
 
             for (int i = 0; i < startInjection.Length; i++)
-            {
                 if (i == 0)
                     il.InsertBefore(il.Body.Instructions[0], startInjection[i]);
                 else
                     il.InsertAfter(il.Body.Instructions[i - 1], startInjection[i]);
-            }
 
             foreach (Instruction t in endInjection)
                 il.InsertBefore(il.Body.Instructions[il.Body.Instructions.Count - 1], t);
@@ -74,12 +81,13 @@ namespace Rocket.Eco.Launcher.Patches
         private static void PatchLogout(MethodDefinition definition, FieldReference delegateDefinition)
         {
             ILProcessor il = definition.Body.GetILProcessor();
-            
+
             Instruction[] endInjection =
             {
                 il.Create(OpCodes.Ldsfld, delegateDefinition),
                 il.Create(OpCodes.Ldarg_0),
-                il.Create(OpCodes.Callvirt, definition.Module.ImportReference(typeof(Action<object>).GetMethod("Invoke")))
+                il.Create(OpCodes.Callvirt,
+                    definition.Module.ImportReference(typeof(Action<object>).GetMethod("Invoke")))
             };
 
             foreach (Instruction t in endInjection)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Eco.Core.Plugins.Interfaces;
 using Eco.Gameplay.Players;
 using Rocket.API.Commands;
@@ -47,7 +46,8 @@ namespace Rocket.Eco.Commands.EcoCommands
             IPlayerManager playerManager = context.Container.Resolve<IPlayerManager>("eco");
 
             if (playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
-                await context.User.UserManager.SendMessageAsync(null, ((EcoPlayer)player).User, "You have been stripped of your administrator permissions.");
+                await context.User.UserManager.SendMessageAsync(null, ((EcoPlayer) player).User,
+                    "You have been stripped of your administrator permissions.");
             else
                 player = await playerManager.GetPlayerAsync(context.Parameters[0]);
 
@@ -57,7 +57,8 @@ namespace Rocket.Eco.Commands.EcoCommands
             UserManager.Config.Admins.Remove(player.User.Id);
             UserManager.Obj.SaveConfig();
 
-            await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user has been removed as an administrator.");
+            await context.User.UserManager.SendMessageAsync(null, context.User,
+                "The requested user has been removed as an administrator.");
         }
     }
 }

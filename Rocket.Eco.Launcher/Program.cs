@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
-using MoreLinq.Extensions;
+using MoreLinq;
 using Rocket.Eco.Launcher.Patches;
 using Rocket.Eco.Launcher.Utils;
 using Rocket.Launcher.Patches;
@@ -15,20 +15,30 @@ namespace Rocket.Eco.Launcher
 {
     internal static class Program
     {
+        static IEnumerable<AssemblyDefinition> _assemblies;
+
         static Program()
         {
             AppDomain.CurrentDomain.AssemblyResolve += GatherRocketDependencies;
 
             AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
             {
+                AssemblyDefinition defn = _assemblies?.FirstOrDefault(x => x.FullName == args.Name);
+
+                if (defn != null) return LoadAssemblyFromDefinition(defn);
+
+                AssemblyName assemblyName = new AssemblyName(args.Name);
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
                 try
                 {
-                    AssemblyName assemblyName = new AssemblyName(args.Name);
-                    Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
                     return (from assembly in assemblies
-                            let interatedName = assembly.GetName()
-                            where string.Equals(interatedName.Name, assemblyName.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(interatedName.CultureInfo?.Name ?? "", assemblyName.CultureInfo?.Name ?? "", StringComparison.InvariantCultureIgnoreCase)
+                            let iteratedName = assembly.GetName()
+                            where string.Equals(iteratedName.Name, assemblyName.Name,
+                                    StringComparison.InvariantCultureIgnoreCase)
+                                && string.Equals(iteratedName.CultureInfo?.Name ?? "",
+                                    assemblyName.CultureInfo?.Name ?? "",
+                                    StringComparison.InvariantCultureIgnoreCase)
                             select assembly).FirstOrDefault();
                 }
                 catch
@@ -38,7 +48,18 @@ namespace Rocket.Eco.Launcher
             };
         }
 
-        private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));
+        private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args)
+        {
+            if (args.Name.Contains("System.Net.Http"))
+            {
+                return null;
+            }
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries",
+                args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll");
+
+            return !File.Exists(path) ? null : Assembly.LoadFile(path);
+        }
 
         public static void Main(string[] args)
         {
@@ -54,37 +75,31 @@ namespace Rocket.Eco.Launcher
             patchingService.RegisterPatch<ChatManagerPatch>();
             patchingService.RegisterPatch<RuntimeCompilerPatch>();
 
-            List<AssemblyDefinition> patches = patchingService.Patch().ToList();
-
-            patches.ForEach(LoadAssemblyFromDefinition);
-
-            CosturaHelper.DisposeStreams();
+            _assemblies = patchingService.Patch().ToList();
 
             patchingService.RegisterAssembly(defn);
             patchingService.RegisterPatch<StartupPatch>();
-
-            patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
-
-            stream.Dispose();
-
-            AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
-
+            
             List<string> newArgs = args.ToList();
-            newArgs.Add("-nogui");
 
+            LoadAssemblyFromDefinition(patchingService.Patch().First());
+
+            newArgs.Add("-nogui");
+            
             AppDomain.CurrentDomain.GetAssemblies()
                      .First(x => x.GetName().Name.Equals("EcoServer"))
                      .GetType("Eco.Server.Startup")
                      .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
                      .Invoke(null, new object[]
-                         {newArgs.ToArray()});
-
-            foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries"))) Assembly.LoadFile(file);
-
+                             {newArgs.ToArray()});
+            
             new Runtime().BootstrapAsync().GetAwaiter().GetResult();
+            
+            CosturaHelper.DisposeStreams();
+            stream.Dispose();
         }
 
-        private static void LoadAssemblyFromDefinition(AssemblyDefinition definition)
+        private static Assembly LoadAssemblyFromDefinition(AssemblyDefinition definition)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -96,7 +111,7 @@ namespace Rocket.Eco.Launcher
 
                 stream.Read(buffer, 0, buffer.Length);
 
-                Assembly.Load(buffer);
+                return Assembly.Load(buffer);
             }
         }
     }

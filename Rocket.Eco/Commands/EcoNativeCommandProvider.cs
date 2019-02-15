@@ -35,10 +35,15 @@ namespace Rocket.Eco.Commands
             }
 
             host = container.Resolve<IHost>();
-            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager).GetField("commands", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(ChatManager.Obj);
+            Dictionary<string, MethodInfo> cmds = (Dictionary<string, MethodInfo>) typeof(ChatManager)
+                                                                                   .GetField("commands",
+                                                                                       BindingFlags.Instance
+                                                                                       | BindingFlags.NonPublic)
+                                                                                   ?.GetValue(ChatManager.Obj);
 
             if (cmds == null)
-                throw new Exception("A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
+                throw new Exception(
+                    "A critical part of the Eco codebase has been changed; please uninstall Rocket until it is updated to support these changes.");
 
             foreach (KeyValuePair<string, MethodInfo> pair in cmds)
                 commands.Add(new EcoNativeCommand(pair.Value, logger));

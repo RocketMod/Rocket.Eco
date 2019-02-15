@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Rocket.API.Commands;
 using Rocket.API.Player;
@@ -46,7 +45,8 @@ namespace Rocket.Eco.Commands.EcoCommands
 
             if (!playerManager.TryGetOnlinePlayer(context.Parameters[0], out IPlayer player))
             {
-                await context.User.UserManager.SendMessageAsync(null, context.User, "The requested user is not online.");
+                await context.User.UserManager.SendMessageAsync(null, context.User,
+                    "The requested user is not online.");
                 return;
             }
 
