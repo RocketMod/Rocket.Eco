@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.10.0" />
     <PackageReference Include="Rocket.Runtime" Version="5.0.0.606" />
   </ItemGroup>
 

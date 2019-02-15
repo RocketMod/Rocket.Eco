@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Mono.Cecil;
-using MoreLinq.Extensions;
+using MoreLinq;
 
 namespace Rocket.Eco.Launcher.Utils
 {

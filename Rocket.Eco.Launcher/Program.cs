@@ -4,8 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
-using Mono.CompilerServices.SymbolWriter;
-using MoreLinq.Extensions;
+using MoreLinq;
 using Rocket.Eco.Launcher.Patches;
 using Rocket.Eco.Launcher.Utils;
 using Rocket.Launcher.Patches;
@@ -16,45 +15,31 @@ namespace Rocket.Eco.Launcher
 {
     internal static class Program
     {
+        static IEnumerable<AssemblyDefinition> _assemblies;
+
         static Program()
         {
             AppDomain.CurrentDomain.AssemblyResolve += GatherRocketDependencies;
 
             AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
             {
+                AssemblyDefinition defn = _assemblies?.FirstOrDefault(x => x.FullName == args.Name);
+
+                if (defn != null) return LoadAssemblyFromDefinition(defn);
+
                 AssemblyName assemblyName = new AssemblyName(args.Name);
                 Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                
-                /*
-                if (assemblyName.Name == "System.Net.Http")
-                {
-                    Console.WriteLine("some dumbass requested this assembly");
-                    return Assembly.LoadFrom(Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries", "System.Net.Http.dll"));
-                }
-                */
 
                 try
                 {
-                    var asm = (from assembly in assemblies
-                               let interatedName = assembly.GetName()
-                               where string.Equals(interatedName.Name, assemblyName.Name,
-                                       StringComparison.InvariantCultureIgnoreCase)
-                                   && string.Equals(interatedName.CultureInfo?.Name ?? "",
-                                       assemblyName.CultureInfo?.Name ?? "",
-                                       StringComparison.InvariantCultureIgnoreCase)
-                               select assembly).FirstOrDefault();
-
-                    if (asm != null)
-                    {
-                        return asm;
-                    }
-
-                    if ((assemblyName.Flags & AssemblyNameFlags.Retargetable) != AssemblyNameFlags.None)
-                    {
-                        return Assembly.Load(assemblyName);
-                    }
-
-                    return null;
+                    return (from assembly in assemblies
+                            let iteratedName = assembly.GetName()
+                            where string.Equals(iteratedName.Name, assemblyName.Name,
+                                    StringComparison.InvariantCultureIgnoreCase)
+                                && string.Equals(iteratedName.CultureInfo?.Name ?? "",
+                                    assemblyName.CultureInfo?.Name ?? "",
+                                    StringComparison.InvariantCultureIgnoreCase)
+                            select assembly).FirstOrDefault();
                 }
                 catch
                 {
@@ -65,10 +50,15 @@ namespace Rocket.Eco.Launcher
 
         private static Assembly GatherRocketDependencies(object obj, ResolveEventArgs args)
         {
-            //Console.WriteLine(args.Name);
-            return Assembly.LoadFile(
-                Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries",
-                    args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll"));
+            if (args.Name.Contains("System.Net.Http"))
+            {
+                return null;
+            }
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "Rocket", "Binaries",
+                args.Name.Remove(args.Name.IndexOf(",", StringComparison.InvariantCultureIgnoreCase)) + ".dll");
+
+            return !File.Exists(path) ? null : Assembly.LoadFile(path);
         }
 
         public static void Main(string[] args)
@@ -85,50 +75,31 @@ namespace Rocket.Eco.Launcher
             patchingService.RegisterPatch<ChatManagerPatch>();
             patchingService.RegisterPatch<RuntimeCompilerPatch>();
 
-            List<AssemblyDefinition> patches = patchingService.Patch().ToList();
-
-            patches.ForEach(LoadAssemblyFromDefinition);
-
-            CosturaHelper.DisposeStreams();
+            _assemblies = patchingService.Patch().ToList();
 
             patchingService.RegisterAssembly(defn);
             patchingService.RegisterPatch<StartupPatch>();
-
-            patchingService.Patch().ForEach(LoadAssemblyFromDefinition);
-
-            stream.Dispose();
-
-            AppDomain.CurrentDomain.AssemblyResolve -= GatherRocketDependencies;
-
+            
             List<string> newArgs = args.ToList();
+
+            LoadAssemblyFromDefinition(patchingService.Patch().First());
+
             newArgs.Add("-nogui");
-            try
-            {
-                AppDomain.CurrentDomain.GetAssemblies()
-                         .First(x => x.GetName().Name.Equals("EcoServer"))
-                         .GetType("Eco.Server.Startup")
-                         .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
-                         .Invoke(null, new object[]
+            
+            AppDomain.CurrentDomain.GetAssemblies()
+                     .First(x => x.GetName().Name.Equals("EcoServer"))
+                     .GetType("Eco.Server.Startup")
+                     .GetMethod("Start", BindingFlags.Static | BindingFlags.Public)
+                     .Invoke(null, new object[]
                              {newArgs.ToArray()});
-
-                //foreach (string file in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Rocket",
-                //   "Binaries"))) Assembly.LoadFile(file);
-            }
-            catch(Exception e)
-            {
-                var aggregated = e.InnerException as AggregateException;
-
-                foreach (var innerAggregated in aggregated.InnerExceptions)
-                {
-                    Console.WriteLine(innerAggregated);
-                }
-                //Console.WriteLine(e);
-            }
-
+            
             new Runtime().BootstrapAsync().GetAwaiter().GetResult();
+            
+            CosturaHelper.DisposeStreams();
+            stream.Dispose();
         }
 
-        private static void LoadAssemblyFromDefinition(AssemblyDefinition definition)
+        private static Assembly LoadAssemblyFromDefinition(AssemblyDefinition definition)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -140,7 +111,7 @@ namespace Rocket.Eco.Launcher
 
                 stream.Read(buffer, 0, buffer.Length);
 
-                Assembly.Load(buffer);
+                return Assembly.Load(buffer);
             }
         }
     }

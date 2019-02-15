@@ -166,10 +166,7 @@ namespace Rocket.Eco
 
                     foreach (EcoPlayer player in (await playerManager.GetPlayersAsync()).Cast<EcoPlayer>())
                         await playerManager.KickAsync(player.User, null, "The server is shutting down.");
-
-                    //TODO: This appears to cause a StackOverflowException.
-                    //runtime.Shutdown();
-
+                    
                     Thread.Sleep(2000);
                     Environment.Exit(0);
                 }, "Shutdown");
